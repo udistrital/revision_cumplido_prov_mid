@@ -1,0 +1,60 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "beego Test API",
+        "description": "beego has a very cool tools to autogenerate documents for your API",
+        "version": "1.0.0",
+        "termsOfService": "http://beego.me/",
+        "contact": {
+            "email": "astaxie@gmail.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        }
+    },
+    "basePath": "/v1",
+    "paths": {
+        "/dependencias_supervisor/{documento_supervisor}": {
+            "get": {
+                "tags": [
+                    "dependencias_supervisor"
+                ],
+                "description": "get DependenciasSupervisor by documento_supervisor",
+                "operationId": "ContratosSupervisorController.GetContratos",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "documento_supervisor",
+                        "description": "documento_supervisor",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.ContratosSupervisor"
+                        }
+                    },
+                    "403": {
+                        "description": ":id is empty"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.ContratosSupervisor": {
+            "title": "ContratosSupervisor",
+            "type": "object"
+        }
+    },
+    "tags": [
+        {
+            "name": "dependencias_supervisor",
+            "description": "ContratosSupervisorController operations for ContratosSupervisor\n"
+        }
+    ]
+}
