@@ -15,6 +15,20 @@
     },
     "basePath": "/v1",
     "paths": {
+        "/contratacion/solicitudes-pago/": {
+            "get": {
+                "tags": [
+                    "contratacion"
+                ],
+                "description": "Metodo para que el personal de c  Obtenga los contratos para la aprobacion de pago",
+                "operationId": "RevisionCumplidoContratacionController.ObtenerPendientesRevisionOrdenador",
+                "responses": {
+                    "403": {
+                        "description": ":document is empty"
+                    }
+                }
+            }
+        },
         "/dependencias_supervisor/{documento_supervisor}": {
             "get": {
                 "tags": [
@@ -43,11 +57,110 @@
                     }
                 }
             }
+        },
+        "/ordenador/certificado-aprobacion-pago/{id_solicitud_pago}": {
+            "post": {
+                "tags": [
+                    "ordenador"
+                ],
+                "description": "Metodo encargado de retornar el certificado firmado de aprobacion pago.",
+                "operationId": "RevisionCumplidoOrdenadorController.ObtenerCertificado firmado de aprobacion pago.",
+                "parameters": [
+                    {
+                        "in": "de",
+                        "name": "id",
+                        "description": "path",
+                        "schema": {
+                            "$ref": "#/definitions/pago"
+                        }
+                    }
+                ],
+                "responses": {
+                    "403": {
+                        "description": ":id_solicitud_pago is empty"
+                    }
+                }
+            }
+        },
+        "/ordenador/revertir-solicitud-pago/{id_solicitud_pago}": {
+            "post": {
+                "tags": [
+                    "ordenador"
+                ],
+                "description": "Metodo para que el ordenador  revierta el estado de un cumplido",
+                "operationId": "RevisionCumplidoOrdenadorController.RevertirSolicitud",
+                "parameters": [
+                    {
+                        "in": "de",
+                        "name": "id",
+                        "description": "path",
+                        "schema": {
+                            "$ref": "#/definitions/pago"
+                        }
+                    }
+                ],
+                "responses": {
+                    "403": {
+                        "description": ":id_solicitud_pago is empty"
+                    }
+                }
+            }
+        },
+        "/ordenador/solicitudes-pago/{documento_ordenador}": {
+            "get": {
+                "tags": [
+                    "ordenador"
+                ],
+                "description": "Metodo para que el ordenador  Obtenga los contratos para la aprobacion de pago",
+                "operationId": "RevisionCumplidoOrdenadorController.ObtenerPendientesRevisionOrdenador",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "documento_ordenador",
+                        "description": "Documento del ordenador",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "403": {
+                        "description": ":document is empty"
+                    }
+                }
+            }
+        },
+        "/ping/ping": {
+            "get": {
+                "tags": [
+                    "ping"
+                ],
+                "description": "Realiza una prueba de ping y devuelve el estado.",
+                "operationId": "PingController.PingTest",
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/map[string]interface{}{\"Success\":true,\"Status\":\"200\",\"Message\":\"Successful\",\"Data\":{}}"
+                        }
+                    },
+                    "500": {
+                        "description": "{object} map[string]interface{}{\"Success\":false,\"Status\":\"500\",\"Message\":\"Internal Server Error\"}"
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "map[string]interface{}{\"Success\":true,\"Status\":\"200\",\"Message\":\"Successful\",\"Data\":{}}": {
+            "title": "map[string]interface{}{\"Success\":true,\"Status\":\"200\",\"Message\":\"Successful\",\"Data\":{}}",
+            "type": "object"
+        },
         "models.ContratosSupervisor": {
             "title": "ContratosSupervisor",
+            "type": "object"
+        },
+        "pago": {
+            "title": "pago",
             "type": "object"
         }
     },
