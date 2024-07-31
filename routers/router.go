@@ -9,14 +9,26 @@ package routers
 
 import (
 	"github.com/astaxie/beego"
+	"github.com/udistrital/revision_cumplidos_proveedores_mid/controllers/controladores_estado_pago"
+	"github.com/udistrital/revision_cumplidos_proveedores_mid/controllers/controladores_soporte"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/controllers/controladores_supervisor"
 )
 
 func init() {
 	ns := beego.NewNamespace("/v1",
-		beego.NSNamespace("/dependencias_supervisor",
+		beego.NSNamespace("/supervisor",
 			beego.NSInclude(
-				&controladores_supervisor.ContratosSupervisorController{},
+				&controladores_supervisor.ContratosSupervisorController{}, &controladores_supervisor.SolicitudContratoController{}, &controladores_supervisor.InformeSeguimientoController{}, &controladores_supervisor.ListarTipoDocumentosCumplidoController{}, &controladores_supervisor.InformeSeguimientoController{},
+			),
+		),
+		beego.NSNamespace("/solicitud-pago",
+			beego.NSInclude(
+				&controladores_soporte.SoportesCumplidoController{},
+			),
+		),
+		beego.NSNamespace("/solicitud-pago",
+			beego.NSInclude(
+				&controladores_estado_pago.EstadoSoporteController{},
 			),
 		))
 	beego.AddNamespace(ns)

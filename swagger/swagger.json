@@ -15,13 +15,325 @@
     },
     "basePath": "/v1",
     "paths": {
-        "/dependencias_supervisor/{documento_supervisor}": {
+        "/solicitud-pago/cambio-estado": {
+            "post": {
+                "tags": [
+                    "solicitud-pago"
+                ],
+                "description": "Cambia el estado de pago del proveedor",
+                "operationId": "EstadoSoporteController.CambioEstadoPago",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "estado_cumplido_id",
+                        "description": "ID del estado cumplido",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "cumplido_proveedor_id",
+                        "description": "ID del cumplido proveedor",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "documento_responsable",
+                        "description": "Número del documento responsable",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "cargo_responsable",
+                        "description": "Cargo del responsable",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.CambioEstadoCumplidoResponse"
+                        }
+                    },
+                    "502": {
+                        "description": "{object} map[string]interface{}"
+                    }
+                }
+            }
+        },
+        "/solicitud-pago/comentario-soporte": {
+            "post": {
+                "tags": [
+                    "solicitud-pago"
+                ],
+                "description": "Agregar un comentario a un soporte de pago",
+                "operationId": "SoportesCumplidoController.AgregarComentarioSoporte",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "soporte_id",
+                        "description": "ID del soporte de pago",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "path",
+                        "name": "cambio_estado_id",
+                        "description": "ID del cambio de estado",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "comentario",
+                        "description": "Comentario a agregar",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "\"Comentario agregado exitosamente\"",
+                        "schema": {
+                            "$ref": "#/definitions/models.RespuestaComentarioSoporte"
+                        }
+                    },
+                    "404": {
+                        "description": "\"No se encontró el soporte de pago o cambio de estado\""
+                    },
+                    "502": {
+                        "description": "\"Error al intentar agregar el comentario\""
+                    }
+                }
+            }
+        },
+        "/solicitud-pago/soportes": {
+            "post": {
+                "tags": [
+                    "solicitud-pago"
+                ],
+                "description": "Subir un soporte de pago",
+                "operationId": "SoportesCumplidoController.SubirSoporte",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "solicitud_pago_id",
+                        "description": "ID de la solicitud de pago",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "tipo_documento",
+                        "description": "Tipo de documento (debe ser 'application/pdf')",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "item_id",
+                        "description": "ID del tipo de documento",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "observaciones",
+                        "description": "Observaciones del documento",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "nombre_archivo",
+                        "description": "Nombre del archivo",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "archivo",
+                        "description": "Archivo en base64",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.SoportePago"
+                        }
+                    },
+                    "403": {
+                        "description": "body is empty"
+                    }
+                }
+            }
+        },
+        "/solicitud-pago/soportes-comprimido/{id_cumplido_proveedor}": {
             "get": {
                 "tags": [
-                    "dependencias_supervisor"
+                    "solicitud-pago"
                 ],
-                "description": "get DependenciasSupervisor by documento_supervisor",
-                "operationId": "ContratosSupervisorController.GetContratos",
+                "description": "Obtener los documentos de soporte de pago mensual y comprimirlos en un archivo ZIP",
+                "operationId": "SoportesCumplidoController.GetSoportesComprimido",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id_cumplido_proveedor",
+                        "description": "ID del cumplido proveedor",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "\"Documentos comprimidos en formato base64\"",
+                        "schema": {
+                            "$ref": "#/definitions/models.DocumentosComprimido"
+                        }
+                    },
+                    "404": {
+                        "description": "\"No se encontraron documentos de soporte\""
+                    },
+                    "502": {
+                        "description": "\"Error al intentar obtener o comprimir los documentos\""
+                    }
+                }
+            }
+        },
+        "/solicitud-pago/soportes/{cumplido_proveedor_id}": {
+            "get": {
+                "tags": [
+                    "solicitud-pago"
+                ],
+                "description": "Obtener los documentos de soporte de pago mensual",
+                "operationId": "SoportesCumplidoController.GetDocumentosPagoMensual",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "cumplido_proveedor_id",
+                        "description": "ID del cumplido proveedor",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.DocumentosSoporte"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No se encontraron documentos de soporte"
+                    }
+                }
+            }
+        },
+        "/solicitud-pago/soportes/{soporte_pago_id}": {
+            "delete": {
+                "tags": [
+                    "solicitud-pago"
+                ],
+                "description": "Eliminar un soporte de pago cumplido",
+                "operationId": "SoportesCumplidoController.EliminarSoporteCumplido",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "soporte_pago_id",
+                        "description": "ID del soporte de pago a eliminar",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "\"Soporte de pago eliminado exitosamente\"",
+                        "schema": {
+                            "$ref": "#/definitions/map[string]interface{}"
+                        }
+                    },
+                    "404": {
+                        "description": "\"No se encontró el soporte de pago\""
+                    },
+                    "502": {
+                        "description": "\"Error al intentar eliminar el soporte de pago\""
+                    }
+                }
+            }
+        },
+        "/supervisor/balance-financiero-contrato/{numero_contrato_suscrito}/{vigencia_contrato}": {
+            "get": {
+                "tags": [
+                    "supervisor"
+                ],
+                "description": "Obtener el balance financiero de un contrato",
+                "operationId": "InformeSeguimientoController.GetBalanceFinancieroContrato",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "numero_contrato_suscrito",
+                        "description": "Numero del contrato suscrito",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "path",
+                        "name": "vigencia_contrato",
+                        "description": "Vigencia del contrato",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.BalanceContrato"
+                        }
+                    },
+                    "502": {
+                        "description": "Error procesando la solicitud"
+                    }
+                }
+            }
+        },
+        "/supervisor/contratos-supervisor/{documento_supervisor}": {
+            "get": {
+                "tags": [
+                    "supervisor"
+                ],
+                "description": "get GetContratosSupervisor by documento_supervisor",
+                "operationId": "ContratosSupervisorController.GetContratosSupervisor",
                 "parameters": [
                     {
                         "in": "path",
@@ -35,26 +347,567 @@
                     "200": {
                         "description": "",
                         "schema": {
-                            "$ref": "#/definitions/models.ContratosSupervisor"
+                            "$ref": "#/definitions/models.ContratoSupervisor"
                         }
                     },
                     "403": {
-                        "description": ":id is empty"
+                        "description": ":documento_supervisor is empty"
+                    }
+                }
+            }
+        },
+        "/supervisor/informe-seguimiento": {
+            "post": {
+                "tags": [
+                    "supervisor"
+                ],
+                "description": "Genera un informe de seguimiento para un contrato suscrito",
+                "operationId": "InformeSeguimientoController.GenerateInformeSeguimiento",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Parámetros necesarios para generar el informe de seguimiento",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.BodyInformeSeguimiento"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "\"Successful - Informe de seguimiento generado exitosamente\"",
+                        "schema": {
+                            "$ref": "#/definitions/models.InformeSeguimiento"
+                        }
+                    },
+                    "404": {
+                        "description": "\"No se encontró el recurso solicitado\""
+                    },
+                    "502": {
+                        "description": "\"Error al intentar generar el informe de seguimiento\""
+                    }
+                }
+            }
+        },
+        "/supervisor/solicitudes-contrato/{numero_contrato}/{vigencia}": {
+            "get": {
+                "tags": [
+                    "supervisor"
+                ],
+                "description": "get solicitudes de contrato",
+                "operationId": "SolicitudContratoController.GetSolicitudesContrato",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "numero_contrato",
+                        "description": "numero_contrato",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "path",
+                        "name": "vigencia",
+                        "description": "vigencia del contrato",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.CambioEstadoCumplido"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": ":numero_contrato or vigencia is empty"
+                    }
+                }
+            }
+        },
+        "/supervisor/tipos-documentos-cumplido": {
+            "get": {
+                "tags": [
+                    "supervisor"
+                ],
+                "description": "get tipos de documentos cumplido",
+                "operationId": "ListarTipoDocumentosCumplidoController.GetTiposDocumentosCumplido",
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.DocumentoCumplido"
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "{object} map[string]interface{} \"Error interno del servidor\""
                     }
                 }
             }
         }
     },
     "definitions": {
-        "models.ContratosSupervisor": {
-            "title": "ContratosSupervisor",
+        "map[string]interface{}": {
+            "title": "map[string]interface{}",
             "type": "object"
+        },
+        "models.BalanceContrato": {
+            "title": "BalanceContrato",
+            "type": "object",
+            "properties": {
+                "saldo": {
+                    "type": "string"
+                },
+                "total_contrato": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.BodyInformeSeguimiento": {
+            "title": "BodyInformeSeguimiento",
+            "type": "object",
+            "properties": {
+                "banco": {
+                    "type": "string"
+                },
+                "numero_contrato_suscrito": {
+                    "type": "string"
+                },
+                "numero_cuenta": {
+                    "type": "string"
+                },
+                "numero_cuenta_factura": {
+                    "type": "string"
+                },
+                "periodo_fin": {
+                    "type": "string"
+                },
+                "periodo_inicio": {
+                    "type": "string"
+                },
+                "tipo_cuenta": {
+                    "type": "string"
+                },
+                "tipo_pago": {
+                    "type": "string"
+                },
+                "tipo_soporte_pagar": {
+                    "type": "string"
+                },
+                "valor_pagar": {
+                    "type": "string"
+                },
+                "vigencia_contrato": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CambioEstadoCumplido": {
+            "title": "CambioEstadoCumplido",
+            "type": "object",
+            "properties": {
+                "Activo": {
+                    "type": "boolean"
+                },
+                "CargoReponsable": {
+                    "type": "string"
+                },
+                "CumplidoProveedorId": {
+                    "$ref": "#/definitions/models.CumplidoProveedor"
+                },
+                "DocumentoResponsable": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "EstadoCumplidoId": {
+                    "$ref": "#/definitions/models.EstadoCumplido"
+                },
+                "FechaCreacion": {
+                    "type": "string",
+                    "format": "datetime"
+                },
+                "FechaModificacion": {
+                    "type": "string",
+                    "format": "datetime"
+                },
+                "Id": {
+                    "type": "integer",
+                    "format": "int64"
+                }
+            }
+        },
+        "models.CambioEstadoCumplidoResponse": {
+            "title": "CambioEstadoCumplidoResponse",
+            "type": "object",
+            "properties": {
+                "CumplidoProveedorId": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "DocumentoResponsable": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "EstadoCumplido": {
+                    "$ref": "#/definitions/models.EstadoCumplido"
+                }
+            }
+        },
+        "models.ContratoSupervisor": {
+            "title": "ContratoSupervisor",
+            "type": "object",
+            "properties": {
+                "contratos": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.InformacionContratoProveedor"
+                    }
+                },
+                "dependencias_supervisor": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Dependencia"
+                    }
+                }
+            }
+        },
+        "models.CumplidoProveedor": {
+            "title": "CumplidoProveedor",
+            "type": "object",
+            "properties": {
+                "Activo": {
+                    "type": "boolean"
+                },
+                "FechaCreacion": {
+                    "type": "string",
+                    "format": "datetime"
+                },
+                "FechaModificacion": {
+                    "type": "string",
+                    "format": "datetime"
+                },
+                "Id": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "NumeroContrato": {
+                    "type": "string"
+                },
+                "VigenciaContrato": {
+                    "type": "integer",
+                    "format": "int64"
+                }
+            }
+        },
+        "models.Dependencia": {
+            "title": "Dependencia",
+            "type": "object",
+            "properties": {
+                "Codigo": {
+                    "type": "string"
+                },
+                "Nombre": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Documento": {
+            "title": "Documento",
+            "type": "object",
+            "properties": {
+                "Activo": {
+                    "type": "boolean"
+                },
+                "Descripcion": {
+                    "type": "string"
+                },
+                "Enlace": {
+                    "type": "string"
+                },
+                "FechaCreacion": {
+                    "type": "string"
+                },
+                "FechaModificacion": {
+                    "type": "string"
+                },
+                "Id": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "Metadatos": {
+                    "type": "string"
+                },
+                "Nombre": {
+                    "type": "string"
+                },
+                "TipoDocumento": {
+                    "$ref": "#/definitions/models.TipoDocumento"
+                }
+            }
+        },
+        "models.DocumentoCumplido": {
+            "title": "DocumentoCumplido",
+            "type": "object",
+            "properties": {
+                "Nombre": {
+                    "type": "string"
+                },
+                "Tipo": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.DocumentosComprimido": {
+            "title": "DocumentosComprimido",
+            "type": "object",
+            "properties": {
+                "file": {
+                    "type": "string"
+                },
+                "nombre": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.DocumentosSoporte": {
+            "title": "DocumentosSoporte",
+            "type": "object",
+            "properties": {
+                "Archivo": {
+                    "$ref": "#/definitions/models.FileGestorDocumental"
+                },
+                "Documento": {
+                    "$ref": "#/definitions/models.Documento"
+                }
+            }
+        },
+        "models.DominioTipoDocumento": {
+            "title": "DominioTipoDocumento",
+            "type": "object",
+            "properties": {
+                "Activo": {
+                    "type": "boolean"
+                },
+                "CodigoAbreviacion": {
+                    "type": "string"
+                },
+                "Descripcion": {
+                    "type": "string"
+                },
+                "FechaCreacion": {
+                    "type": "string"
+                },
+                "FechaModificacion": {
+                    "type": "string"
+                },
+                "Id": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "Nombre": {
+                    "type": "string"
+                },
+                "NumeroOrden": {
+                    "type": "number",
+                    "format": "double"
+                }
+            }
+        },
+        "models.EstadoCumplido": {
+            "title": "EstadoCumplido",
+            "type": "object",
+            "properties": {
+                "Abreviacion": {
+                    "type": "string"
+                },
+                "Activo": {
+                    "type": "boolean"
+                },
+                "Descripcion": {
+                    "type": "string"
+                },
+                "Id": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "Nombre": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.FileGestorDocumental": {
+            "title": "FileGestorDocumental",
+            "type": "object",
+            "properties": {
+                "file": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.InformacionContratoProveedor": {
+            "title": "InformacionContratoProveedor",
+            "type": "object",
+            "properties": {
+                "NombreDependencia": {
+                    "type": "string"
+                },
+                "NombreProveedor": {
+                    "type": "string"
+                },
+                "NumDocumentoSupervisor": {
+                    "type": "string"
+                },
+                "NumeroCdp": {
+                    "type": "string"
+                },
+                "NumeroContratoSuscrito": {
+                    "type": "string"
+                },
+                "NumeroRp": {
+                    "type": "string"
+                },
+                "Rubro": {
+                    "type": "string"
+                },
+                "TipoContrato": {
+                    "type": "string"
+                },
+                "Vigencia": {
+                    "type": "string"
+                },
+                "VigenciaCdp": {
+                    "type": "string"
+                },
+                "VigenciaRp": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.InformeSeguimiento": {
+            "title": "InformeSeguimiento",
+            "type": "object",
+            "properties": {
+                "archivo": {
+                    "type": "string"
+                },
+                "file": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.RespuestaComentarioSoporte": {
+            "title": "RespuestaComentarioSoporte",
+            "type": "object",
+            "properties": {
+                "cambio_estado_cumplido_id": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "comentario": {
+                    "type": "string"
+                },
+                "soporte_pago_id": {
+                    "type": "integer",
+                    "format": "int64"
+                }
+            }
+        },
+        "models.SoportePago": {
+            "title": "SoportePago",
+            "type": "object",
+            "properties": {
+                "Activo": {
+                    "type": "boolean"
+                },
+                "CumplidoProveedorId": {
+                    "$ref": "#/definitions/models.CumplidoProveedor"
+                },
+                "DocumentoId": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "FechaCreacion": {
+                    "type": "string",
+                    "format": "datetime"
+                },
+                "FechaModificacion": {
+                    "type": "string",
+                    "format": "datetime"
+                },
+                "Id": {
+                    "type": "integer",
+                    "format": "int64"
+                }
+            }
+        },
+        "models.TipoDocumento": {
+            "title": "TipoDocumento",
+            "type": "object",
+            "properties": {
+                "Activo": {
+                    "type": "boolean"
+                },
+                "CodigoAbreviacion": {
+                    "type": "string"
+                },
+                "Descripcion": {
+                    "type": "string"
+                },
+                "DominioTipoDocumento": {
+                    "$ref": "#/definitions/models.DominioTipoDocumento"
+                },
+                "Extension": {
+                    "type": "string"
+                },
+                "FechaCreacion": {
+                    "type": "string"
+                },
+                "FechaModificacion": {
+                    "type": "string"
+                },
+                "Id": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "Nombre": {
+                    "type": "string"
+                },
+                "NumeroOrden": {
+                    "type": "number",
+                    "format": "double"
+                },
+                "Tamano": {
+                    "type": "number",
+                    "format": "double"
+                },
+                "TipoDocumentoNuxeo": {
+                    "type": "string"
+                },
+                "Workspace": {
+                    "type": "string"
+                }
+            }
         }
     },
     "tags": [
         {
-            "name": "dependencias_supervisor",
-            "description": "ContratosSupervisorController operations for ContratosSupervisor\n"
+            "name": "supervisor",
+            "description": "Informe_seguimientoController operations for Informe_seguimiento\n"
+        },
+        {
+            "name": "solicitud-pago",
+            "description": "SoportesCumplidoController operations for SoportesCumplido\n"
+        },
+        {
+            "name": "solicitud-pago",
+            "description": "EstadoSoporteController operations for EstadoSoporte\n"
         }
     ]
 }
