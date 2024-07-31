@@ -1,9 +1,14 @@
 package controladores_ordenador
 
 import (
+	"encoding/json"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
+	"github.com/udistrital/revision_cumplidos_proveedores_mid/helpers/helper_generar_documento"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/helpers/helpers_ordenador"
+	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
+	"io/ioutil"
+	"net/http"
 )
 
 type RevisionCumplidoOrdenadorController struct {
@@ -13,7 +18,7 @@ type RevisionCumplidoOrdenadorController struct {
 // URLMapping asigna métodos a la estructura PingController
 func (c *RevisionCumplidoOrdenadorController) URLMapping() {
 	c.Mapping("ObtenerPendientesRevisionOrdenador", c.ObtenerPendientesRevisionOrdenador)
-	c.Mapping("RevertirSolicitud", c.RevertirSolicitud)
+	c.Mapping("ListaCumplidosReversibles", c.ListaCumplidosReversibles)
 }
 
 //ObtenerPendientesRevisionOrdenador
@@ -41,7 +46,7 @@ func (c *RevisionCumplidoOrdenadorController) ObtenerPendientesRevisionOrdenador
 
 	documento_ordenador := c.GetString(":documento_ordenador")
 
-	dependencias, err := helpers_ordenador.ObternerContratos(documento_ordenador, "PRO")
+	dependencias, err := helpers_ordenador.ObtenerSolicitudesCumplidos(documento_ordenador, "PRO,Activo:true")
 
 	if err != nil {
 		c.Ctx.Output.SetStatus(400)
@@ -62,8 +67,8 @@ func (c *RevisionCumplidoOrdenadorController) ObtenerPendientesRevisionOrdenador
 //@Param id de pago path string true  "id_solictud_de_pago"
 //Success 200 {object}
 // @Failure 403 :id_solicitud_pago is empty
-//@router /revertir-solicitud-pago/:id_solicitud_pago [post]
-func (c *RevisionCumplidoOrdenadorController) RevertirSolicitud() {
+//@router /revertir-solicitud-pago/:id_cumplido [get]
+func (c *RevisionCumplidoOrdenadorController) ListaCumplidosReversibles() {
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -79,10 +84,10 @@ func (c *RevisionCumplidoOrdenadorController) RevertirSolicitud() {
 		}
 	}()
 
-	id_pago := c.GetString(":id_solicitud_pago")
-	print(id_pago)
+	id_cumplido := c.GetString(":id_cumplido")
+	print(id_cumplido)
 
-	dependencias, err := helpers_ordenador.RevertirAprobadoSupervisor(id_pago)
+	dependencias, err := helpers_ordenador.ListaCumplidosReversibles(id_cumplido)
 
 	if err != nil {
 		c.Ctx.Output.SetStatus(400)
@@ -100,12 +105,13 @@ func (c *RevisionCumplidoOrdenadorController) RevertirSolicitud() {
 //
 //@Title ObtenerCertificado firmado de aprobacion pago.
 //@Description Metodo encargado de retornar el certificado firmado de aprobacion pago.
-//@Param id de pago path string true  "id_solictud_de_pago"
+//@Param body  body models.AutorizacionPago true "body para la autorizacion de pago"
 //Success 200 {object}
 // @Failure 403 :id_solicitud_pago is empty
 //@router /certificado-aprobacion-pago/:id_solicitud_pago [post]
 func (c *RevisionCumplidoOrdenadorController) ObtenerCertificado() {
 
+	helper_generar_documento.GenerarPdf()
 	defer func() {
 		if err := recover(); err != nil {
 			logs.Error(err)
@@ -120,19 +126,56 @@ func (c *RevisionCumplidoOrdenadorController) ObtenerCertificado() {
 		}
 	}()
 
-	id_solicitud_pago := c.Ctx.Input.Param(":id_solicitud_pago")
-
-	cumplido, err := helpers_ordenador.ObtenerInfoContratoPorId(id_solicitud_pago)
+	var body models.AutorizacionPago
+	json.Unmarshal(c.Ctx.Input.RequestBody, &body)
+	autorizacion, err := helpers_ordenador.GenerarAutorizacion(body)
 
 	if err != nil {
 		c.Ctx.Output.SetStatus(400)
 		c.Data["json"] = err
-	} else if cumplido == nil {
+	} else if autorizacion == nil {
 		println("2")
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 204, "Message": "No hay datos", "Data": cumplido}
+		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 204, "Message": "No hay datos", "Data": autorizacion}
 	} else {
 		println("3")
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": cumplido}
+		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": autorizacion}
 	}
+	c.ServeJSON()
+}
+
+//generarDocumentoAutorizacion
+//@Title GnerarAutorizaxionPago
+//@Description Metodo
+//Success 200 {object}
+// @Failure 403
+//@router /testpdf [get]
+func (c *RevisionCumplidoOrdenadorController) GenerarPdf() {
+
+	helper_generar_documento.GenerarPdf()
+
+	// Leer el archivo PDF generado
+	pdfFile, err := ioutil.ReadFile("tabla.pdf")
+	if err != nil {
+		beego.Error("Error al leer el archivo PDF:", err)
+		c.Ctx.ResponseWriter.WriteHeader(http.StatusInternalServerError)
+		c.Ctx.ResponseWriter.Write([]byte("Error al generar el archivo PDF"))
+		return
+	}
+
+	// Establecer encabezados para la respuesta HTTP
+	c.Ctx.ResponseWriter.Header().Set("Content-Type", "application/pdf")
+	c.Ctx.ResponseWriter.Header().Set("Content-Disposition", "attachment; filename=tabla.pdf")
+
+	// Escribir el contenido del PDF en la respuesta
+	_, err = c.Ctx.ResponseWriter.Write(pdfFile)
+	if err != nil {
+		beego.Error("Error al escribir el archivo PDF en la respuesta:", err)
+		c.Ctx.ResponseWriter.WriteHeader(http.StatusInternalServerError)
+		c.Ctx.ResponseWriter.Write([]byte("Error al enviar el archivo PDF"))
+		return
+	}
+
+	// Opcional: Enviar una respuesta JSON si deseas informar sobre el éxito de la operación
+	c.Data["json"] = map[string]string{"status": "success"}
 	c.ServeJSON()
 }

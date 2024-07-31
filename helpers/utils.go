@@ -24,7 +24,6 @@ func GetJsonWSO2Test(urlp string, target interface{}) (status int, err error) {
 			beego.Error(nil, err)
 		}
 	}()
-	fmt.Println("Respuesta de la peticion", r)
 	return r.StatusCode, json.NewDecoder(r.Body).Decode(target)
 }
 

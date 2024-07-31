@@ -67,11 +67,12 @@
                 "operationId": "RevisionCumplidoOrdenadorController.ObtenerCertificado firmado de aprobacion pago.",
                 "parameters": [
                     {
-                        "in": "de",
-                        "name": "id",
-                        "description": "path",
+                        "in": "body",
+                        "name": "body",
+                        "description": "body para la autorizacion de pago",
+                        "required": true,
                         "schema": {
-                            "$ref": "#/definitions/pago"
+                            "$ref": "#/definitions/models.AutorizacionPago"
                         }
                     }
                 ],
@@ -82,8 +83,8 @@
                 }
             }
         },
-        "/ordenador/revertir-solicitud-pago/{id_solicitud_pago}": {
-            "post": {
+        "/ordenador/revertir-solicitud-pago/{id_cumplido}": {
+            "get": {
                 "tags": [
                     "ordenador"
                 ],
@@ -129,6 +130,20 @@
                 }
             }
         },
+        "/ordenador/testpdf": {
+            "get": {
+                "tags": [
+                    "ordenador"
+                ],
+                "description": "Metodo",
+                "operationId": "RevisionCumplidoOrdenadorController.GnerarAutorizaxionPago",
+                "responses": {
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/ping/ping": {
             "get": {
                 "tags": [
@@ -154,6 +169,27 @@
         "map[string]interface{}{\"Success\":true,\"Status\":\"200\",\"Message\":\"Successful\",\"Data\":{}}": {
             "title": "map[string]interface{}{\"Success\":true,\"Status\":\"200\",\"Message\":\"Successful\",\"Data\":{}}",
             "type": "object"
+        },
+        "models.AutorizacionPago": {
+            "title": "AutorizacionPago",
+            "type": "object",
+            "properties": {
+                "Archivo": {
+                    "type": "string"
+                },
+                "Item": {
+                    "type": "string"
+                },
+                "NombreArchivo": {
+                    "type": "string"
+                },
+                "Observaciones": {
+                    "type": "string"
+                },
+                "SolicitudPagoId": {
+                    "type": "string"
+                }
+            }
         },
         "models.ContratosSupervisor": {
             "title": "ContratosSupervisor",

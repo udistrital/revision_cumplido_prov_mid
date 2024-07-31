@@ -36,7 +36,7 @@ func (c *RevisionCumplidoContratacionController) ObtenerPendientesContratacion()
 		}
 	}()
 
-	dependencias, err := helpers_contratacion.ObternerContratos()
+	dependencias, err := helpers_contratacion.ObternerCumplidosPendientesContratacion()
 
 	if err != nil {
 		c.Ctx.Output.SetStatus(400)
