@@ -40,7 +40,6 @@ func GetJsonTest(url string, target interface{}) (status int, err error) {
 			beego.Error(err)
 		}
 	}()
-
 	return r.StatusCode, json.NewDecoder(r.Body).Decode(target)
 }
 

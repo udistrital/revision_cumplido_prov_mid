@@ -12,42 +12,40 @@ type SoportePago struct {
 }
 
 type Documento struct {
-	Id                int            `json:"Id"`
-	Nombre            string         `json:"Nombre"`
-	Descripcion       string         `json:"Descripcion"`
-	Enlace            string         `json:"Enlace"`
-	TipoDocumento     *TipoDocumento `json:"TipoDocumento"`
-	Metadatos         string         `json:"Metadatos"`
-	Activo            bool           `json:"Activo"`
-	FechaCreacion     time.Time      `json:"FechaCreacion"`
-	FechaModificacion time.Time      `json:"FechaModificacion"`
+	Id                int
+	Nombre            string
+	Descripcion       string
+	Enlace            string
+	TipoDocumento     *TipoDocumento
+	Metadatos         string
+	Activo            bool
+	FechaCreacion     string
+	FechaModificacion string
 }
 
-// Estructura anidada para TipoDocumento
 type TipoDocumento struct {
-	Id                   int                   `json:"Id"`
-	Nombre               string                `json:"Nombre"`
-	Descripcion          string                `json:"Descripcion"`
-	CodigoAbreviacion    string                `json:"CodigoAbreviacion"`
-	Activo               bool                  `json:"Activo"`
-	NumeroOrden          int                   `json:"NumeroOrden"`
-	Tamano               int                   `json:"Tamano"`
-	Extension            string                `json:"Extension"`
-	Workspace            string                `json:"Workspace"`
-	TipoDocumentoNuxeo   string                `json:"TipoDocumentoNuxeo"`
-	FechaCreacion        time.Time             `json:"FechaCreacion"`
-	FechaModificacion    time.Time             `json:"FechaModificacion"`
-	DominioTipoDocumento *DominioTipoDocumento `json:"DominioTipoDocumento"`
+	Id                   int
+	Nombre               string
+	Descripcion          string
+	CodigoAbreviacion    string
+	Activo               bool
+	NumeroOrden          float64
+	Tamano               float64
+	Extension            string
+	Workspace            string
+	TipoDocumentoNuxeo   string
+	FechaCreacion        string
+	FechaModificacion    string
+	DominioTipoDocumento *DominioTipoDocumento
 }
 
-// Estructura anidada para DominioTipoDocumento
 type DominioTipoDocumento struct {
-	Id                int       `json:"Id"`
-	Nombre            string    `json:"Nombre"`
-	Descripcion       string    `json:"Descripcion"`
-	CodigoAbreviacion string    `json:"CodigoAbreviacion"`
-	Activo            bool      `json:"Activo"`
-	NumeroOrden       int       `json:"NumeroOrden"`
-	FechaCreacion     time.Time `json:"FechaCreacion"`
-	FechaModificacion time.Time `json:"FechaModificacion"`
+	Id                int
+	Nombre            string
+	Descripcion       string
+	CodigoAbreviacion string
+	Activo            bool
+	NumeroOrden       float64
+	FechaCreacion     string
+	FechaModificacion string
 }
