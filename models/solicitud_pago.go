@@ -14,4 +14,5 @@ type DocuementoAutorizacionPago struct {
 	NombreProveedor    string
 	DocumentoProveedor string
 	ValorPago          string
+	DocumentosCargados []string
 }

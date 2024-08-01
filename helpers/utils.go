@@ -9,7 +9,7 @@ import (
 )
 
 func GetJsonWSO2Test(urlp string, target interface{}) (status int, err error) {
-
+	fmt.Println("URL: ", urlp)
 	b := new(bytes.Buffer)
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", urlp, b)
@@ -24,6 +24,23 @@ func GetJsonWSO2Test(urlp string, target interface{}) (status int, err error) {
 			beego.Error(nil, err)
 		}
 	}()
+	return r.StatusCode, json.NewDecoder(r.Body).Decode(target)
+}
+
+func GetJsonTest(url string, target interface{}) (status int, err error) {
+	fmt.Println("URL: ", url)
+	r, err := http.Get(url)
+	fmt.Println(err)
+	if err != nil {
+		fmt.Println("r", r)
+		return r.StatusCode, err
+	}
+	defer func() {
+		if err := r.Body.Close(); err != nil {
+			beego.Error(err)
+		}
+	}()
+
 	return r.StatusCode, json.NewDecoder(r.Body).Decode(target)
 }
 

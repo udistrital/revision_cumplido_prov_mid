@@ -59,7 +59,7 @@
             }
         },
         "/ordenador/certificado-aprobacion-pago/{id_solicitud_pago}": {
-            "post": {
+            "get": {
                 "tags": [
                     "ordenador"
                 ],
@@ -102,7 +102,7 @@
                 ],
                 "responses": {
                     "403": {
-                        "description": ":id_solicitud_pago is empty"
+                        "description": ":id_cumplido is empty"
                     }
                 }
             }

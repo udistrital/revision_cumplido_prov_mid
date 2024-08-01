@@ -1,12 +1,10 @@
 package controladores_ordenador
 
 import (
-	"encoding/json"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/helpers/helper_generar_documento"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/helpers/helpers_ordenador"
-	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 	"io/ioutil"
 	"net/http"
 )
@@ -66,7 +64,7 @@ func (c *RevisionCumplidoOrdenadorController) ObtenerPendientesRevisionOrdenador
 //@Description Metodo para que el ordenador  revierta el estado de un cumplido
 //@Param id de pago path string true  "id_solictud_de_pago"
 //Success 200 {object}
-// @Failure 403 :id_solicitud_pago is empty
+// @Failure 403 :id_cumplido is empty
 //@router /revertir-solicitud-pago/:id_cumplido [get]
 func (c *RevisionCumplidoOrdenadorController) ListaCumplidosReversibles() {
 
@@ -108,7 +106,7 @@ func (c *RevisionCumplidoOrdenadorController) ListaCumplidosReversibles() {
 //@Param body  body models.AutorizacionPago true "body para la autorizacion de pago"
 //Success 200 {object}
 // @Failure 403 :id_solicitud_pago is empty
-//@router /certificado-aprobacion-pago/:id_solicitud_pago [post]
+//@router /certificado-aprobacion-pago/:id_solicitud_pago [get]
 func (c *RevisionCumplidoOrdenadorController) ObtenerCertificado() {
 
 	helper_generar_documento.GenerarPdf()
@@ -126,9 +124,8 @@ func (c *RevisionCumplidoOrdenadorController) ObtenerCertificado() {
 		}
 	}()
 
-	var body models.AutorizacionPago
-	json.Unmarshal(c.Ctx.Input.RequestBody, &body)
-	autorizacion, err := helpers_ordenador.GenerarAutorizacion(body)
+	id_solicitud_pago := c.GetString(":id_solicitud_pago")
+	autorizacion, err := helpers_ordenador.GenerarAutorizacion(id_solicitud_pago)
 
 	if err != nil {
 		c.Ctx.Output.SetStatus(400)

@@ -242,11 +242,11 @@ func ObtenerEstado(estado string) (Estado *models.EstadoCumplidoId, errorOutput 
 		logs.Error(err)
 		return nil, errorOutput
 	}
-	var estado_List []models.EstadoCumplidoId
+	var estado_list []models.EstadoCumplidoId
 
-	helpers.LimpiezaRespuestaRefactor(respuesta, &estado_List)
+	helpers.LimpiezaRespuestaRefactor(respuesta, &estado_list)
 	if respuesta != nil {
-		Estado = &estado_List[0]
+		Estado = &estado_list[0]
 		return Estado, nil
 
 	}
@@ -391,11 +391,11 @@ func ObtenerCrdp(Cdp string, Vigencia string) (crdp *models.CDPRP, errorOutput i
 
 }
 
-func GenerarAutorizacion(Autorizacion models.AutorizacionPago) (DocumentoGenerado *models.DocuementoAutorizacionPago, errorOutput interface{}) {
+func GenerarAutorizacion(idSolicitudPago string) (DocumentoGenerado *models.DocuementoAutorizacionPago, errorOutput interface{}) {
 
 	// Obtiene datos de cambio estado
 	var respuestaCambioEstado map[string]interface{}
-	urlRequest := beego.AppConfig.String("UrlProveedoresCrud") + "/cambio_estado_cumplido/?query=CumplidoProveedorId:" + Autorizacion.SolicitudPagoId + ",EstadoCumplidoId.Abreviacion:AO"
+	urlRequest := beego.AppConfig.String("UrlProveedoresCrud") + "/cambio_estado_cumplido/?query=CumplidoProveedorId:" + idSolicitudPago + ",EstadoCumplidoId.Abreviacion:AO,Activo:true"
 	response, err := helpers.GetJsonWSO2Test(urlRequest, &respuestaCambioEstado)
 
 	if err != nil || response != 200 {
@@ -416,10 +416,10 @@ func GenerarAutorizacion(Autorizacion models.AutorizacionPago) (DocumentoGenerad
 		helpers.LimpiezaRespuestaRefactor(respuestaCambioEstado, &cambioEstado)
 	}
 
-	if len(cambioEstado) == 0 {
+	if len(cambioEstado) < 1 {
 		return nil, nil
-	}
 
+	}
 	// Obtiene información de los contratos
 	var respuesta []models.ContratoProveedor
 	urlRequestContrato := beego.AppConfig.String("UrlcrudAgora") + "/contrato_general/?query=ContratoSuscrito.NumeroContrato:" + cambioEstado[0].CumplidoProveedorId.NumeroContrato
@@ -455,15 +455,50 @@ func GenerarAutorizacion(Autorizacion models.AutorizacionPago) (DocumentoGenerad
 			return nil, errorOutput
 		}
 
+		var respuestaDocumentos map[string]interface{}
+		urlRequestDocumentos := beego.AppConfig.String("UrlProveedoresCrud") + "/soporte_pago?query=CumplidoProveedorId.id:" + idSolicitudPago
+		responseDocuementos, erroDocumentos := helpers.GetJsonWSO2Test(urlRequestDocumentos, &respuestaDocumentos)
+		fmt.Println(urlRequestDocumentos)
+		var documentosCargados []models.SoportePago
+		if len(respuestaDocumentos["Data"].([]interface{})[0].(map[string]interface{})) != 0 {
+			helpers.LimpiezaRespuestaRefactor(respuestaDocumentos, &documentosCargados)
+		}
+
+		var idDocumentos []string
+		for _, documentosCargado := range documentosCargados {
+			idDocumentos = append(idDocumentos, strconv.Itoa(documentosCargado.DocumentoId))
+		}
+		idDocumentosUnidos := strings.Join(idDocumentos, "|")
+
+		if erroDocumentos != nil || responseDocuementos != 200 {
+
+			return nil, errorOutput
+		}
+
+		var documentos []models.Documento
+		urlRequestDocumentosGestion := "http://pruebasapi.intranetoas.udistrital.edu.co:8094/v1/documento/?query=TipoDocumento.DominioTipoDocumento.CodigoAbreviacion:CUMP_PROV,Id.in:" + idDocumentosUnidos + ",Activo:true"
+		responseDocuementosGestion, erroDocumentosGestion := helpers.GetJsonWSO2Test(urlRequestDocumentosGestion, &documentos)
+
+		var lista_documentos_cargados_strings []string
+		for _, documento := range documentos {
+			lista_documentos_cargados_strings = append(lista_documentos_cargados_strings, documento.TipoDocumento.CodigoAbreviacion)
+		}
+
+		indexRespuestaOrdenador := len(respuesta) - 1
 		DocumentoGenerado := &models.DocuementoAutorizacionPago{
-			NombreOrdenador:    respuestaOrdenador[0].NomProveedor,
-			DocumentoOrdenador: respuestaOrdenador[0].NumDocumento,
+			NombreOrdenador:    respuestaOrdenador[indexRespuestaOrdenador].NomProveedor,
+			DocumentoOrdenador: respuestaOrdenador[indexRespuestaOrdenador].NumDocumento,
 			NombreProveedor:    proveedor.NomProveedor,
 			DocumentoProveedor: proveedor.NumDocumento,
+			DocumentosCargados: lista_documentos_cargados_strings,
 		}
 
 		return DocumentoGenerado, nil
-	}
 
+		if erroDocumentosGestion != nil || responseDocuementosGestion != 200 {
+			return nil, errorOutput
+		}
+
+	}
 	return nil, nil
 }

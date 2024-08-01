@@ -20,7 +20,7 @@ func init() {
 		beego.ControllerComments{
 			Method:           "ObtenerCertificado",
 			Router:           "/certificado-aprobacion-pago/:id_solicitud_pago",
-			AllowHTTPMethods: []string{"post"},
+			AllowHTTPMethods: []string{"get"},
 			MethodParams:     param.Make(),
 			Filters:          nil,
 			Params:           nil})
