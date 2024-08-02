@@ -1,6 +1,7 @@
 package helpers_soporte
 
 import (
+	"encoding/json"
 	"strconv"
 	"strings"
 
@@ -9,7 +10,7 @@ import (
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 )
 
-func GetDocumentosPagoMensual(cumplido_proveedor_id string) (documentos []models.DocumentosSoporte, outputError map[string]interface{}) {
+func GetDocumentosPagoMensual(cumplido_proveedor_id string) (documentos []models.DocumentosSoporteCorto, outputError map[string]interface{}) {
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -21,7 +22,8 @@ func GetDocumentosPagoMensual(cumplido_proveedor_id string) (documentos []models
 	var soportes_pagos_mensuales []models.SoportePago
 	var documentos_crud []models.Documento
 	var fileGestor models.FileGestorDocumental
-	var soporte models.DocumentosSoporte
+	var soporte models.DocumentosSoporteCorto
+	var documento_individual models.DocumentoCorto
 
 	var respuesta_peticion map[string]interface{}
 
@@ -35,16 +37,30 @@ func GetDocumentosPagoMensual(cumplido_proveedor_id string) (documentos []models
 
 			var ids_documentos_juntos = strings.Join(ids_documentos, "|")
 			if response, err := getJsonTest(beego.AppConfig.String("UrlDocumentosCrud")+"/documento/?limit=-1&query=Activo:True,Id.in:"+ids_documentos_juntos, &documentos_crud); (err == nil) && (response == 200) {
-				for _, documento_crud := range documentos_crud {
-					soporte.Documento = documento_crud
-					if response, err := getJsonTest(beego.AppConfig.String("UrlGestorDocumental")+"/document/"+documento_crud.Enlace, &fileGestor); (err == nil) && (response == 200) {
-						soporte.Archivo = fileGestor
-						documentos = append(documentos, soporte)
-					} else {
-						logs.Error(err)
-						continue
+				if len(documentos_crud) > 0 {
+					for _, documento_crud := range documentos_crud {
+						var observaciones map[string]interface{}
+						documento_individual.Id = documento_crud.Id
+						documento_individual.Nombre = documento_crud.Nombre
+						documento_individual.Descripcion = documento_crud.Descripcion
+						if err := json.Unmarshal([]byte(documento_crud.Metadatos), &observaciones); err == nil {
+							documento_individual.Observaciones = observaciones["observaciones"].(string)
+						}
+						soporte.Documento = documento_individual
+						if response, err := getJsonTest(beego.AppConfig.String("UrlGestorDocumental")+"/document/"+documento_crud.Enlace, &fileGestor); (err == nil) && (response == 200) {
+							soporte.Archivo = fileGestor
+							documentos = append(documentos, soporte)
+						} else {
+							logs.Error(err)
+							continue
+						}
 					}
+				} else {
+					logs.Error(err)
+					outputError = map[string]interface{}{"funcion": "/GetDocumentosPagoMensual/documento", "err": err, "status": "502", "Message": "No se encontraron documentos asociados al cumplido proveedor"}
+					return nil, outputError
 				}
+
 			} else {
 				logs.Error(err)
 				outputError = map[string]interface{}{"funcion": "/GetDocumentosPagoMensual/documento", "err": err, "status": "502"}

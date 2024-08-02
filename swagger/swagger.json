@@ -478,7 +478,8 @@
                     "type": "string"
                 },
                 "numero_contrato_suscrito": {
-                    "type": "string"
+                    "type": "integer",
+                    "format": "int64"
                 },
                 "numero_cuenta": {
                     "type": "string"
@@ -495,14 +496,15 @@
                 "tipo_cuenta": {
                     "type": "string"
                 },
+                "tipo_factura": {
+                    "type": "string"
+                },
                 "tipo_pago": {
                     "type": "string"
                 },
-                "tipo_soporte_pagar": {
-                    "type": "string"
-                },
                 "valor_pagar": {
-                    "type": "string"
+                    "type": "integer",
+                    "format": "int64"
                 },
                 "vigencia_contrato": {
                     "type": "string"

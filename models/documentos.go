@@ -7,6 +7,18 @@ type DocumentosSoporte struct {
 	Archivo   FileGestorDocumental
 }
 
+type DocumentosSoporteCorto struct {
+	Documento DocumentoCorto
+	Archivo   FileGestorDocumental
+}
+
+type DocumentoCorto struct {
+	Id            int
+	Nombre        string
+	Descripcion   string
+	Observaciones string
+}
+
 type Documento struct {
 	Id                int
 	Nombre            string

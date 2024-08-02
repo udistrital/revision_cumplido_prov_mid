@@ -5,6 +5,9 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
@@ -12,131 +15,6 @@ import (
 
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 )
-
-func CreateInformeSeguimiento(numero_contrato_suscrito string, vigencia_contrato string, tipo_pago string, periodo_inicio string, periodo_fin string, tipo_soporte_pagar string, numero_cuenta_factura string, valor_pagar string, tipo_cuenta string, numero_cuenta string, banco string) (informe_seguimiento models.InformeSeguimiento, outputError map[string]interface{}) {
-
-	// Se obtiene la información del proveedor
-	informacion_proveedor, err := GetInformacionProveedor(numero_contrato_suscrito, vigencia_contrato)
-	if err == nil {
-		fmt.Println(informacion_proveedor)
-		// Se crea el PDF
-
-		pdf := gofpdf.New("P", "mm", "Letter", "")
-		pdf.AddPage()
-		pdf.SetMargins(7, 7, 7)
-		pdf.SetAutoPageBreak(true, 7) // margen inferior
-		pdf.SetY(pdf.GetCellMargin())
-		pdf.SetX(pdf.GetCellMargin())
-
-		pdf = header(pdf, true)
-		pdf = footer(pdf, "-COPIA ESTUDIANTE-")
-		pdf = separador(pdf)
-
-		// Se codifica el PDF
-		encodedFile := encodePDF(pdf)
-		nombre := "InformeSeguimiento_" + informacion_proveedor.NumeroContratoSuscrito + "_" + informacion_proveedor.Vigencia + ".pdf"
-
-		informe_seguimiento = models.InformeSeguimiento{File: encodedFile, Archivo: nombre}
-		return informe_seguimiento, nil
-	}
-	return
-}
-
-type styling struct {
-	mL float64 // margen izq
-	mT float64 // margen sup
-	mR float64 // margen der
-	mB float64 // margen inf
-	wW float64 // ancho area trabajo
-	hW float64 // alto area trabajo
-	//hH    float64 // alto header
-	hF float64 // alto footer
-	//lh int     // alto linea común
-	//brdrs string  // estilo border común
-}
-
-func encodePDF(pdf *gofpdf.Fpdf) string {
-	var buffer bytes.Buffer
-	writer := bufio.NewWriter(&buffer)
-	//pdf.OutputFileAndClose("../docs/recibo.pdf") // para guardar el archivo localmente
-	pdf.Output(writer)
-	writer.Flush()
-	encodedFile := base64.StdEncoding.EncodeToString(buffer.Bytes())
-	return encodedFile
-}
-
-func image(pdf *gofpdf.Fpdf, image string, x, y, w, h float64) *gofpdf.Fpdf {
-	//The ImageOptions method takes a file path, x, y, width, and height parameters, and an ImageOptions struct to specify a couple of options.
-	pdf.ImageOptions(image, x, y, w, h, false, gofpdf.ImageOptions{ImageType: "PNG", ReadDpi: true}, 0, "")
-	return pdf
-}
-
-func fontStyle(pdf *gofpdf.Fpdf, style string, size float64, bw int) {
-	pdf.SetTextColor(bw, bw, bw)
-	pdf.SetFont("Helvetica", style, size)
-}
-
-// Description: genera el encabezado reutilizable del recibo de pago
-func header(pdf *gofpdf.Fpdf, banco bool) *gofpdf.Fpdf {
-	tr := pdf.UnicodeTranslatorFromDescriptor("")
-
-	path := beego.AppConfig.String("StaticPath")
-	pdf = image(pdf, path+"/img/UDEscudo2.png", 7, pdf.GetY(), 0, 17.5)
-
-	if banco {
-		pdf = image(pdf, path+"/img/banco.PNG", 198, pdf.GetY(), 0, 12.5)
-	}
-
-	pdf.SetXY(7, pdf.GetY())
-	fontStyle(pdf, "B", 10, 0)
-	pdf.Cell(13, 10, "")
-	pdf.Cell(140, 10, "UNIVERSIDAD DISTRITAL")
-	if banco {
-		fontStyle(pdf, "B", 8, 0)
-		pdf.Cell(50, 10, "PAGUE UNICAMENTE EN")
-		fontStyle(pdf, "B", 10, 0)
-	}
-	pdf.Ln(4)
-	pdf.Cell(13, 10, "")
-	pdf.Cell(60, 10, tr("Francisco José de Caldas"))
-	pdf.Cell(80, 10, "COMPROBANTE DE PAGO No ")
-
-	if banco {
-		fontStyle(pdf, "B", 8, 0)
-		pdf.Cell(50, 10, "BANCO DE OCCIDENTE")
-	} /* else {
-		fontStyle(pdf, "", 8, 70)
-		pdf.Cell(50, 10, "espacio para serial")
-	} */
-
-	pdf.Ln(4)
-	fontStyle(pdf, "", 8, 0)
-	pdf.Cell(13, 10, "")
-	pdf.Cell(50, 10, "NIT 899.999.230-7")
-	pdf.Ln(10)
-	return pdf
-}
-
-// Description: genera el pie de paǵina reutilizable del recibo de pago
-func footer(pdf *gofpdf.Fpdf, copiaPara string) *gofpdf.Fpdf {
-	fontStyle(pdf, "", 8, 70)
-	pdf.CellFormat(134, 5, copiaPara, "", 0, "C", false, 0, "")
-	pdf.SetXY(142.9, pdf.GetY())
-	pdf.CellFormat(66, 5, "-Espacio para timbre o sello Banco-", "", 0, "C", false, 0, "")
-	fontStyle(pdf, "", 8, 0)
-	pdf.Ln(5)
-
-	return pdf
-}
-
-// Description: genera linea de corte reutilizable del recibo de pago
-func separador(pdf *gofpdf.Fpdf) *gofpdf.Fpdf {
-	fontStyle(pdf, "", 8, 70)
-	pdf.CellFormat(201.9, 5, "...........................................................................................................................Doblar...........................................................................................................................", "", 0, "TC", false, 0, "")
-	fontStyle(pdf, "", 8, 0)
-	pdf.Ln(5)
-	return pdf
-}
 
 func GetInformacionProveedor(numero_contrato_suscrito string, vigencia string) (informacion_proveedor models.InformacionContratoProveedor, outputError map[string]interface{}) {
 
@@ -165,6 +43,7 @@ func ContratosContratistaTemp(numero_documento string) (contrato_proveedor []mod
 	}()
 
 	if contratos_persona, outputError := GetContratosPersona(numero_documento); outputError == nil {
+		//fmt.Println("contratos_persona", contratos_persona)
 		for _, contrato_persona := range contratos_persona.ContratosPersonas.ContratoPersona {
 			var contrato models.InformacionContrato
 			contrato, outputError = GetContrato(contrato_persona.NumeroContrato, contrato_persona.Vigencia)
@@ -205,4 +84,280 @@ func ContratosContratistaTemp(numero_documento string) (contrato_proveedor []mod
 		return nil, outputError
 	}
 	return contrato_proveedor, nil
+}
+
+func CreateInformeSeguimiento(numero_contrato_suscrito int, vigencia_contrato string, tipo_pago string, periodo_inicio string, periodo_fin string, tipo_factura string, numero_cuenta_factura string, valor_pagar int, tipo_cuenta string, numero_cuenta string, banco string) (informe_seguimiento models.InformeSeguimiento, outputError map[string]interface{}) {
+
+	var valor_total_contrato int
+	var saldo_contrato int
+	balance, err := GetBalanceFinancieroContrato(strconv.Itoa(numero_contrato_suscrito), vigencia_contrato)
+	if err == nil {
+		valor := strings.Split(balance.TotalContrato, ".")[0]
+		valor_total_contrato, _ = strconv.Atoi(valor)
+		saldo_contrato, _ = strconv.Atoi(balance.Saldo)
+	}
+	fmt.Println("valor_total_contrato", valor_total_contrato)
+	fmt.Println("saldo_contrato", saldo_contrato)
+	pdf := gofpdf.New("P", "mm", "Letter", "")
+	pdf.SetMargins(7, 7, 7)
+	pdf.SetAutoPageBreak(true, 7)
+
+	pdf.SetHeaderFunc(func() {
+		pdf = header(pdf)
+		pdf.Ln(35)
+	})
+	//body_primera_parte(pdf *gofpdf.Fpdf, nombre_proveedor string, numero_nit string, cumplimiento_contrato bool, tipo_contrato string, fecha_inicio string, numero_contrato string, cdp string, vigencia_cdp string, crp string, vigencia_crp string)
+	pdf.AddPage()
+
+	vigencia, _ := strconv.Atoi(vigencia_contrato)
+	contrato, err := GetInformacionProveedor(strconv.Itoa(numero_contrato_suscrito), vigencia_contrato)
+	if err != nil {
+		outputError = map[string]interface{}{"funcion": "/CreateInformeSeguimiento", "err": err, "status": "502"}
+		return informe_seguimiento, outputError
+	}
+
+	acta_inicio, err := GetActaInicio(strconv.Itoa(numero_contrato_suscrito), vigencia)
+	if err == nil {
+		pdf = body_primera_parte(
+			pdf,
+			contrato.NombreDependencia,
+			contrato.NombreProveedor,
+			"830006800-3",
+			true,
+			"Contrato de comisión",
+			formatear_fecha(acta_inicio.FechaInicio),
+			contrato.NumeroContratoSuscrito,
+			contrato.NumeroCdp,
+			contrato.VigenciaCdp,
+			contrato.NumeroRp,
+			contrato.VigenciaRp,
+		)
+	} else {
+
+		pdf = body_primera_parte(
+			pdf,
+			contrato.NombreDependencia,
+			contrato.NombreProveedor,
+			"830006800-3",
+			true,
+			"Contrato de comisión",
+			"08/04/2024",
+			contrato.NumeroContratoSuscrito,
+			contrato.NumeroCdp,
+			contrato.VigenciaCdp,
+			contrato.NumeroRp,
+			contrato.VigenciaRp,
+		)
+	}
+
+	pdf = body_segunda_parte(
+		pdf,
+		tipo_factura,
+		numero_cuenta_factura,
+		valor_total_contrato,
+		periodo_inicio,
+		periodo_fin,
+		saldo_contrato,
+		formatear_fecha(acta_inicio.FechaInicio),
+		formatear_fecha(acta_inicio.FechaFin),
+		tipo_cuenta,
+		numero_cuenta,
+		banco)
+
+	// Crear el PDF
+
+	// Codificar el PDF
+	encodedFile := encodePDF(pdf)
+	nombre := "prueba"
+
+	informe_seguimiento = models.InformeSeguimiento{File: encodedFile, Archivo: nombre}
+	return informe_seguimiento, nil
+}
+
+func formatear_fecha(fecha time.Time) (fecha_formateada string) {
+	layout := "02/01/2006"
+	return fecha.Format(layout)
+}
+
+func encodePDF(pdf *gofpdf.Fpdf) string {
+	var buffer bytes.Buffer
+	writer := bufio.NewWriter(&buffer)
+	pdf.OutputFileAndClose("/home/faidercamilo/go/src/github.com/udistrital/prueba.pdf") // para guardar el archivo localmente
+	pdf.Output(writer)
+	writer.Flush()
+	encodedFile := base64.StdEncoding.EncodeToString(buffer.Bytes())
+	return encodedFile
+}
+
+func image(pdf *gofpdf.Fpdf, image string, x, y, w, h float64) *gofpdf.Fpdf {
+	pdf.ImageOptions(image, x, y, w, h, false, gofpdf.ImageOptions{ImageType: "PNG", ReadDpi: true}, 0, "")
+	return pdf
+}
+
+func fontStyle(pdf *gofpdf.Fpdf, style string, size float64, bw int) {
+	pdf.SetTextColor(bw, bw, bw)
+	pdf.SetFont("Helvetica", style, size)
+}
+
+func header(pdf *gofpdf.Fpdf) *gofpdf.Fpdf {
+	tr := pdf.UnicodeTranslatorFromDescriptor("")
+
+	path := beego.AppConfig.String("StaticPath")
+
+	now := time.Now()
+	formattedDate := now.Format("02/01/2006")
+
+	pdf.SetFont("Times", "", 12)
+	pdf.SetMargins(10, 10, 10)
+	pdf.SetFillColor(240, 240, 240)
+
+	cellX, cellY := 30.0, 10.0
+	cellX2, cellY2 := 55.0, 10.0
+	cellWidth, cellHeight := 25.0, 25.0
+	cellWidth2, cellHeight2 := 55.0, 7.5
+
+	// Primer recuadro con logo
+	pdf.Rect(cellX, cellY, cellWidth, cellHeight, "")
+	pdf = image(pdf, path+"/img/EscudoUd.png", cellX+1, cellY+1, cellWidth-2, cellHeight-4)
+
+	// Segundo recuadro
+	pdf.Rect(cellX2, cellY2, cellWidth2, cellHeight2, "")
+	pdf.SetFont("Times", "B", 8)
+	pdf.Text(cellX2+3, cellY2+3, tr("CUMPLIDO A SATISFACCIÓN POR"))
+	pdf.Text(cellX2+7, cellY2+6, tr("PARTE DE LA DEPENDENCIA"))
+
+	// Tercer recuadro
+	pdf.SetFont("Times", "", 10)
+	pdf.Rect(cellX2, cellY2+7.5, cellWidth2, cellHeight2, "")
+	pdf.Text(cellX2+2, cellY2+12, tr("Macroproceso:  Gestión de Recursos"))
+
+	// Cuarto recuadro
+	pdf.SetFont("Times", "", 10)
+	pdf.Rect(cellX2, cellY2+15, cellWidth2, cellHeight2+2.5, "")
+	pdf.Text(cellX2+6, cellY2+20, tr("Proceso: Gestión Contractual"))
+
+	// Quinto recuadro
+	pdf.SetFont("Times", "", 9)
+	pdf.Rect(cellX2+55, cellY2, cellWidth2-12, cellHeight2, "")
+	pdf.Text(cellX2+56, cellY2+5, "Codigo: GC-PR-003-FR-012")
+
+	// Sexto recuadro
+	pdf.SetFont("Times", "", 10)
+	pdf.Rect(cellX2+55, cellY2+7.5, cellWidth2-12, cellHeight2, "")
+	pdf.Text(cellX2+56, cellY2+12, tr("Versión: 05"))
+
+	// Séptimo recuadro
+	pdf.Rect(cellX2+55, cellY2+15, cellWidth2-12, cellHeight2+2.5, "")
+	pdf.Text(cellX2+56, cellY2+20, tr("Fecha de Aprobación:"))
+	pdf.Text(cellX2+56, cellY2+24, formattedDate)
+
+	// Último recuadro con logo
+	pdf.Rect(cellX+123, cellY, cellWidth+2, cellHeight, "")
+	pdf = image(pdf, path+"/img/EscudoSigud.png", cellX+123+1, cellY+10, cellWidth-1, cellHeight-20)
+
+	return pdf
+}
+
+func textoNegrilla(pdf *gofpdf.Fpdf, texto string) string {
+	tr := pdf.UnicodeTranslatorFromDescriptor("")
+	pdf.SetFont("Times", "B", 12)
+	pdf.CellFormat(0, 10, tr(texto), "", 1, "C", false, 0, "")
+	return texto
+}
+
+func textoMayuscula(pdf *gofpdf.Fpdf, texto string) *gofpdf.Fpdf {
+	tr := pdf.UnicodeTranslatorFromDescriptor("")
+	pdf.SetFont("Times", "", 12)
+	pdf.CellFormat(0, 10, tr(strings.ToUpper(texto)), "", 1, "C", false, 0, "")
+	return pdf
+}
+
+func body_primera_parte(pdf *gofpdf.Fpdf, dependencia string, nombre_proveedor string, numero_nit string, cumplimiento_contrato bool, tipo_contrato string, fecha_inicio string, numero_contrato string, cdp string, vigencia_cdp string, crp string, vigencia_crp string) *gofpdf.Fpdf {
+
+	var cumplimiento string
+	if cumplimiento_contrato {
+		cumplimiento = "totalmente"
+	} else {
+		cumplimiento = "parcialmente"
+	}
+
+	tr := pdf.UnicodeTranslatorFromDescriptor("")
+
+	pdf.SetFont("Times", "", 12)
+
+	pdf.CellFormat(0, 10, tr("UNIVERSIDAD DISTRITAL FRANCISCO JOSÉ DE CALDAS"), "", 1, "C", false, 0, "")
+	pdf.CellFormat(0, 10, tr("("+dependencia+")"), "", 1, "C", false, 0, "")
+	pdf.CellFormat(0, 10, tr("En ejercicio de las funciones de (jefe de la dependencia o supervisor del contrato)"), "", 1, "C", false, 0, "")
+	pdf.CellFormat(0, 10, tr("CERTIFICA"), "", 1, "C", false, 0, "")
+	pdf.Ln(10) // Espacio después de la certificación
+
+	/**
+	pdf.SetFont("Times", "B", 12)
+	nombre_proveedor = strings.ToUpper(nombre_proveedor)
+	**/
+	// Contenido principal
+	pdf.SetFont("Times", "", 12)
+	pdf.MultiCell(0, 10, tr(fmt.Sprintf(`Que el contratista %s identificado con NIT %s cumplió %s a satisfacción con las obligaciones y objeto del %s Nro. %s de fecha %s garantizada y perfeccionada con Certificado de Disponibilidad Presupuestal No. %s de %s y Certificado de Registro Presupuestal No. %s de %s.`, nombre_proveedor, numero_nit, cumplimiento, tipo_contrato, numero_contrato, fecha_inicio, cdp, vigencia_cdp, crp, vigencia_crp)), "", "", false)
+
+	pdf.MultiCell(0, 10, tr(`Que conforme con los documentos aportados el contratista cumple con la afiliación y pagos al Sistema General de Seguridad Social de Salud y Pensiones Riesgos Laborales y las obligaciones parafiscales por el período y desembolso aquí causados y autorizados. Así mismo los documentos requeridos (RUT con impresión actualizada Certificado de Cámara de Comercio “no mayor a 90 días” cuenta bancaria fotocopia de la Cédula Actas de Entrega de Elementos o Remisiones Informes de Seguimiento de Supervisión Evaluación del Proveedor y Actas de Liquidación “si se requiere”) para el giro respectivo.`), "", "", false)
+
+	return pdf
+}
+
+func body_segunda_parte(pdf *gofpdf.Fpdf, tipo_factura string, numero_cuenta_factura string, valor_total_contrato int, periodo_inicio, periodo_fin string, saldo_contrato int, fecha_inicio string, fecha_fin string, tipo_cuenta string, numero_cuenta string, banco string) *gofpdf.Fpdf {
+
+	pdf.SetFont("Times", "", 12)
+
+	tr := pdf.UnicodeTranslatorFromDescriptor("")
+
+	pdf.MultiCell(0, 10, tr(fmt.Sprintf(`Que el valor causado de conformidad con la %s de Venta o Cuenta de cobro No. %s es %s PESOS $%s pesos m/cte.`, tipo_factura, numero_cuenta_factura, strings.ToUpper(ValorLetras(valor_total_contrato)), FormatNumber(valor_total_contrato, 0, ".", ","))), "", "", false)
+
+	pdf.MultiCell(0, 10, tr(fmt.Sprintf(`Que el valor total del contrato corresponde a %s $%s pesos m/cte.`, strings.ToUpper(ValorLetras(valor_total_contrato)), FormatNumber(valor_total_contrato, 0, ".", ","))), "", "", false)
+
+	pdf.MultiCell(0, 10, tr(fmt.Sprintf(`Que el presente pago corresponde al período de %s a %s de ejecución parcial total o único pago del contrato.`, periodo_inicio, periodo_fin)), "", "", false)
+
+	pdf.MultiCell(0, 10, tr(fmt.Sprintf(`Quedando un saldo correspondiente a $%s pesos m/cte.`, FormatNumber(saldo_contrato, 0, ".", ","))), "", "", false)
+
+	pdf.MultiCell(0, 10, tr(fmt.Sprintf(`Que el presente pago se encuentra en cumplimiento dentro del tiempo de ejecución del contrato del %s al %s.`, fecha_inicio, fecha_fin)), "", "", false)
+
+	pdf.MultiCell(0, 10, tr(fmt.Sprintf(`Que tal valor debe girarse por petición del contratista a la Cuenta %s  No. %s del Banco %s.`, tipo_cuenta, numero_cuenta, strings.ToUpper(banco))), "", "", false)
+
+	pdf.MultiCell(0, 10, tr(`Con el presente cumplido y de acuerdo a lo establecido en los numerales 32 y 33 del Artículo 18° de la Resolución de Rectoría No. 629 de 2016- Manual de Interventoría y Supervisión certifico que los informes físicos técnicos financieros y administrativos sobre el avance de la ejecución del objeto contractual reposan en el expediente del ______________ (Contrato/ Contrato de Comisión/Orden de Compra/Orden de Servicio/ Orden de Compra CCE) No.________ de________. De igual forma certifico que se verificaron las condiciones y elementos que hacen parte de la(s) factura(s) No. ___________________ acorde con lo establecido en la ficha técnica del proceso en mención garantizando la calidad del bien o servicio adquirido por la Universidad.`), "", "", false)
+
+	pdf.MultiCell(0, 10, tr(`La presente se expide a los ____ días del mes _____ de ______.`), "", "", false)
+
+	pdf.Ln(10) // Espacio para la firma
+
+	pdf.SetFont("Times", "B", 12)
+	pdf.MultiCell(0, 10, tr(`__________________________`), "", "", false)
+	pdf.MultiCell(0, 10, tr(`NOMBRE`), "", "", false)
+	pdf.MultiCell(0, 10, tr(`C.C ______________ de Bogotá`), "", "", false)
+	pdf.MultiCell(0, 10, tr(`CARGO`), "", "", false)
+	pdf.MultiCell(0, 10, tr(`DEPENDENCIA`), "", "", false)
+	pdf.MultiCell(0, 10, tr(`Supervisor ______________________Contrato/ Contrato de Comisión/Orden de Compra/Orden de Servicio/ Orden de Compra CCE) No. ________ de________.`), "", "", false)
+
+	// Tabla de elaboración, revisión y aprobación
+	pdf.Ln(10)
+	pdf.SetFont("Times", "B", 10)
+	pdf.CellFormat(0, 10, tr(`Elaboró`), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(0, 10, tr(`Revisó`), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(0, 10, tr(`Aprobó`), "1", 0, "C", false, 0, "")
+	pdf.Ln(-1)
+
+	pdf.SetFont("Times", "", 10)
+	pdf.CellFormat(0, 10, tr(`NOMBRE`), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(0, 10, tr(`NOMBRE`), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(0, 10, tr(`NOMBRE`), "1", 0, "C", false, 0, "")
+	pdf.Ln(-1)
+
+	pdf.CellFormat(0, 10, tr(`CARGO`), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(0, 10, tr(`CARGO`), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(0, 10, tr(`CARGO`), "1", 0, "C", false, 0, "")
+	pdf.Ln(-1)
+
+	pdf.CellFormat(0, 10, tr(`FIRMA`), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(0, 10, tr(`FIRMA`), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(0, 10, tr(`FIRMA`), "1", 0, "C", false, 0, "")
+
+	return pdf
 }

@@ -2,7 +2,6 @@ package helpers_supervisor
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -323,7 +322,7 @@ func GetInformacionContratoContratista(num_contrato_suscrito string, vigencia st
 	}()
 
 	var temp map[string]interface{}
-	fmt.Println("URL GetInformacionContratoContratista", beego.AppConfig.String("UrlAdministrativaJBPM")+"/"+"informacion_contrato_contratista/"+num_contrato_suscrito+"/"+vigencia)
+	//fmt.Println("URL GetInformacionContratoContratista", beego.AppConfig.String("UrlAdministrativaJBPM")+"/"+"informacion_contrato_contratista/"+num_contrato_suscrito+"/"+vigencia)
 	if response, err := getJsonWSO2Test(beego.AppConfig.String("UrlAdministrativaJBPM")+"/"+"informacion_contrato_contratista/"+num_contrato_suscrito+"/"+vigencia, &temp); (err == nil) && (response == 200) {
 		json_contrato, error_json := json.Marshal(temp)
 		if error_json == nil {
@@ -406,22 +405,48 @@ func ContratosContratista(numero_documento string) (contrato_proveedor []models.
 	return contrato_proveedor, nil
 }
 
-func GetActaDeInicio(numero_contrato string, vigencia_contrato int) (acta_inicio models.ActaInicio, outputError map[string]interface{}) {
+func GetActaInicio(numero_contrato_suscrito string, vigencia_contrato int) (acta_inicio models.ActaInicio, outputError map[string]interface{}) {
+	var contratos_suscrito []models.ContratoSuscrito
+	if response, err := getJsonTest(beego.AppConfig.String("UrlcrudAgora")+"/contrato_suscrito/?query=NumeroContratoSuscrito:"+numero_contrato_suscrito+",Vigencia:"+strconv.Itoa(vigencia_contrato), &contratos_suscrito); (err == nil) && (response == 200) {
+		if len(contratos_suscrito) > 0 {
+			var actasInicio []models.ActaInicio
+			if response, err := getJsonTest(beego.AppConfig.String("UrlcrudAgora")+"/acta_inicio/?query=NumeroContrato:"+contratos_suscrito[0].NumeroContrato.Id+",Vigencia:"+strconv.Itoa(contratos_suscrito[0].Vigencia), &actasInicio); (err == nil) && (response == 200) {
+				if len(actasInicio) == 0 {
+					acta_inicio.Id = 0
+					acta_inicio.NumeroContrato = contratos_suscrito[0].NumeroContratoSuscrito
+					acta_inicio.Vigencia = contratos_suscrito[0].Vigencia
+					acta_inicio.FechaInicio = contratos_suscrito[0].FechaSuscripcion
+					acta_inicio.Descripcion = "No se ha registrado acta de inicio"
 
-	var actasInicio []models.ActaInicio
-	fmt.Println(beego.AppConfig.String("UrlcrudAgora") + "/acta_inicio/?query=NumeroContrato:" + numero_contrato + ",Vigencia:" + strconv.Itoa(vigencia_contrato))
-	if response, err := getJsonTest(beego.AppConfig.String("UrlcrudAgora")+"/acta_inicio/?query=NumeroContrato:"+numero_contrato+",Vigencia:"+strconv.Itoa(vigencia_contrato), &actasInicio); (err == nil) && (response == 200) {
-		if len(actasInicio) == 0 {
-			outputError = map[string]interface{}{"funcion": "/getInformacionContratosContratista", "err": errors.New("No se encontro acta de inicio"), "status": "502"}
+					switch contratos_suscrito[0].NumeroContrato.UnidadEjecucion.Id {
+					case 205:
+						acta_inicio.FechaFin = acta_inicio.FechaInicio.AddDate(0, 0, contratos_suscrito[0].NumeroContrato.PlazoEjecucion)
+					case 206:
+						acta_inicio.FechaFin = acta_inicio.FechaInicio.AddDate(0, contratos_suscrito[0].NumeroContrato.PlazoEjecucion, 0)
+					case 207:
+						acta_inicio.FechaFin = acta_inicio.FechaInicio.AddDate(contratos_suscrito[0].NumeroContrato.PlazoEjecucion, 0, 0)
+					default:
+						outputError = map[string]interface{}{"funcion": "/getInformacionContratosContratista", "message": "La unidad de ejecucuion no es un valor de tiempo", "status": "502"}
+						return acta_inicio, outputError
+					}
+				} else {
+					acta_inicio = actasInicio[0]
+					return acta_inicio, nil
+				}
+			} else {
+				outputError = map[string]interface{}{"funcion": "/GetActaInicio", "err": err, "message": "Error al obtener la acta de inicio", "status": "502"}
+				return acta_inicio, outputError
+			}
+		} else {
+			outputError = map[string]interface{}{"funcion": "/GetActaInicio", "err": err, "message": "No existe el contrato suscrito ingresado", "status": "502"}
 			return acta_inicio, outputError
 		}
-		acta_inicio = actasInicio[0]
-		return acta_inicio, nil
-
 	} else {
-		outputError = map[string]interface{}{"funcion": "/getInformacionContratosContratista", "err": err, "status": "502"}
+		outputError = map[string]interface{}{"funcion": "/GetActaInicio", "err": err, "message": "Error al obtener el contrato suscrito", "status": "502"}
 		return acta_inicio, outputError
 	}
+
+	return acta_inicio, outputError
 }
 
 func FechasContratoConNovedades(numero_contrato string, vigencia_contrato string, numero_cdp string, num_doc string) (fechas models.FechasConNovedades, outputError map[string]interface{}) {
@@ -435,8 +460,10 @@ func FechasContratoConNovedades(numero_contrato string, vigencia_contrato string
 			}
 		}
 		outputError = map[string]interface{}{"funcion": "/FechasContratoConNovedades", "err": "No se encontro el contrato", "status": "502"}
+		return fechas, outputError
 	} else {
 		outputError = map[string]interface{}{"funcion": "/FechasContratoConNovedades/GetContratoPersona", "err": err, "status": "502"}
+		return fechas, outputError
 	}
 
 	return fechas, outputError

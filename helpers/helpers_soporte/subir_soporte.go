@@ -3,11 +3,9 @@ package helpers_soporte
 import (
 	"encoding/base64"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/astaxie/beego"
-	"github.com/udistrital/revision_cumplidos_proveedores_mid/helpers/helpers_supervisor"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 )
 
@@ -38,18 +36,11 @@ func SubirSoporte(solicitud_pago_id string, tipo_documento string, item_id strin
 		return soporte_pago, outputError
 	}
 
-	var nombre_documento string
 	var respuesta_peticion map[string]interface{}
 	var cumplido_proveedor []models.CumplidoProveedor
 	if response, err := getJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cumplido_proveedor/?query=Id:"+solicitud_pago_id, &respuesta_peticion); err == nil && response == 200 {
 		LimpiezaRespuestaRefactor(respuesta_peticion, &cumplido_proveedor)
 		fmt.Println("Cumplido Proveedor: ", &cumplido_proveedor[0])
-
-		informacion_contratista, err := helpers_supervisor.GetInformacionContratoContratista(cumplido_proveedor[0].NumeroContrato, strconv.Itoa(cumplido_proveedor[0].VigenciaContrato))
-		if err == nil {
-			nombre_documento = strconv.Itoa(cumplido_proveedor[0].VigenciaContrato) + "_" + cumplido_proveedor[0].NumeroContrato + "_" + informacion_contratista.InformacionContratista.Documento.Numero + "_" + strconv.Itoa(int(cumplido_proveedor[0].FechaCreacion.Month())) + "_" + strconv.Itoa(cumplido_proveedor[0].FechaCreacion.Year())
-			fmt.Println("Nombre Documento: ", nombre_documento)
-		}
 	} else {
 		outputError = map[string]interface{}{"funcion": "/SubirSoporte", "status": "502", "mensaje": "Error al consultar el cumplido proveedor"}
 		return soporte_pago, outputError
@@ -70,7 +61,7 @@ func SubirSoporte(solicitud_pago_id string, tipo_documento string, item_id strin
 	data := []models.BodySubirSoporte{
 		{
 			IdTipoDocumento: tipo[0].Id,
-			Nombre:          nombre_documento,
+			Nombre:          nombre_archivo,
 			Metadatos: struct {
 				NombreArchivo string `json:"nombre_archivo"`
 				Tipo          string `json:"tipo"`

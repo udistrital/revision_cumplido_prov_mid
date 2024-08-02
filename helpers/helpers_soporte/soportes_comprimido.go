@@ -64,7 +64,7 @@ func SoportesComprimido(id_cumplido_proveedor string) (documentos_comprimido mod
 		}
 
 		// Crear una entrada en el ZIP para cada archivo PDF con su nombre específico y un índice único
-		fileName := fmt.Sprintf("%s_%d.pdf", filepath.Base(documento.Documento.TipoDocumento.Nombre), i)
+		fileName := fmt.Sprintf("%s_%d.pdf", filepath.Base(documento.Documento.Nombre), i)
 		zipEntry, err := zipWriter.Create(fileName)
 		if err != nil {
 			outputError = map[string]interface{}{

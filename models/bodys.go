@@ -33,14 +33,14 @@ type BodySoportePago struct {
 }
 
 type BodyInformeSeguimiento struct {
-	NumeroContratoSuscrito string `json:"numero_contrato_suscrito"`
+	NumeroContratoSuscrito int    `json:"numero_contrato_suscrito"`
 	VigenciaContrato       string `json:"vigencia_contrato"`
 	TipoPago               string `json:"tipo_pago"`
 	PeiodoInicio           string `json:"periodo_inicio"`
 	PeriodoFin             string `json:"periodo_fin"`
-	TipoSoportePagar       string `json:"tipo_soporte_pagar"`
+	TipoFactura            string `json:"tipo_factura"`
 	NumeroCuentaFactura    string `json:"numero_cuenta_factura"`
-	ValorPagar             string `json:"valor_pagar"`
+	ValorPagar             int    `json:"valor_pagar"`
 	TipoCuenta             string `json:"tipo_cuenta"`
 	NumeroCuenta           string `json:"numero_cuenta"`
 	Banco                  string `json:"banco"`
