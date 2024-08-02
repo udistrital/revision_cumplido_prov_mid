@@ -2,13 +2,14 @@ package helpers_ordenador
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/helpers"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
-	"strconv"
-	"strings"
-	"time"
 )
 
 func obtenerCumplidos(docuemento_ordenador string, estado string) (cambios_estado_limpios []models.CambioEstadoCumplido, errorOutput interface{}) {
@@ -27,7 +28,8 @@ func obtenerCumplidos(docuemento_ordenador string, estado string) (cambios_estad
 	}()
 
 	var cambios_estado map[string]interface{}
-	var urlRequest = beego.AppConfig.String("UrlProveedoresCrud") + "/cambio_estado_cumplido/?query=DocumentoResponsable:" + docuemento_ordenador + ",EstadoCumplidoId.CodigoAbreviación:" + estado
+
+	var urlRequest = beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores") + "/cambio_estado_cumplido/?query=DocumentoResponsable:" + docuemento_ordenador + ",EstadoCumplidoId.CodigoAbreviación:" + estado
 
 	response, err := helpers.GetJsonWSO2Test(urlRequest, &cambios_estado)
 	fmt.Println(response)
@@ -50,7 +52,7 @@ func obtenerCumplidos(docuemento_ordenador string, estado string) (cambios_estad
 	return cambios_estado_limpios, nil
 }
 
-func ObtenerSolicitudesCumplidos(documento string, estado string) (cumplidosInfo []models.CumplidoProveedor, errorOutput interface{}) {
+func ObtenerSolicitudesCumplidos(documento string, estado string) (cumplidosInfo []models.SolicituRevisionCumplidoProveedor, errorOutput interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
 			errorMessage := fmt.Sprintf("%v", err)
@@ -103,7 +105,7 @@ func ObtenerSolicitudesCumplidos(documento string, estado string) (cumplidosInfo
 					cdprp, _ := ObtenerCrdp(strconv.Itoa(contrato_disponibilidad.NumeroCdp), strconv.Itoa(contrato_disponibilidad.Vigencia))
 					if cdprp != nil {
 
-						contrato := models.CumplidoProveedor{
+						contrato := models.SolicituRevisionCumplidoProveedor{
 							TipoContrato:     info_contrato[0].TipoContrato.TipoContrato,
 							NumeroContrato:   info_contrato[0].ContratoSuscrito[ultimoContrato].NumeroContrato.Id,
 							VigenciaContrato: info_contrato[0].ContratoSuscrito[ultimoContrato].Vigencia,
@@ -127,7 +129,7 @@ func ObtenerSolicitudesCumplidos(documento string, estado string) (cumplidosInfo
 	return cumplidosInfo, nil
 }
 
-func ListaCumplidosReversibles(docuemento_ordenador string) (soliciudes []models.CumplidoProveedor, errorOutput interface{}) {
+func ListaCumplidosReversibles(docuemento_ordenador string) (soliciudes []models.SolicituRevisionCumplidoProveedor, errorOutput interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
 			errorMessage := fmt.Sprintf("%v", err)
@@ -181,7 +183,8 @@ func ListaCumplidosReversibles(docuemento_ordenador string) (soliciudes []models
 
 						if cdprp != nil {
 							fmt.Println("proverdor no es nulo")
-							contrato := models.CumplidoProveedor{
+
+							contrato := models.SolicituRevisionCumplidoProveedor{
 								TipoContrato:     info_contrato[0].TipoContrato.TipoContrato,
 								NumeroContrato:   info_contrato[0].ContratoSuscrito[ultimoContrato].NumeroContrato.Id,
 								VigenciaContrato: info_contrato[0].ContratoSuscrito[ultimoContrato].Vigencia,
@@ -220,7 +223,7 @@ func ObtenerEstado(estado string) (Estado *models.EstadoCumplidoId, errorOutput 
 	}()
 
 	var respuesta map[string]interface{}
-	urlRequest := beego.AppConfig.String("UrlProveedoresCrud") + "/estado_cumplido?query=CodigoAbreviación:" + estado
+	urlRequest := beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores") + "/estado_cumplido?query=CodigoAbreviación:" + estado
 	println(urlRequest)
 	response, err := helpers.GetJsonWSO2Test(urlRequest, &respuesta)
 
@@ -263,7 +266,7 @@ func ObtenerInfoProveedor(IdProveedor string) (provedor *models.Proveedor, error
 
 	var respuesta []models.Proveedor
 	urlRequest := beego.AppConfig.String("UrlcrudAgora") + "/informacion_proveedor/?query=id:" + IdProveedor
-	println(urlRequest)
+	//println(urlRequest)
 	response, err := helpers.GetJsonWSO2Test(urlRequest, &respuesta)
 
 	if err != nil || response != 200 {
@@ -388,7 +391,8 @@ func GenerarAutorizacion(id_solicitud_pago string) (datos_documento *models.Docu
 
 	// Obtiene datos de cambio estado
 	var respuesta_cambioEstado map[string]interface{}
-	url_request := beego.AppConfig.String("UrlProveedoresCrud") + "/cambio_estado_cumplido/?query=CumplidoProveedorId:" + id_solicitud_pago + ",EstadoCumplidoId.CodigoAbreviación:PRO,Activo:true"
+
+	url_request := beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores") + "/cambio_estado_cumplido/?query=CumplidoProveedorId:" + id_solicitud_pago + ",EstadoCumplidoId.CodigoAbreviación:PRO,Activo:true"
 	response, err := helpers.GetJsonWSO2Test(url_request, &respuesta_cambioEstado)
 	var cambio_estado []models.CambioEstadoCumplido
 	fmt.Println(url_request)
@@ -457,7 +461,8 @@ func GenerarAutorizacion(id_solicitud_pago string) (datos_documento *models.Docu
 			}
 
 			var respuesta_documentos map[string]interface{}
-			url_request_documentos := beego.AppConfig.String("UrlProveedoresCrud") + "/soporte_cumplido?query=CumplidoProveedorId.id:" + id_solicitud_pago
+
+			url_request_documentos := beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores") + "/soporte_cumplido?query=CumplidoProveedorId.id:" + id_solicitud_pago
 			responseDocuementos, error_documentos := helpers.GetJsonWSO2Test(url_request_documentos, &respuesta_documentos)
 			fmt.Println(url_request_documentos)
 			var documentosCargados []models.SoporteCumplido

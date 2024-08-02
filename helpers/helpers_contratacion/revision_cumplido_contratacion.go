@@ -2,12 +2,13 @@ package helpers_contratacion
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/helpers"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/helpers/helpers_ordenador"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
-	"strconv"
 )
 
 func obtenerCumplidos(estado string) (cambios_estado_limpios []models.CambioEstadoCumplido, errorOutput interface{}) {
@@ -26,7 +27,8 @@ func obtenerCumplidos(estado string) (cambios_estado_limpios []models.CambioEsta
 	}()
 
 	var cambios_estado map[string]interface{}
-	var urlRequest = beego.AppConfig.String("UrlProveedoresCrud") + "/cambio_estado_cumplido/?query=EstadoCumplidoId.CodigoAbreviación:" + estado
+
+	var urlRequest = beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores") + "/cambio_estado_cumplido/?query=EstadoCumplidoId.CodigoAbreviación:" + estado
 
 	response, err := helpers.GetJsonWSO2Test(urlRequest, &cambios_estado)
 	fmt.Println(response)
@@ -49,7 +51,7 @@ func obtenerCumplidos(estado string) (cambios_estado_limpios []models.CambioEsta
 	return cambios_estado_limpios, nil
 }
 
-func ObtenerCumplidosPendientesContratacion(estado string) (cumplidosInfo []models.CumplidoProveedor, errorOutput interface{}) {
+func ObtenerCumplidosPendientesContratacion(estado string) (cumplidosInfo []models.SolicituRevisionCumplidoProveedor, errorOutput interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
 			errorMessage := fmt.Sprintf("%v", err)
@@ -102,7 +104,7 @@ func ObtenerCumplidosPendientesContratacion(estado string) (cumplidosInfo []mode
 					cdprp, _ := helpers_ordenador.ObtenerCrdp(strconv.Itoa(contrato_disponibilidad.NumeroCdp), strconv.Itoa(contrato_disponibilidad.Vigencia))
 					if cdprp != nil {
 
-						contrato := models.CumplidoProveedor{
+						contrato := models.SolicituRevisionCumplidoProveedor{
 							TipoContrato:     info_contrato[0].TipoContrato.TipoContrato,
 							NumeroContrato:   info_contrato[0].ContratoSuscrito[ultimoContrato].NumeroContrato.Id,
 							VigenciaContrato: info_contrato[0].ContratoSuscrito[ultimoContrato].Vigencia,

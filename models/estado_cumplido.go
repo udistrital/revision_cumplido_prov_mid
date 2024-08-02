@@ -1,9 +1,9 @@
 package models
 
 type EstadoCumplido struct {
-	Id          int
-	Nombre      string
-	Descripcion string
-	Activo      bool
-	Abreviacion string
+	Id                int
+	Nombre            string
+	Descripcion       string
+	Activo            bool
+	CodigoAbreviación string
 }

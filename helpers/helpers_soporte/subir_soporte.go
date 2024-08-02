@@ -41,7 +41,6 @@ func SubirSoporte(solicitud_pago_id int, tipo_documento string, item_id int, obs
 	var cumplido_proveedor []models.CumplidoProveedor
 	if response, err := getJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cumplido_proveedor/?query=Id:"+strconv.Itoa(solicitud_pago_id), &respuesta_peticion); err == nil && response == 200 {
 		LimpiezaRespuestaRefactor(respuesta_peticion, &cumplido_proveedor)
-		fmt.Println("Cumplido Proveedor: ", &cumplido_proveedor[0])
 	} else {
 		outputError = map[string]interface{}{"funcion": "/SubirSoporte", "status": "502", "mensaje": "Error al consultar el cumplido proveedor"}
 		return soporte_pago, outputError
@@ -49,11 +48,9 @@ func SubirSoporte(solicitud_pago_id int, tipo_documento string, item_id int, obs
 
 	//var respuesta map[string]interface{}
 	var tipo []models.TipoDocumento
-	fmt.Println("Item ID: ", item_id)
-	fmt.Println("URL: ", beego.AppConfig.String("UrlDocumentosCrud")+"/tipo_documento/?query=Id:"+strconv.Itoa(item_id))
+	//fmt.Println("URL: ", beego.AppConfig.String("UrlDocumentosCrud")+"/tipo_documento/?query=Id:"+strconv.Itoa(item_id))
 	if response, err := getJsonTest(beego.AppConfig.String("UrlDocumentosCrud")+"/tipo_documento/?query=Id:"+strconv.Itoa(item_id), &tipo); err == nil && response == 200 {
 		//LimpiezaRespuestaRefactor(respuesta, &tipo)
-		fmt.Println("Tipo Documento: ", tipo)
 	} else {
 		outputError = map[string]interface{}{"funcion": "/SubirSoporte", "status": "502", "error": err, "mensaje": "Error al consultar el tipo de documento"}
 		return soporte_pago, outputError
@@ -81,6 +78,7 @@ func SubirSoporte(solicitud_pago_id int, tipo_documento string, item_id int, obs
 
 	// Realizar la solicitud
 
+	fmt.Println("URL Subir documento gestor documental: ", beego.AppConfig.String("UrlGestorDocumental")+"/document/upload")
 	if err := sendJson(beego.AppConfig.String("UrlGestorDocumental")+"/document/upload", "POST", &respuesta, data); err == nil {
 		id := respuesta["res"].(map[string]interface{})["Id"].(float64)
 		soporte := models.BodySoportePago{

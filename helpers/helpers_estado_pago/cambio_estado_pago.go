@@ -1,7 +1,6 @@
 package helpers_estado_pago
 
 import (
-	"fmt"
 	"strconv"
 	"time"
 
@@ -68,7 +67,7 @@ func CambioEstadoPago(estado_cumplido_id int, cumplido_proveedor_id int, documen
 						FechaModificacion:    time.Now(),
 					}
 					if err := sendJson(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido", "POST", &respuesta, body); err == nil {
-						fmt.Println(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores") + "/cambio_estado_cumplido")
+						//fmt.Println(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores") + "/cambio_estado_cumplido")
 						var respuesta_cambio_estado models.CambioEstadoCumplidoResponse
 						respuesta_cambio_estado.CumplidoProveedorId = cumplido_proveedor[0].Id
 						respuesta_cambio_estado.DocumentoResponsable = documento

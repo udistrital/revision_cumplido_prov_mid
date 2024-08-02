@@ -24,7 +24,7 @@ type FormaPago struct {
 	FechaRegistro     string `json:"FechaRegistro"`
 }
 
-//Contrato disponibilidad
+// Contrato disponibilidad
 type ContratoDisponibilidad struct {
 	Id             int       `json:"Id"`
 	NumeroCdp      int       `json:"NumeroCdp"`
@@ -35,7 +35,7 @@ type ContratoDisponibilidad struct {
 	VigenciaCdp    int       `json:"VigenciaCdp"`
 }
 
-///////ContratoCompleto
+// /////ContratoCompleto
 type Cargo struct {
 	Id    int    `json:"Id"`
 	Cargo string `json:"Cargo"`

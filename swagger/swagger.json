@@ -587,39 +587,40 @@
             "title": "BodyInformeSeguimiento",
             "type": "object",
             "properties": {
-                "banco": {
-                    "type": "string"
-                },
-                "numero_contrato_suscrito": {
+                "BancoId": {
                     "type": "integer",
                     "format": "int64"
                 },
-                "numero_cuenta": {
-                    "type": "string"
-                },
-                "numero_cuenta_factura": {
-                    "type": "string"
-                },
-                "periodo_fin": {
-                    "type": "string"
-                },
-                "periodo_inicio": {
-                    "type": "string"
-                },
-                "tipo_cuenta": {
-                    "type": "string"
-                },
-                "tipo_factura": {
-                    "type": "string"
-                },
-                "tipo_pago": {
-                    "type": "string"
-                },
-                "valor_pagar": {
+                "NumeroContratoSuscrito": {
                     "type": "integer",
                     "format": "int64"
                 },
-                "vigencia_contrato": {
+                "NumeroCuenta": {
+                    "type": "string"
+                },
+                "NumeroCuentaFactura": {
+                    "type": "string"
+                },
+                "PeriodoFin": {
+                    "type": "string"
+                },
+                "PeriodoInicio": {
+                    "type": "string"
+                },
+                "TipoDocumentoCobroId": {
+                    "type": "string"
+                },
+                "TipoFactura": {
+                    "type": "string"
+                },
+                "TipoPago": {
+                    "type": "string"
+                },
+                "ValorPagar": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "VigenciaContrato": {
                     "type": "string"
                 }
             }
@@ -703,15 +704,6 @@
                 "Activo": {
                     "type": "boolean"
                 },
-                "Cdp": {
-                    "type": "string"
-                },
-                "Dependencia": {
-                    "type": "string"
-                },
-                "DocumentoOrdenador": {
-                    "type": "string"
-                },
                 "FechaCreacion": {
                     "type": "string",
                     "format": "datetime"
@@ -724,27 +716,12 @@
                     "type": "integer",
                     "format": "int64"
                 },
-                "NombreOrdenador": {
-                    "type": "string"
-                },
-                "NombreProveedor": {
-                    "type": "string"
-                },
                 "NumeroContrato": {
-                    "type": "string"
-                },
-                "Rp": {
-                    "type": "string"
-                },
-                "TipoContrato": {
                     "type": "string"
                 },
                 "VigenciaContrato": {
                     "type": "integer",
                     "format": "int64"
-                },
-                "VigenciaRP": {
-                    "type": "string"
                 }
             }
         },
@@ -870,11 +847,11 @@
             "title": "EstadoCumplido",
             "type": "object",
             "properties": {
-                "Abreviacion": {
-                    "type": "string"
-                },
                 "Activo": {
                     "type": "boolean"
+                },
+                "CodigoAbreviación": {
+                    "type": "string"
                 },
                 "Descripcion": {
                     "type": "string"
