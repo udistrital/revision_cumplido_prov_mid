@@ -100,6 +100,7 @@ func (c *RevisionCumplidoOrdenadorController) ListaCumplidosReversibles() {
 	c.ServeJSON()
 }
 
+/*
 //
 //@Title ObtenerCertificado firmado de aprobacion pago.
 //@Description Metodo encargado de retornar el certificado firmado de aprobacion pago.
@@ -140,15 +141,21 @@ func (c *RevisionCumplidoOrdenadorController) ObtenerCertificado() {
 	c.ServeJSON()
 }
 
+
+*/
+
 //generarDocumentoAutorizacion
 //@Title GnerarAutorizaxionPago
 //@Description Metodo
 //Success 200 {object}
 // @Failure 403
-//@router /testpdf [get]
+//@router /certificado-aprobacion-pago/:id_solicitud_pago [get]
 func (c *RevisionCumplidoOrdenadorController) GenerarPdf() {
 
-	helper_generar_documento.GenerarPdf()
+	id_solicitud_pago := c.GetString(":id_solicitud_pago")
+	autorizacion, err := helpers_ordenador.GenerarAutorizacion(id_solicitud_pago)
+
+	helper_generar_documento.GenerarPdf(autorizacion)
 
 	// Leer el archivo PDF generado
 	pdfFile, err := ioutil.ReadFile("tabla.pdf")
