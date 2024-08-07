@@ -27,7 +27,7 @@ func ObteberNumeroDeContrato() (dependencias string, errorOutput interface{}) {
 	}()
 
 	var respuesta map[string]interface{}
-	var urlRequest = beego.AppConfig.String("UrlProveedoresCrud") + "/cambio_estado_cumplido/?query=EstadoCumplidoId.Abreviacion:PRC,Activo:true"
+	var urlRequest = beego.AppConfig.String("UrlProveedoresCrud") + "/cambio_estado_cumplido/?query=EstadoCumplidoId.CodigoAbreviación:PRC,Activo:true"
 	response, err := helpers.GetJsonWSO2Test(urlRequest, &respuesta)
 
 	if err != nil || response != 200 {

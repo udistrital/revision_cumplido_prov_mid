@@ -12,6 +12,8 @@ type Contrato struct {
 	Cdp                string
 	NombreOrdenador    string
 	DocumentoOrdenador string
+	VigenciaRP         string
+	FechaCreacion      time.Time
 }
 
 type FormaPago struct {

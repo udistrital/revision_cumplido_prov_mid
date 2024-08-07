@@ -1,11 +1,11 @@
 package models
 
 type EstadoCumplidoId struct {
-	Id          int    `json:"Id"`
-	Nombre      string `json:"Nombre"`
-	Descripcion string `json:"Descripcion"`
-	Activo      bool   `json:"Activo"`
-	Abreviacion string `json:"Abreviacion"`
+	Id                int    `json:"Id"`
+	Nombre            string `json:"Nombre"`
+	Descripcion       string `json:"Descripcion"`
+	Activo            bool   `json:"Activo"`
+	CodigoAbreviación string `json:"CodigoAbreviación"`
 }
 
 type CumplidoProveedorId struct {

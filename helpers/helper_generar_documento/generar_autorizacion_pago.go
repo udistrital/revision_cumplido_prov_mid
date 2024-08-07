@@ -9,6 +9,11 @@ import (
 
 func GenerarPdf(atorizacion *models.DocuementoAutorizacionPago) {
 
+	if atorizacion == nil {
+		fmt.Println("Error al generar el documento")
+		return
+
+	}
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	now := time.Now()
 	//////Header
