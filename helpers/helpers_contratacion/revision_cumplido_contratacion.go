@@ -82,7 +82,7 @@ func ObternerCumplidosPendientesContratacion() (solicitudes []models.Contrato, e
 
 	var respuesta []models.ContratoProveedor
 	urlRequest := beego.AppConfig.String("UrlcrudAgora") + "/contrato_general/?query=ContratoSuscrito.NumeroContrato.in:" + cumplidos
-	fmt.Println(urlRequest)
+	fmt.Println("url", urlRequest)
 	response, err := helpers.GetJsonWSO2Test(urlRequest, &respuesta)
 
 	if err != nil || response != 200 {
@@ -120,9 +120,11 @@ func ObternerCumplidosPendientesContratacion() (solicitudes []models.Contrato, e
 							NombreProveedor: proveedor.NomProveedor,
 							Cdp:             strconv.Itoa(contratoDisponibilidad.NumeroCdp),
 							Rp:              cdprp.CDPNumeroDisponibilidad,
+							VigenciaRP:      cdprp.RPVigencia,
 						}
 						solicitudes = append(solicitudes, contrato)
 					}
+					fmt.Println("proverdor no es nulo", contrato)
 				}
 			}
 
