@@ -28,7 +28,6 @@ func main() {
 		AllowCredentials: true,
 	}))
 	beego.ErrorController(&customerrorv2.CustomErrorController{})
-	//xray.InitXRay()
 	apistatus.Init()
 	//auditoria.InitMiddleware()
 	beego.Run()

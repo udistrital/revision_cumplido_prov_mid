@@ -9,4 +9,5 @@ type CumplidoProveedor struct {
 	FechaModificacion time.Time "json:fecha_modificacion"
 	FechaCreacion     time.Time "json:fecha_creacion"
 	Activo            bool      "json:activo"
+
 }
