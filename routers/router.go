@@ -8,23 +8,34 @@
 package routers
 
 import (
-	"revision_cumplidos_proveedores_mid/controllers"
-
 	"github.com/astaxie/beego"
+	"github.com/udistrital/revision_cumplidos_proveedores_mid/controllers/controladores_contratacion"
+	"github.com/udistrital/revision_cumplidos_proveedores_mid/controllers/controladores_ordenador"
+	"github.com/udistrital/revision_cumplidos_proveedores_mid/controllers/controladores_supervisor"
 )
 
 func init() {
 	ns := beego.NewNamespace("/v1",
-		beego.NSNamespace("/object",
+		beego.NSNamespace("/dependencias_supervisor",
 			beego.NSInclude(
-				&controllers.ObjectController{},
+				&controladores_supervisor.ContratosSupervisorController{},
 			),
 		),
-		beego.NSNamespace("/user",
+		beego.NSNamespace("/ping",
 			beego.NSInclude(
-				&controllers.UserController{},
+				&controladores_ordenador.PingController{},
 			),
 		),
-	)
+		beego.NSNamespace("/ordenador",
+			beego.NSInclude(
+				&controladores_ordenador.RevisionCumplidoOrdenadorController{},
+			),
+		),
+		beego.NSNamespace("/contratacion",
+			beego.NSInclude(
+				&controladores_contratacion.RevisionCumplidoContratacionController{},
+			),
+		))
+
 	beego.AddNamespace(ns)
 }
