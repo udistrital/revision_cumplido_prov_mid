@@ -12,3 +12,9 @@ type CambioEstadoCumplido struct {
 	FechaModificacion    time.Time
 	Activo               bool
 }
+
+type CambioEstadoCumplidoResponse struct {
+	CumplidoProveedorId  int
+	DocumentoResponsable int
+	EstadoCumplido       *EstadoCumplido
+}

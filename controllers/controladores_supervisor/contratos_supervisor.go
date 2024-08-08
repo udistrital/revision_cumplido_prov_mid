@@ -13,17 +13,18 @@ type ContratosSupervisorController struct {
 
 // URLMapping ...
 func (c *ContratosSupervisorController) URLMapping() {
-	c.Mapping("GetContratos", c.GetContratos)
+	c.Mapping("GetContratosSupervisor", c.GetContratosSupervisor)
+
 }
 
-// GetContratos ...
-// @Title GetContratos
-// @Description get DependenciasSupervisor by documento_supervisor
+// GetContratosSupervisor ...
+// @Title GetContratosSupervisor
+// @Description get GetContratosSupervisor by documento_supervisor
 // @Param	documento_supervisor		path 	string	true		"documento_supervisor"
-// @Success 200 {object} models.ContratosSupervisor
-// @Failure 403 :id is empty
-// @router /:documento_supervisor [get]
-func (c *ContratosSupervisorController) GetContratos() {
+// @Success 200 {object} models.ContratoSupervisor
+// @Failure 403 :documento_supervisor is empty
+// @router /contratos-supervisor/:documento_supervisor [get]
+func (c *ContratosSupervisorController) GetContratosSupervisor() {
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -41,13 +42,13 @@ func (c *ContratosSupervisorController) GetContratos() {
 
 	documento_supervisor := c.Ctx.Input.Param(":documento_supervisor")
 
-	if data, err := helpers_supervisor.GetDependenciasSupervisor(documento_supervisor); err == nil {
-		if data != nil {
+	if data, err := helpers_supervisor.ContratosSupervisor(documento_supervisor); err == nil {
+		if len(data.Contratos) > 0 {
 			c.Ctx.Output.SetStatus(200)
 			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Successful", "Data": data}
 		} else {
 			c.Ctx.Output.SetStatus(200)
-			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "No se encontro ninguna dependencia para el supervisor", "Data": nil}
+			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "No se encontro ningun contrato para el supervisor", "Data": nil}
 		}
 		c.ServeJSON()
 	} else {

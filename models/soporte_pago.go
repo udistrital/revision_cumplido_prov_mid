@@ -11,6 +11,7 @@ type SoportePago struct {
 	Activo              bool
 }
 
+
 type Documento struct {
 	Id                int
 	Nombre            string
