@@ -21,15 +21,13 @@ func ContratosSupervisor(documento_supervisor string) (contratos_supervisor mode
 	}()
 
 	if dependencias_supervisor, outputError := GetDependenciasSupervisor(documento_supervisor); outputError == nil {
-		fmt.Println("dependencias_supervisor", dependencias_supervisor)
 		for _, dependencia := range dependencias_supervisor {
 			contratos_supervisor.Dependencias_supervisor = append(contratos_supervisor.Dependencias_supervisor, dependencia)
-			if contratos_dependencia, outputError := GetContratosDependenciaFiltro(dependencia.Codigo, documento_supervisor); outputError == nil {
-				fmt.Println("contratos_dependencia", contratos_dependencia)
+			if contratos_dependencia, outputError := GetContratosDependenciaFiltroTemp(dependencia.Codigo, "2024-05", "2024-05"); outputError == nil {
 				for _, contrato := range contratos_dependencia.Contratos.Contrato {
-					contrato_contratista, err := GetInformacionContratoContratista(contrato.NumeroContrato, strconv.Itoa(contrato.Vigencia))
+					contrato_contratista, err := GetInformacionContratoContratista(contrato.NumeroContrato, contrato.Vigencia)
 					if err == nil {
-						fmt.Println("contrato_contratista", contrato_contratista)
+						contratos_supervisor.NombreSupervisor = contrato_contratista.InformacionContratista.Supervisor.Nombre
 						contratistas, err := ContratosContratista(contrato_contratista.InformacionContratista.Documento.Numero)
 						if err == nil {
 
@@ -74,7 +72,7 @@ func GetDependenciasSupervisor(documento string) (dependenciasList []models.Depe
 		}
 	}()
 	var respuesta map[string]interface{}
-	fmt.Println(beego.AppConfig.String("UrlAdministrativaProduccionJBPM") + "/dependencias_supervisor/" + documento)
+	//fmt.Println(beego.AppConfig.String("UrlAdministrativaProduccionJBPM") + "/dependencias_supervisor/" + documento)
 	response, err := getJsonWSO2Test(beego.AppConfig.String("UrlAdministrativaProduccionJBPM")+"/dependencias_supervisor/"+documento, &respuesta)
 	if err == nil && response == 200 {
 		if respuesta != nil {
@@ -255,7 +253,7 @@ func GetContratosDependenciaFiltro(dependencia string, documento_supervisor stri
 			for _, contrato_general := range contratos_general {
 				if len(contrato_general.ContratoSuscrito) > 0 {
 					var contrato models.Contrato
-					contrato.Vigencia = contrato_general.ContratoSuscrito[0].Vigencia
+					contrato.Vigencia = strconv.Itoa(contrato_general.ContratoSuscrito[0].Vigencia)
 					contrato.NumeroContrato = contrato_general.ContratoSuscrito[0].NumeroContratoSuscrito
 					contratos_dependencia.Contratos.Contrato = append(contratos_dependencia.Contratos.Contrato, contrato)
 				} else {
@@ -273,6 +271,58 @@ func GetContratosDependenciaFiltro(dependencia string, documento_supervisor stri
 
 	return
 
+}
+
+func GetContratosDependenciaFiltroTemp(dependencia string, fecha_inicio string, fecha_fin string) (contratos_dependencia models.ContratoDependencia, outputError map[string]interface{}) {
+	var temp map[string]interface{}
+	if response, err := getJsonWSO2Test(beego.AppConfig.String("UrlHomologacionDepsJBPM")+"/oikos_argo/"+dependencia, &temp); (err == nil) && (response == 200) {
+		json_dep_oikos, error_json := json.Marshal(temp)
+		if error_json == nil {
+			var depOikos models.HomologacionDepOikos
+			if err := json.Unmarshal(json_dep_oikos, &depOikos); err == nil {
+
+				if len(depOikos.Dependencias.Dependencia) != 0 {
+					if response, err := getJsonWSO2Test(beego.AppConfig.String("UrlAdministrativaJBPM")+"/contratos_dependencia_oikos/"+depOikos.Dependencias.Dependencia[0].IDMaster+"/"+fecha_inicio+"/"+fecha_fin, &temp); (err == nil) && (response == 200) {
+						json_contrato, error_json := json.Marshal(temp)
+						if error_json == nil {
+							if err := json.Unmarshal(json_contrato, &contratos_dependencia); err == nil {
+								return contratos_dependencia, nil
+							} else {
+								logs.Error(err)
+								outputError = map[string]interface{}{"funcion": "/GetContratosDependenciaFiltro/contratos_dependencia_oikos", "err": err.Error(), "status": "502"}
+								return contratos_dependencia, outputError
+
+							}
+						} else {
+							logs.Error(error_json)
+							outputError = map[string]interface{}{"funcion": "/GetContratosDependenciaFiltro/contratos_dependencia_oikos", "err": error_json.Error(), "status": "502"}
+							return contratos_dependencia, outputError
+						}
+
+					} else {
+						logs.Error(err)
+						outputError = map[string]interface{}{"funcion": "/GetContratosDependenciaFiltro/contratos_dependencia_oikos", "err": err.Error(), "status": "502"}
+						return contratos_dependencia, outputError
+					}
+				} else {
+					outputError = map[string]interface{}{"funcion": "/GetContratosDependenciaFiltro/oikos_argo", "err": "no hay dependencia homologada en oikos", "status": "502"}
+					return contratos_dependencia, outputError
+
+				}
+
+			} else {
+				logs.Error(err)
+				outputError = map[string]interface{}{"funcion": "/GetContratosDependenciaFiltro/oikos_argo", "err": err.Error(), "status": "502"}
+				return contratos_dependencia, outputError
+
+			}
+		} else {
+			logs.Error(error_json)
+			outputError = map[string]interface{}{"funcion": "/GetContratosDependenciaFiltro/oikos_argo", "err": error_json.Error(), "status": "502"}
+			return contratos_dependencia, outputError
+		}
+	}
+	return
 }
 
 func GetRP(numero_cdp string, vigencia_cdp string) (rp models.InformacionCdpRp, outputError map[string]interface{}) {

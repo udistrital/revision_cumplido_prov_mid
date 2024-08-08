@@ -45,10 +45,10 @@ func (c *EstadoSoporteController) CambioEstadoPago() {
 
 	// Estructura para recibir el cuerpo de la solicitud
 	type BodyParams struct {
-		EstadoCumplidoID     string `json:"estado_cumplido_id"`
-		CumplidoProveedorID  string `json:"cumplido_proveedor_id"`
-		DocumentoResponsable string `json:"documento_responsable"`
-		CargoResponsable     string `json:"cargo_responsable"`
+		EstadoCumplidoID     int    `json:"EstadoCumplidoId"`
+		CumplidoProveedorID  int    `json:"CumplidoProveedorId"`
+		DocumentoResponsable string `json:"DocumentoResponsable"`
+		CargoResponsable     string `json:"CargoResponsable"`
 	}
 
 	var v BodyParams

@@ -3,13 +3,14 @@ package helpers_soporte
 import (
 	"encoding/base64"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/astaxie/beego"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 )
 
-func SubirSoporte(solicitud_pago_id string, tipo_documento string, item_id string, observaciones string, nombre_archivo string, archivo string) (soporte_pago models.SoportePago, outputError map[string]interface{}) {
+func SubirSoporte(solicitud_pago_id int, tipo_documento string, item_id int, observaciones string, nombre_archivo string, archivo string) (soporte_pago models.SoportePago, outputError map[string]interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
 			outputError = map[string]interface{}{"funcion": "/SubirSoporte", "err": err, "status": "502"}
@@ -18,7 +19,7 @@ func SubirSoporte(solicitud_pago_id string, tipo_documento string, item_id strin
 	}()
 
 	// Verificar que se envien todos los datos y que el archivo sea un PDF
-	if tipo_documento != "application/pdf" || tipo_documento == "" || archivo == "" || item_id == "" || solicitud_pago_id == "" {
+	if tipo_documento != "application/pdf" || archivo == "" || item_id == 0 || solicitud_pago_id == 0 {
 		outputError = map[string]interface{}{"funcion": "/SubirSoporte", "status": "502", "mensaje": "El archivo debe ser un PDF y no debe estar vacío"}
 		return soporte_pago, outputError
 	}
@@ -38,7 +39,7 @@ func SubirSoporte(solicitud_pago_id string, tipo_documento string, item_id strin
 
 	var respuesta_peticion map[string]interface{}
 	var cumplido_proveedor []models.CumplidoProveedor
-	if response, err := getJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cumplido_proveedor/?query=Id:"+solicitud_pago_id, &respuesta_peticion); err == nil && response == 200 {
+	if response, err := getJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cumplido_proveedor/?query=Id:"+strconv.Itoa(solicitud_pago_id), &respuesta_peticion); err == nil && response == 200 {
 		LimpiezaRespuestaRefactor(respuesta_peticion, &cumplido_proveedor)
 		fmt.Println("Cumplido Proveedor: ", &cumplido_proveedor[0])
 	} else {
@@ -49,8 +50,8 @@ func SubirSoporte(solicitud_pago_id string, tipo_documento string, item_id strin
 	//var respuesta map[string]interface{}
 	var tipo []models.TipoDocumento
 	fmt.Println("Item ID: ", item_id)
-	fmt.Println("URL: ", beego.AppConfig.String("UrlDocumentosCrud")+"/tipo_documento/?query=Id:"+item_id)
-	if response, err := getJsonTest(beego.AppConfig.String("UrlDocumentosCrud")+"/tipo_documento/?query=Id:"+item_id, &tipo); err == nil && response == 200 {
+	fmt.Println("URL: ", beego.AppConfig.String("UrlDocumentosCrud")+"/tipo_documento/?query=Id:"+strconv.Itoa(item_id))
+	if response, err := getJsonTest(beego.AppConfig.String("UrlDocumentosCrud")+"/tipo_documento/?query=Id:"+strconv.Itoa(item_id), &tipo); err == nil && response == 200 {
 		//LimpiezaRespuestaRefactor(respuesta, &tipo)
 		fmt.Println("Tipo Documento: ", tipo)
 	} else {

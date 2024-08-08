@@ -7,6 +7,6 @@ type ContratoDependencia struct {
 }
 
 type Contrato struct {
-	Vigencia       int    `json:"vigencia"`
+	Vigencia       string `json:"vigencia"`
 	NumeroContrato string `json:"numero_contrato"`
 }

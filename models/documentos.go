@@ -15,8 +15,10 @@ type DocumentosSoporteCorto struct {
 type DocumentoCorto struct {
 	Id            int
 	Nombre        string
+	TipoDocumento string
 	Descripcion   string
 	Observaciones string
+	FechaCreacion string
 }
 
 type Documento struct {
@@ -103,7 +105,7 @@ type FileGestorDocumental struct {
 	// DcPublisher                     interface{}   `json:"dc:publisher"`
 	// RelatedtextRelatedtextresources []interface{} `json:"relatedtext:relatedtextresources"`
 	// NxtagTags                       []interface{} `json:"nxtag:tags"`
-	File string `json:"file"`
+	File string `json:"File"`
 }
 
 type ItemInformeTipoContrato struct {
@@ -127,8 +129,9 @@ type ItemInforme struct {
 }
 
 type DocumentoCumplido struct {
-	Nombre string
-	Tipo   string
+	IdTipoDocumento int
+	Nombre          string
+	Tipo            string
 }
 
 type DocumentosComprimido struct {

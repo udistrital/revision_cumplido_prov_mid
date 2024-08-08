@@ -577,6 +577,9 @@
                     "items": {
                         "$ref": "#/definitions/models.Dependencia"
                     }
+                },
+                "nombre_supervisor": {
+                    "type": "string"
                 }
             }
         },
@@ -658,6 +661,10 @@
             "title": "DocumentoCumplido",
             "type": "object",
             "properties": {
+                "IdTipoDocumento": {
+                    "type": "integer",
+                    "format": "int64"
+                },
                 "Nombre": {
                     "type": "string"
                 },
@@ -748,7 +755,7 @@
             "title": "FileGestorDocumental",
             "type": "object",
             "properties": {
-                "file": {
+                "File": {
                     "type": "string"
                 }
             }

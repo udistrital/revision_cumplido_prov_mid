@@ -53,12 +53,12 @@ func (c *SoportesCumplidoController) SubirSoporte() {
 
 	// Estructura para recibir el cuerpo de la solicitud
 	var soporteReq struct {
-		SolicitudPagoID string `json:"solicitud_pago_id"`
-		TipoDocumento   string `json:"tipo_documento"`
-		ItemID          string `json:"item_id"`
-		Observaciones   string `json:"observaciones"`
-		NombreArchivo   string `json:"nombre_archivo"`
-		Archivo         string `json:"archivo"`
+		SolicitudPagoID int    `json:"SolicitudPagoID"`
+		TipoDocumento   string `json:"TipoDocumento"`
+		ItemID          int    `json:"ItemID"`
+		Observaciones   string `json:"Observaciones"`
+		NombreArchivo   string `json:"NombreArchivo"`
+		Archivo         string `json:"Archivo"`
 	}
 
 	// Parsear el cuerpo de la solicitud

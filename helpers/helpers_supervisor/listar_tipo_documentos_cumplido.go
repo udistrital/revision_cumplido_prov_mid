@@ -21,11 +21,11 @@ func GetTiposDocumentosCumplido() (tipos_documento []models.DocumentoCumplido, o
 
 	fmt.Println("UrlcrudAgora: ", beego.AppConfig.String("UrlcrudCore")+"/tipo_documento/?query=DominioTipoDocumento.Id:12")
 	if response, err := getJsonTest(beego.AppConfig.String("UrlcrudCore")+"/tipo_documento/?query=DominioTipoDocumento.Id:12", &tipo_documento); err == nil && response == 200 {
-		fmt.Println("Error: ", err)
 		//LimpiezaRespuestaRefactor(respuesta_peticion, &tipo_documento)
 		for _, tipo := range tipo_documento {
 			fmt.Println("Tipo: ", tipo)
 			var documento models.DocumentoCumplido
+			documento.IdTipoDocumento = tipo.Id
 			documento.Nombre = tipo.Nombre
 			if tipo.NumeroOrden == 0 {
 				documento.Tipo = "Obligatorio"

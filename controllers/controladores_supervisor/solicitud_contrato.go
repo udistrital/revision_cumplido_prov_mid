@@ -4,6 +4,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/helpers/helpers_supervisor"
+	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 )
 
 // Solicitud_contratoController operations for Solicitud_contrato
@@ -43,7 +44,7 @@ func (c *SolicitudContratoController) GetSolicitudesContrato() {
 	vigencia := c.Ctx.Input.Param(":vigencia")
 
 	if data, err := helpers_supervisor.GetSolicitudesCumplidosProveedor(numero_contrato, vigencia); err == nil {
-		if len(data) > 0 {
+		if (data[0] != models.CambioEstadoCumplido{}) {
 			c.Ctx.Output.SetStatus(200)
 			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Successful", "Data": data}
 		} else {

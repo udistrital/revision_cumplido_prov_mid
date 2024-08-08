@@ -42,7 +42,9 @@ func GetDocumentosPagoMensual(cumplido_proveedor_id string) (documentos []models
 						var observaciones map[string]interface{}
 						documento_individual.Id = documento_crud.Id
 						documento_individual.Nombre = documento_crud.Nombre
+						documento_individual.TipoDocumento = documento_crud.TipoDocumento.Nombre
 						documento_individual.Descripcion = documento_crud.Descripcion
+						documento_individual.FechaCreacion = documento_crud.FechaCreacion
 						if err := json.Unmarshal([]byte(documento_crud.Metadatos), &observaciones); err == nil {
 							documento_individual.Observaciones = observaciones["observaciones"].(string)
 						}
