@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strconv"
 	"strings"
-
+  	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
@@ -26,8 +26,8 @@ func GetDocumentosPagoMensual(cumplido_proveedor_id string) (documentos []models
 	var documento_individual models.DocumentoCorto
 
 	var respuesta_peticion map[string]interface{}
-
-	if response, err := getJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_pago/?limit=-1&query=CumplidoProveedorId.Id:"+cumplido_proveedor_id, &respuesta_peticion); (err == nil) && (response == 200) {
+	if response, err := getJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido/?limit=-1&query=CumplidoProveedorId.Id:"+cumplido_proveedor_id, &respuesta_peticion); (err == nil) && (response == 200) {
+		fmt.Println(respuesta_peticion)
 		LimpiezaRespuestaRefactor(respuesta_peticion, &soportes_pagos_mensuales)
 		if len(soportes_pagos_mensuales) != 0 {
 			var ids_documentos []string

@@ -36,7 +36,7 @@ func (c *RevisionCumplidoContratacionController) ObtenerPendientesContratacion()
 		}
 	}()
 
-	dependencias, err := helpers_contratacion.ObternerCumplidosPendientesContratacion()
+	dependencias, err := helpers_contratacion.ObtenerCumplidosPendientesContratacion("PRC,Activo:true")
 
 	if err != nil {
 		c.Ctx.Output.SetStatus(400)

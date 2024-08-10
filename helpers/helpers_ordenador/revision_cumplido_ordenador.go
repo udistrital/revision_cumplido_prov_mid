@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func ObtenerNumerosDeContrato(documentoOrdenador string, estado string) (numerosContrato string, errorOutput interface{}) {
+func obtenerCumplidos(docuemento_ordenador string, estado string) (cambios_estado_limpios []models.CambioEstadoCumplido, errorOutput interface{}) {
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -19,17 +19,15 @@ func ObtenerNumerosDeContrato(documentoOrdenador string, estado string) (numeros
 			errorOutput = map[string]interface{}{
 				"Success": false,
 				"Status":  400,
-				"Message": "Error al consultar las dependencias: " + documentoOrdenador + " - " + errorMessage,
+				"Message": "Error al consultar las dependencias: " + docuemento_ordenador + " - " + errorMessage,
 				"Error":   errorMessage,
 			}
 			fmt.Println("Error recuperado:", errorMessage)
 		}
 	}()
 
-	var numeros_contrato []string
-	var cambios_estado_limpios []models.CambioEstadoCumplido
 	var cambios_estado map[string]interface{}
-	var urlRequest = beego.AppConfig.String("UrlProveedoresCrud") + "/cambio_estado_cumplido/?query=DocumentoResponsable:" + documentoOrdenador + ",EstadoCumplidoId.CodigoAbreviación:" + estado
+	var urlRequest = beego.AppConfig.String("UrlProveedoresCrud") + "/cambio_estado_cumplido/?query=DocumentoResponsable:" + docuemento_ordenador + ",EstadoCumplidoId.CodigoAbreviación:" + estado
 
 	response, err := helpers.GetJsonWSO2Test(urlRequest, &cambios_estado)
 	fmt.Println(response)
@@ -42,28 +40,17 @@ func ObtenerNumerosDeContrato(documentoOrdenador string, estado string) (numeros
 			"Error":   errorMessage,
 		}
 		logs.Error(err)
-		return "", errorOutput
+		return nil, errorOutput
 	}
 
 	if len(cambios_estado["Data"].([]interface{})[0].(map[string]interface{})) != 0 {
 		helpers.LimpiezaRespuestaRefactor(cambios_estado, &cambios_estado_limpios)
 
-		for _, dependencia := range cambios_estado_limpios {
-
-			numeros_contrato = append(numeros_contrato, dependencia.CumplidoProveedorId.NumeroContrato)
-		}
-
 	}
-	numero_contrato_unidos := strings.Join(numeros_contrato, "|")
-	return numero_contrato_unidos, nil
+	return cambios_estado_limpios, nil
 }
 
-func ObtenerSolicitudesCumplidos(documento string, estado string) (contratos_list []models.Contrato, errorOutput interface{}) {
-
-	var info_contratos []models.ContratoProveedor
-	numero_contratos, e := ObtenerNumerosDeContrato(documento, estado)
-	urlRequest := beego.AppConfig.String("UrlcrudAgora") + "/contrato_general/?query=ContratoSuscrito.NumeroContrato.in:" + numero_contratos
-
+func ObtenerSolicitudesCumplidos(documento string, estado string) (cumplidosInfo []models.CumplidoProveedor, errorOutput interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
 			errorMessage := fmt.Sprintf("%v", err)
@@ -77,66 +64,77 @@ func ObtenerSolicitudesCumplidos(documento string, estado string) (contratos_lis
 		}
 	}()
 
-	if e != nil || numero_contratos == "" {
-		return nil, e
+	cumplidos, err := obtenerCumplidos(documento, estado)
+
+	if err != nil {
+		return nil, err
 	}
+	var info_contrato []models.ContratoGeneral
 
-	response, err := helpers.GetJsonTest(urlRequest, &info_contratos)
+	for _, cumplido := range cumplidos {
 
-	if err != nil || response != 200 {
-		errorMessage := fmt.Sprintf("%v", err)
-		errorOutput = map[string]interface{}{
-			"Success": false,
-			"Status":  400,
-			"Message": "Error el consultar los contratros para el ordenador en .GetContratos" + errorMessage,
-			"Error":   errorMessage,
+		urlRequest := beego.AppConfig.String("UrlcrudAgora") + "/contrato_general/?query=ContratoSuscrito.NumeroContrato:" + cumplido.CumplidoProveedorId.NumeroContrato
+		fmt.Println(urlRequest)
+		response, err := helpers.GetJsonTest(urlRequest, &info_contrato)
+
+		fmt.Println(err)
+		if err != nil || response != 200 {
+
+			errorMessage := fmt.Sprintf("%v", err)
+			errorOutput = map[string]interface{}{
+				"Success": false,
+				"Status":  400,
+				"Message": "Error el consultar los contratros para el ordenador en .GetContratos" + errorMessage,
+				"Error":   errorMessage,
+			}
+			logs.Error(err)
+			return nil, errorOutput
 		}
-		logs.Error(err)
-		return nil, errorOutput
-	}
 
-	for _, contrato := range info_contratos {
+		var ultimoContrato = len(info_contrato[0].ContratoSuscrito) - 1
 
-		var ultimoContrato = len(contrato.ContratoSuscrito) - 1
-		if proveedor, err := ObtenerInfoProveedor(strconv.Itoa(contrato.Contratista)); err == nil && proveedor != nil {
+		if proveedor, err := ObtenerInfoProveedor(strconv.Itoa(info_contrato[0].Contratista)); err == nil && proveedor != nil {
 
 			if proveedor != nil {
-				contrato_disponibilidad, _ := ObtenerContratoDisponiblidad(contrato.ContratoSuscrito[ultimoContrato].NumeroContrato.Id)
+				contrato_disponibilidad, _ := ObtenerContratoDisponiblidad(info_contrato[0].ContratoSuscrito[ultimoContrato].NumeroContrato.Id)
 
 				if contrato_disponibilidad != nil {
 
 					cdprp, _ := ObtenerCrdp(strconv.Itoa(contrato_disponibilidad.NumeroCdp), strconv.Itoa(contrato_disponibilidad.Vigencia))
 					if cdprp != nil {
 
-						contrato := models.Contrato{
-							TipoContrato:    contrato.TipoContrato.TipoContrato,
-							NumeroContrato:  contrato.ContratoSuscrito[ultimoContrato].NumeroContrato.Id,
-							Vigencia:        contrato.ContratoSuscrito[ultimoContrato].Vigencia,
-							Dependencia:     contrato.DependenciaSolicitante,
-							NombreProveedor: proveedor.NomProveedor,
-							Cdp:             strconv.Itoa(contrato_disponibilidad.NumeroCdp),
-							Rp:              cdprp.CDPNumeroDisponibilidad,
-							VigenciaRP:      cdprp.RPVigencia,
+						contrato := models.CumplidoProveedor{
+							TipoContrato:     info_contrato[0].TipoContrato.TipoContrato,
+							NumeroContrato:   info_contrato[0].ContratoSuscrito[ultimoContrato].NumeroContrato.Id,
+							VigenciaContrato: info_contrato[0].ContratoSuscrito[ultimoContrato].Vigencia,
+							Dependencia:      info_contrato[0].DependenciaSolicitante,
+							NombreProveedor:  proveedor.NomProveedor,
+							Cdp:              strconv.Itoa(contrato_disponibilidad.NumeroCdp),
+							Rp:               cdprp.CDPNumeroDisponibilidad,
+							VigenciaRP:       cdprp.RPVigencia,
+							Id:               cumplido.CumplidoProveedorId.Id,
+							Activo:           cumplido.Activo,
 						}
-						contratos_list = append(contratos_list, contrato)
+						cumplidosInfo = append(cumplidosInfo, contrato)
 					}
 				}
 			}
 
 		}
+
 	}
 
-	return contratos_list, nil
+	return cumplidosInfo, nil
 }
 
-func ListaCumplidosReversibles(documentoOrdenador string) (soliciudes []models.Contrato, errorOutput interface{}) {
+func ListaCumplidosReversibles(docuemento_ordenador string) (soliciudes []models.CumplidoProveedor, errorOutput interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
 			errorMessage := fmt.Sprintf("%v", err)
 			errorOutput = map[string]interface{}{
 				"Success": false,
 				"Status":  400,
-				"Message": "Error al consultar las dependencias: " + documentoOrdenador + " - " + errorMessage,
+				"Message": "Error al consultar las dependencias: " + docuemento_ordenador + " - " + errorMessage,
 				"Error":   errorMessage,
 			}
 			fmt.Println("Error recuperado:", errorMessage)
@@ -146,65 +144,61 @@ func ListaCumplidosReversibles(documentoOrdenador string) (soliciudes []models.C
 	fechaActual := time.Now()
 	fechaMenosQuinceDias := fechaActual.AddDate(0, 0, -15)
 	fechaFormateada := fechaMenosQuinceDias.Format("01/02/2006")
-	numeros_contrato, e := ObtenerNumerosDeContrato(documentoOrdenador, "AO,FechaCreacion__gt:"+fechaFormateada+",Activo:true")
+	cumplidos, e := obtenerCumplidos(docuemento_ordenador, "AO,FechaCreacion__gt:"+fechaFormateada+",Activo:true")
 
-	if e != nil || numeros_contrato == "" {
+	if e != nil || cumplidos == nil {
 		return nil, e
 	}
+	var info_contrato []models.ContratoGeneral
+	for _, cumplido := range cumplidos {
+		urlRequest := beego.AppConfig.String("UrlcrudAgora") + "/contrato_general/?query=ContratoSuscrito.NumeroContrato:" + cumplido.CumplidoProveedorId.NumeroContrato
+		response, err := helpers.GetJsonWSO2Test(urlRequest, &info_contrato)
 
-	var respuesta []models.ContratoProveedor
-	urlRequest := beego.AppConfig.String("UrlcrudAgora") + "/contrato_general/?query=ContratoSuscrito.NumeroContrato.in:" + numeros_contrato
-	println(urlRequest)
-	response, err := helpers.GetJsonWSO2Test(urlRequest, &respuesta)
-
-	if err != nil || response != 200 {
-		errorMessage := fmt.Sprintf("%v", err)
-		errorOutput = map[string]interface{}{
-			"Success": false,
-			"Status":  400,
-			"Message": "Error el consultar los contratros para el ordenador en .GetContratos" + errorMessage,
-			"Error":   errorMessage,
+		if err != nil || response != 200 {
+			errorMessage := fmt.Sprintf("%v", err)
+			errorOutput = map[string]interface{}{
+				"Success": false,
+				"Status":  400,
+				"Message": "Error el consultar los contratros para el ordenador en .GetContratos" + errorMessage,
+				"Error":   errorMessage,
+			}
+			logs.Error(err)
+			return nil, errorOutput
 		}
-		logs.Error(err)
-		return nil, errorOutput
-	}
-	if respuesta == nil {
 
-		return nil, nil
+		for _, contrato := range info_contrato {
 
-	}
+			var ultimoContrato = len(contrato.ContratoSuscrito) - 1
+			if proveedor, err := ObtenerInfoProveedor(strconv.Itoa(contrato.Contratista)); err == nil && proveedor != nil {
 
-	for _, contrato := range respuesta {
+				if proveedor != nil {
+					fmt.Println("proverdor no es nulo")
+					contrato_disponibilidad, _ := ObtenerContratoDisponiblidad(contrato.ContratoSuscrito[ultimoContrato].NumeroContrato.Id)
 
-		var ultimoContrato = len(contrato.ContratoSuscrito) - 1
-		if proveedor, err := ObtenerInfoProveedor(strconv.Itoa(contrato.Contratista)); err == nil && proveedor != nil {
+					if contrato_disponibilidad != nil {
+						fmt.Println("contratoDisponibilidad no es nulo")
+						cdprp, _ := ObtenerCrdp(strconv.Itoa(contrato_disponibilidad.NumeroCdp), strconv.Itoa(contrato_disponibilidad.Vigencia))
 
-			if proveedor != nil {
-				fmt.Println("proverdor no es nulo")
-				contrato_disponibilidad, _ := ObtenerContratoDisponiblidad(contrato.ContratoSuscrito[ultimoContrato].NumeroContrato.Id)
-
-				if contrato_disponibilidad != nil {
-					fmt.Println("contratoDisponibilidad no es nulo")
-					cdprp, _ := ObtenerCrdp(strconv.Itoa(contrato_disponibilidad.NumeroCdp), strconv.Itoa(contrato_disponibilidad.Vigencia))
-
-					if cdprp != nil {
-						fmt.Println("proverdor no es nulo")
-						contrato := models.Contrato{
-							TipoContrato:       contrato.TipoContrato.TipoContrato,
-							NumeroContrato:     contrato.ContratoSuscrito[ultimoContrato].NumeroContrato.Id,
-							Vigencia:           contrato.ContratoSuscrito[ultimoContrato].Vigencia,
-							Dependencia:        contrato.DependenciaSolicitante,
-							NombreProveedor:    proveedor.NomProveedor,
-							Cdp:                strconv.Itoa(contrato_disponibilidad.NumeroCdp),
-							Rp:                 cdprp.CDPNumeroDisponibilidad,
-							DocumentoOrdenador: documentoOrdenador,
-							VigenciaRP:         cdprp.RPVigencia,
+						if cdprp != nil {
+							fmt.Println("proverdor no es nulo")
+							contrato := models.CumplidoProveedor{
+								TipoContrato:     info_contrato[0].TipoContrato.TipoContrato,
+								NumeroContrato:   info_contrato[0].ContratoSuscrito[ultimoContrato].NumeroContrato.Id,
+								VigenciaContrato: info_contrato[0].ContratoSuscrito[ultimoContrato].Vigencia,
+								Dependencia:      info_contrato[0].DependenciaSolicitante,
+								NombreProveedor:  proveedor.NomProveedor,
+								Cdp:              strconv.Itoa(contrato_disponibilidad.NumeroCdp),
+								Rp:               cdprp.CDPNumeroDisponibilidad,
+								VigenciaRP:       cdprp.RPVigencia,
+								Id:               cumplido.CumplidoProveedorId.Id,
+								Activo:           cumplido.Activo,
+							}
+							soliciudes = append(soliciudes, contrato)
 						}
-						soliciudes = append(soliciudes, contrato)
 					}
 				}
-			}
 
+			}
 		}
 	}
 
@@ -428,7 +422,7 @@ func GenerarAutorizacion(id_solicitud_pago string) (datos_documento *models.Docu
 		}
 
 		// Obtiene información de los contratos
-		var respuesta []models.ContratoProveedor
+		var respuesta []models.ContratoGeneral
 		url_request_contrato := beego.AppConfig.String("UrlcrudAgora") + "/contrato_general/?query=ContratoSuscrito.NumeroContrato:" + cambio_estado[0].CumplidoProveedorId.NumeroContrato
 		resonse_contrato, err_contrato := helpers.GetJsonWSO2Test(url_request_contrato, &respuesta)
 
@@ -467,8 +461,13 @@ func GenerarAutorizacion(id_solicitud_pago string) (datos_documento *models.Docu
 			responseDocuementos, error_documentos := helpers.GetJsonWSO2Test(url_request_documentos, &respuesta_documentos)
 			fmt.Println(url_request_documentos)
 			var documentosCargados []models.SoportePago
-			if len(respuesta_documentos["Data"].([]interface{})[0].(map[string]interface{})) != 0 {
-				helpers.LimpiezaRespuestaRefactor(respuesta_documentos, &documentosCargados)
+			if respuesta_documentos["Data"] != nil {
+				if len(respuesta_documentos["Data"].([]interface{})[0].(map[string]interface{})) != 0 {
+					helpers.LimpiezaRespuestaRefactor(respuesta_documentos, &documentosCargados)
+				}
+
+			} else {
+				return nil, errorOutput
 			}
 
 			var id_documentos []string
