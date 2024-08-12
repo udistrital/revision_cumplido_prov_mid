@@ -23,7 +23,7 @@ func AgregarComentarioSoporte(soporte_id string, cambio_estado_id string, coment
 		return respuesta, outputError
 	}
 
-	if response, err := getJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_pago/"+soporte_id, &respuesta_peticion); (err == nil) && (response == 200) {
+	if response, err := getJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido/"+soporte_id, &respuesta_peticion); (err == nil) && (response == 200) {
 		LimpiezaRespuestaRefactor(respuesta_peticion, &soporte_pago)
 		if response, err := getJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/"+cambio_estado_id, &respuesta_peticion); (err == nil) && (response == 200) {
 			LimpiezaRespuestaRefactor(respuesta_peticion, &cambio_estado_cumplido)
