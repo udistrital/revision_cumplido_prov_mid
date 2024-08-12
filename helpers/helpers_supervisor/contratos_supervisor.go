@@ -424,6 +424,7 @@ func ContratosContratista(numero_documento string) (contrato_proveedor []models.
 
 				if cdprp, outputError := GetRP(contrato_persona.NumeroCDP, contrato_persona.Vigencia); outputError == nil {
 					for _, rp := range cdprp.CdpXRp.CdpRp {
+						var tipo_contrato models.TipoContrato
 						var contrato_proveedor_individual models.InformacionContratoProveedor
 						contrato_proveedor_individual.TipoContrato = contrato.Contrato.TipoContrato
 						contrato_proveedor_individual.NumeroContratoSuscrito = contrato_persona.NumeroContrato
@@ -436,6 +437,14 @@ func ContratosContratista(numero_documento string) (contrato_proveedor []models.
 						contrato_proveedor_individual.NumeroCdp = contrato_persona.NumeroCDP
 						contrato_proveedor_individual.VigenciaCdp = contrato_persona.Vigencia
 						contrato_proveedor_individual.Rubro = contrato.Contrato.Rubro
+						if response, err := getJsonTest(beego.AppConfig.String("UrlcrudAgora")+"/tipo_contrato/"+contrato.Contrato.TipoContrato, &tipo_contrato); err == nil && response == 200 {
+							contrato_proveedor_individual.TipoContrato = tipo_contrato.TipoContrato
+						} else {
+							logs.Error(err)
+							outputError = map[string]interface{}{"funcion": "/contratosContratista/GetContratosPersona", "err": err, "status": "502"}
+							return nil, outputError
+
+						}
 						contrato_proveedor = append(contrato_proveedor, contrato_proveedor_individual)
 					}
 

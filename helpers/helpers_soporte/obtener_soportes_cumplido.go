@@ -27,7 +27,7 @@ func GetDocumentosPagoMensual(cumplido_proveedor_id string) (documentos []models
 
 	var respuesta_peticion map[string]interface{}
 
-	if response, err := getJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_pago/?limit=-1&query=CumplidoProveedorId.Id:"+cumplido_proveedor_id, &respuesta_peticion); (err == nil) && (response == 200) {
+	if response, err := getJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido/?limit=-1&query=CumplidoProveedorId.Id:"+cumplido_proveedor_id+",Activo:true", &respuesta_peticion); (err == nil) && (response == 200) {
 		LimpiezaRespuestaRefactor(respuesta_peticion, &soportes_pagos_mensuales)
 		if len(soportes_pagos_mensuales) != 0 {
 			var ids_documentos []string
@@ -36,6 +36,7 @@ func GetDocumentosPagoMensual(cumplido_proveedor_id string) (documentos []models
 			}
 
 			var ids_documentos_juntos = strings.Join(ids_documentos, "|")
+			//fmt.Println("URL documentos juntos: ", beego.AppConfig.String("UrlDocumentosCrud")+"/documento/?limit=-1&query=Activo:True,Id.in:"+ids_documentos_juntos)
 			if response, err := getJsonTest(beego.AppConfig.String("UrlDocumentosCrud")+"/documento/?limit=-1&query=Activo:True,Id.in:"+ids_documentos_juntos, &documentos_crud); (err == nil) && (response == 200) {
 				if len(documentos_crud) > 0 {
 					for _, documento_crud := range documentos_crud {

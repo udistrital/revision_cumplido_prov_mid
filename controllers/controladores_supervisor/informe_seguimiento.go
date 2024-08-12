@@ -86,7 +86,7 @@ func (c *InformeSeguimientoController) GenerateInformeSeguimiento() {
 
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
-	if data, err := helpers_supervisor.CreateInformeSeguimiento(v.NumeroContratoSuscrito, v.VigenciaContrato, v.TipoPago, v.PeiodoInicio, v.PeriodoFin, v.TipoFactura, v.NumeroCuentaFactura, v.ValorPagar, v.TipoCuenta, v.NumeroCuenta, v.Banco); err == nil {
+	if data, err := helpers_supervisor.CreateInformeSeguimiento(v.NumeroContratoSuscrito, v.VigenciaContrato, v.TipoPagoId, v.PeiodoInicio, v.PeriodoFin, v.TipoDocumentoCobroId, v.NumeroCuentaFactura, v.ValorPagar, v.TipoDocumentoCobroId, v.NumeroCuenta, v.BancoId); err == nil {
 		if (data == models.InformeSeguimiento{}) {
 			c.Ctx.Output.SetStatus(200)
 			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "No se pudo generar el informe de seguimiento", "Data": nil}
