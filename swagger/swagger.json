@@ -15,6 +15,20 @@
     },
     "basePath": "/v1",
     "paths": {
+        "/contratacion/certificado-aprobacion-pago/{id_solicitud_pago}": {
+            "get": {
+                "tags": [
+                    "contratacion"
+                ],
+                "description": "Metodo",
+                "operationId": "RevisionCumplidoContratacionController.GnerarAutorizaxionPago",
+                "responses": {
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/contratacion/solicitudes-pago/": {
             "get": {
                 "tags": [

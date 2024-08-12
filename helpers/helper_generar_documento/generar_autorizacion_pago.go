@@ -1,17 +1,20 @@
 package helper_generar_documento
 
 import (
+	"encoding/base64"
 	"fmt"
 	"github.com/jung-kurt/gofpdf"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
+	"io/ioutil"
+	"os"
 	"time"
 )
 
-func GenerarPdf(atorizacion *models.DocuementoAutorizacionPago) {
+func GenerarPdf(atorizacion *models.DocuementoAutorizacionPago) string {
 
 	if atorizacion == nil {
 		fmt.Println("Error al generar el documento")
-		return
+		return ""
 
 	}
 	pdf := gofpdf.New("P", "mm", "A4", "")
@@ -43,7 +46,8 @@ func GenerarPdf(atorizacion *models.DocuementoAutorizacionPago) {
 
 	pdf = body(pdf, cellX, cellY, month, day, year, atorizacion)
 
-	err := pdf.OutputFileAndClose("tabla.pdf")
+	file_name := fmt.Sprintf("AutorizacionPago_%s.pdf", atorizacion.NombreProveedor+"-"+atorizacion.DocumentoProveedor)
+	err := pdf.OutputFileAndClose(file_name + ".pdf")
 	if err != nil {
 		fmt.Println("Error al guardar el archivo PDF:", err)
 	} else {
@@ -51,16 +55,29 @@ func GenerarPdf(atorizacion *models.DocuementoAutorizacionPago) {
 
 	}
 
+	fileData, err := ioutil.ReadFile(file_name + ".pdf")
+	if err != nil {
+		fmt.Println("Error al leer el archivo PDF:", err)
+		return ""
+	}
+
+	base64Data := base64.StdEncoding.EncodeToString(fileData)
+
+	err = os.Remove(file_name)
+	if err != nil {
+		fmt.Println("Error al eliminar el archivo temporal:", err)
+	}
+	return base64Data
 }
 
 func header(pdf *gofpdf.Fpdf, cellX float64, cellY float64, cellX2 float64, cellY2 float64, cellWidth float64, cellHeight float64, cellWidth2 float64, cellHeight2 float64, formattedDate string) *gofpdf.Fpdf {
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
 	pdf.Rect(cellX, cellY, cellWidth, cellHeight, "")
-	logoU := "imgs/image1.png"
+	logoU := "static/img/EscudoU.png"
 	pdf.Image(logoU, cellX+2, cellY, cellWidth-3, cellHeight-5, false, "", 0, "")
 
 	pdf.Rect(cellX+123, cellY, cellWidth+2, cellHeight, "")
-	logoSigud := "imgs/image2.png"
+	logoSigud := "static/img/EscudoSigud.png"
 	pdf.Image(logoSigud, cellX+127, cellY+8, cellWidth-5, cellHeight-16, false, "", 0, "")
 
 	pdf.Rect(cellX2, cellY2, cellWidth2, cellHeight2, "")

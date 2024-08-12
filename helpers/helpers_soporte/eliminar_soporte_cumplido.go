@@ -16,11 +16,11 @@ func EliminarSoporteCumplido(id_soporte_pago string) (response string, outputErr
 	delete_true := "Soporte pago eliminado correctamente"
 	delect_false := "No se encontró el soporte de pago"
 
-	if err := sendJson(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_pago/"+id_soporte_pago, "DELETE", &res, nil); err == nil {
+	if err := sendJson(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido/"+id_soporte_pago, "DELETE", &res, nil); err == nil {
 		response = delete_true
 		return response, nil
 	} else {
-		outputError = map[string]interface{}{"funcion": "/EliminarSoporteCumplido/soporte_pago", "err": err, "status": "502"}
+		outputError = map[string]interface{}{"funcion": "/EliminarSoporteCumplido/soporte_cumplido", "err": err, "status": "502"}
 		response = delect_false
 		return response, outputError
 	}

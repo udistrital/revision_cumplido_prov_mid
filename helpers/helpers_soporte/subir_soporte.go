@@ -93,7 +93,7 @@ func SubirSoporte(solicitud_pago_id int, tipo_documento string, item_id int, obs
 		fmt.Println("Soporte: ", soporte)
 		var res map[string]interface{}
 		if err == nil {
-			if err := sendJson(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_pago", "POST", &res, soporte); err == nil {
+			if err := sendJson(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido", "POST", &res, soporte); err == nil {
 				LimpiezaRespuestaRefactor(res, &soporte_pago)
 				return soporte_pago, nil
 			} else {

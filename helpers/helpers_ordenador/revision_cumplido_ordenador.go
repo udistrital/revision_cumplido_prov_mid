@@ -388,10 +388,10 @@ func GenerarAutorizacion(id_solicitud_pago string) (datos_documento *models.Docu
 
 	// Obtiene datos de cambio estado
 	var respuesta_cambioEstado map[string]interface{}
-	url_request := beego.AppConfig.String("UrlProveedoresCrud") + "/cambio_estado_cumplido/?query=CumplidoProveedorId:" + id_solicitud_pago + ",EstadoCumplidoId.CodigoAbreviación:AO,Activo:true"
+	url_request := beego.AppConfig.String("UrlProveedoresCrud") + "/cambio_estado_cumplido/?query=CumplidoProveedorId:" + id_solicitud_pago + ",EstadoCumplidoId.CodigoAbreviación:PRO,Activo:true"
 	response, err := helpers.GetJsonWSO2Test(url_request, &respuesta_cambioEstado)
 	var cambio_estado []models.CambioEstadoCumplido
-
+	fmt.Println(url_request)
 	if err != nil || response != 200 {
 		errorMessage := fmt.Sprintf("%v", err)
 		errorOutput = map[string]interface{}{
@@ -457,7 +457,7 @@ func GenerarAutorizacion(id_solicitud_pago string) (datos_documento *models.Docu
 			}
 
 			var respuesta_documentos map[string]interface{}
-			url_request_documentos := beego.AppConfig.String("UrlProveedoresCrud") + "/soporte_pago?query=CumplidoProveedorId.id:" + id_solicitud_pago
+			url_request_documentos := beego.AppConfig.String("UrlProveedoresCrud") + "/soporte_cumplido?query=CumplidoProveedorId.id:" + id_solicitud_pago
 			responseDocuementos, error_documentos := helpers.GetJsonWSO2Test(url_request_documentos, &respuesta_documentos)
 			fmt.Println(url_request_documentos)
 			var documentosCargados []models.SoportePago
@@ -495,6 +495,7 @@ func GenerarAutorizacion(id_solicitud_pago string) (datos_documento *models.Docu
 				lista_documentos_cargados_strings = append(lista_documentos_cargados_strings, documento.TipoDocumento.CodigoAbreviacion)
 			}
 
+			fmt.Println("documentos", lista_documentos_cargados_strings)
 			indexRespuestaOrdenador := len(respuesta) - 1
 			datos_documento := &models.DocuementoAutorizacionPago{
 				NombreOrdenador:    info_ordenador[indexRespuestaOrdenador].NomProveedor,
