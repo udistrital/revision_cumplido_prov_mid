@@ -15,7 +15,7 @@ func AgregarComentarioSoporte(soporte_id string, cambio_estado_id string, coment
 
 	var respuesta_peticion map[string]interface{}
 	var comentario_soporte models.ComentarioSoporte
-	var soporte_pago models.SoportePago
+	var soporte_pago models.SoporteCumplido
 	var cambio_estado_cumplido models.CambioEstadoCumplido
 
 	if soporte_id == "" || cambio_estado_id == "" || comentario == "" {
@@ -28,7 +28,7 @@ func AgregarComentarioSoporte(soporte_id string, cambio_estado_id string, coment
 		if response, err := getJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/"+cambio_estado_id, &respuesta_peticion); (err == nil) && (response == 200) {
 			LimpiezaRespuestaRefactor(respuesta_peticion, &cambio_estado_cumplido)
 			comentario_soporte.Comentario = comentario
-			comentario_soporte.SoportePagoId = &soporte_pago
+			comentario_soporte.SoporteCumplidoId = &soporte_pago
 			comentario_soporte.CambioEstadoCumplidoId = &cambio_estado_cumplido
 			if err := sendJson(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/comentario_soporte", "POST", &respuesta, comentario_soporte); err == nil {
 				respuesta.SoportePagoId = soporte_pago.Id

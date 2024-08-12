@@ -967,31 +967,7 @@
         },
         "models.SoportePago": {
             "title": "SoportePago",
-            "type": "object",
-            "properties": {
-                "Activo": {
-                    "type": "boolean"
-                },
-                "CumplidoProveedorId": {
-                    "$ref": "#/definitions/models.CumplidoProveedor"
-                },
-                "DocumentoId": {
-                    "type": "integer",
-                    "format": "int64"
-                },
-                "FechaCreacion": {
-                    "type": "string",
-                    "format": "datetime"
-                },
-                "FechaModificacion": {
-                    "type": "string",
-                    "format": "datetime"
-                },
-                "Id": {
-                    "type": "integer",
-                    "format": "int64"
-                }
-            }
+            "type": "object"
         },
         "models.TipoDocumento": {
             "title": "TipoDocumento",

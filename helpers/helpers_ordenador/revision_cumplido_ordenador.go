@@ -460,7 +460,7 @@ func GenerarAutorizacion(id_solicitud_pago string) (datos_documento *models.Docu
 			url_request_documentos := beego.AppConfig.String("UrlProveedoresCrud") + "/soporte_cumplido?query=CumplidoProveedorId.id:" + id_solicitud_pago
 			responseDocuementos, error_documentos := helpers.GetJsonWSO2Test(url_request_documentos, &respuesta_documentos)
 			fmt.Println(url_request_documentos)
-			var documentosCargados []models.SoportePago
+			var documentosCargados []models.SoporteCumplido
 			if respuesta_documentos["Data"] != nil {
 				if len(respuesta_documentos["Data"].([]interface{})[0].(map[string]interface{})) != 0 {
 					helpers.LimpiezaRespuestaRefactor(respuesta_documentos, &documentosCargados)

@@ -2,7 +2,7 @@ package models
 
 import "time"
 
-type SoportePago struct {
+type SoporteCumplido struct {
 	Id                  int
 	DocumentoId         int
 	CumplidoProveedorId *CumplidoProveedor

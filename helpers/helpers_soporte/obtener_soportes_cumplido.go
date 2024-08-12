@@ -2,12 +2,12 @@ package helpers_soporte
 
 import (
 	"encoding/json"
-	"strconv"
-	"strings"
-  	"fmt"
+	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
+	"strconv"
+	"strings"
 )
 
 func GetDocumentosPagoMensual(cumplido_proveedor_id string) (documentos []models.DocumentosSoporteCorto, outputError map[string]interface{}) {
@@ -19,7 +19,7 @@ func GetDocumentosPagoMensual(cumplido_proveedor_id string) (documentos []models
 		}
 	}()
 
-	var soportes_pagos_mensuales []models.SoportePago
+	var soportes_pagos_mensuales []models.SoporteCumplido
 	var documentos_crud []models.Documento
 	var fileGestor models.FileGestorDocumental
 	var soporte models.DocumentosSoporteCorto
