@@ -73,7 +73,7 @@ func GenerarPdf(atorizacion *models.DocuementoAutorizacionPago) string {
 func header(pdf *gofpdf.Fpdf, cellX float64, cellY float64, cellX2 float64, cellY2 float64, cellWidth float64, cellHeight float64, cellWidth2 float64, cellHeight2 float64, formattedDate string) *gofpdf.Fpdf {
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
 	pdf.Rect(cellX, cellY, cellWidth, cellHeight, "")
-	logoU := "static/img/EscudoU.png"
+	logoU := "static/img/EscudoUd.png"
 	pdf.Image(logoU, cellX+2, cellY, cellWidth-3, cellHeight-5, false, "", 0, "")
 
 	pdf.Rect(cellX+123, cellY, cellWidth+2, cellHeight, "")
