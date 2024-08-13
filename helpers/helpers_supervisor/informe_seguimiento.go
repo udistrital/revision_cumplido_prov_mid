@@ -140,7 +140,6 @@ func CreateInformeSeguimiento(numero_contrato_suscrito int, vigencia_contrato st
 		outputError = map[string]interface{}{"funcion": "/CreateInformeSeguimiento", "err": error, "status": "502"}
 		return informe_seguimiento, outputError
 	}
-	fmt.Println("Nombre Banco: ", nombre_banco)
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetMargins(25, 20, 25)
 	pdf.SetAutoPageBreak(true, 20)
@@ -209,8 +208,8 @@ func CreateInformeSeguimiento(numero_contrato_suscrito int, vigencia_contrato st
 
 	pdf = footer(pdf,
 		contrato.NumeroContratoSuscrito,
-		"08/04/2024",           //formatear_fecha(acta_inicio.FechaInicio)
-		"Contrato de comisión", //contrato.TipoContrato
+		"08/04/2024", //formatear_fecha(acta_inicio.FechaInicio)
+		contrato.TipoContrato,
 		numero_cuenta_factura,
 		supervisor,
 		verificarJefe(info_contrato),
@@ -350,11 +349,6 @@ func image(pdf *gofpdf.Fpdf, image string, x, y, w, h float64) *gofpdf.Fpdf {
 	return pdf
 }
 
-func fontStyle(pdf *gofpdf.Fpdf, style string, size float64, bw int) {
-	pdf.SetTextColor(bw, bw, bw)
-	pdf.SetFont("Helvetica", style, size)
-}
-
 func header(pdf *gofpdf.Fpdf) *gofpdf.Fpdf {
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
 
@@ -410,5 +404,3 @@ func header(pdf *gofpdf.Fpdf) *gofpdf.Fpdf {
 
 	return pdf
 }
-
-// funcion para obtener el día, el mes y el año actual en formato string

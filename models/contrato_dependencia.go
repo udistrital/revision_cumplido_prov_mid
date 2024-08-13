@@ -2,11 +2,11 @@ package models
 
 type ContratoDependencia struct {
 	Contratos struct {
-		Contrato []Contrato `json:"contrato"`
+		Contrato []ContratoDep `json:"contrato"`
 	} `json:"contratos"`
 }
 
-type Contrato struct {
+type ContratoDep struct {
 	Vigencia       string `json:"vigencia"`
 	NumeroContrato string `json:"numero_contrato"`
 }

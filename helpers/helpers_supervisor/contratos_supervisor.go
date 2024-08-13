@@ -2,7 +2,6 @@ package helpers_supervisor
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -162,7 +161,7 @@ func GetContratosPersona(num_documento string) (contratos_persona models.Informa
 
 	var temp map[string]interface{}
 	var contratos models.InformacionContratosPersona
-	fmt.Println(beego.AppConfig.String("UrlAdministrativaJBPM") + "/contratos_contratista/" + num_documento)
+	//fmt.Println(beego.AppConfig.String("UrlAdministrativaJBPM") + "/contratos_contratista/" + num_documento)
 	if response, err := getJsonWSO2Test(beego.AppConfig.String("UrlAdministrativaJBPM")+"/contratos_contratista/"+num_documento, &temp); (err == nil) && (response == 200) {
 		json_contratos, error_json := json.Marshal(temp)
 		if error_json == nil {
@@ -252,7 +251,7 @@ func GetContratosDependenciaFiltro(dependencia string, documento_supervisor stri
 		if len(contratos_general) > 0 {
 			for _, contrato_general := range contratos_general {
 				if len(contrato_general.ContratoSuscrito) > 0 {
-					var contrato models.Contrato
+					var contrato models.ContratoDep
 					contrato.Vigencia = strconv.Itoa(contrato_general.ContratoSuscrito[0].Vigencia)
 					contrato.NumeroContrato = contrato_general.ContratoSuscrito[0].NumeroContratoSuscrito
 					contratos_dependencia.Contratos.Contrato = append(contratos_dependencia.Contratos.Contrato, contrato)

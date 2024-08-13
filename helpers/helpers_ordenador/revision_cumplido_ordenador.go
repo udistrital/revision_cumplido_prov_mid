@@ -2,13 +2,14 @@ package helpers_ordenador
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/helpers"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
-	"strconv"
-	"strings"
-	"time"
 )
 
 func ObtenerNumerosDeContrato(documentoOrdenador string, estado string) (numerosContrato string, errorOutput interface{}) {
@@ -269,7 +270,7 @@ func ObtenerInfoProveedor(IdProveedor string) (provedor *models.Proveedor, error
 
 	var respuesta []models.Proveedor
 	urlRequest := beego.AppConfig.String("UrlcrudAgora") + "/informacion_proveedor/?query=id:" + IdProveedor
-	println(urlRequest)
+	//println(urlRequest)
 	response, err := helpers.GetJsonWSO2Test(urlRequest, &respuesta)
 
 	if err != nil || response != 200 {

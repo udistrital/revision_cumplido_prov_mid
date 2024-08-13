@@ -24,7 +24,7 @@ type FormaPago struct {
 	FechaRegistro     string `json:"FechaRegistro"`
 }
 
-//Contrato disponibilidad
+// Contrato disponibilidad
 type ContratoDisponibilidad struct {
 	Id             int       `json:"Id"`
 	NumeroCdp      int       `json:"NumeroCdp"`
@@ -35,7 +35,7 @@ type ContratoDisponibilidad struct {
 	VigenciaCdp    int       `json:"VigenciaCdp"`
 }
 
-///////ContratoCompleto
+// /////ContratoCompleto
 type Cargo struct {
 	Id    int    `json:"Id"`
 	Cargo string `json:"Cargo"`
@@ -56,36 +56,12 @@ type Supervisor struct {
 	CargoId               Cargo  `json:"CargoId"`
 }
 
-type TipoContrato struct {
-	Id           int    `json:"Id"`
-	TipoContrato string `json:"TipoContrato"`
-	Estado       bool   `json:"Estado"`
-}
-
-type LugarEjecucion struct {
-	Id          int    `json:"Id"`
-	Direccion   string `json:"Direccion"`
-	Sede        string `json:"Sede"`
-	Dependencia string `json:"Dependencia"`
-	Ciudad      int    `json:"Ciudad"`
-}
-
 type UnidadEjecucion struct {
 	Id                int    `json:"Id"`
 	Descripcion       string `json:"Descripcion"`
 	CodigoContraloria string `json:"CodigoContraloria"`
 	EstadoRegistro    bool   `json:"EstadoRegistro"`
 	FechaRegistro     string `json:"FechaRegistro"`
-}
-
-type ContratoSuscrito struct {
-	Id                     int            `json:"Id"`
-	NumeroContrato         NumeroContrato `json:"NumeroContrato"`
-	Vigencia               int            `json:"Vigencia"`
-	FechaRegistro          string         `json:"FechaRegistro"`
-	Usuario                string         `json:"Usuario"`
-	FechaSuscripcion       string         `json:"FechaSuscripcion"`
-	NumeroContratoSuscrito string         `json:"NumeroContratoSuscrito"`
 }
 
 type NumeroContrato struct {
