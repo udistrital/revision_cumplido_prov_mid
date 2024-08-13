@@ -15,12 +15,12 @@ func EliminarSoporteCumplido(documento_id string) (response string, outputError 
 		}
 	}()
 
-	var soportes_pagos_mensuales []models.SoportePago
+	var soportes_pagos_mensuales []models.SoporteCumplido
 	var respuesta_peticion map[string]interface{}
 
 	if response, err := getJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido/?limit=1&query=DocumentoId:"+documento_id+",Activo:true", &respuesta_peticion); (err == nil) && (response == 200) {
 		LimpiezaRespuestaRefactor(respuesta_peticion, &soportes_pagos_mensuales)
-		if (soportes_pagos_mensuales[0] == models.SoportePago{}) {
+		if (soportes_pagos_mensuales[0] == models.SoporteCumplido{}) {
 			return "No se encontró el soporte de pago o este ya se elimino con anterioridad", nil
 		}
 	} else {

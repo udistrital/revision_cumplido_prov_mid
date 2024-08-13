@@ -15,6 +15,20 @@
     },
     "basePath": "/v1",
     "paths": {
+        "/contratacion/certificado-aprobacion-pago/{id_solicitud_pago}": {
+            "get": {
+                "tags": [
+                    "contratacion"
+                ],
+                "description": "Metodo",
+                "operationId": "RevisionCumplidoContratacionController.GnerarAutorizaxionPago",
+                "responses": {
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/contratacion/solicitudes-pago/": {
             "get": {
                 "tags": [
@@ -833,11 +847,11 @@
             "title": "EstadoCumplido",
             "type": "object",
             "properties": {
-                "Abreviacion": {
-                    "type": "string"
-                },
                 "Activo": {
                     "type": "boolean"
+                },
+                "CodigoAbreviación": {
+                    "type": "string"
                 },
                 "Descripcion": {
                     "type": "string"
@@ -930,31 +944,7 @@
         },
         "models.SoportePago": {
             "title": "SoportePago",
-            "type": "object",
-            "properties": {
-                "Activo": {
-                    "type": "boolean"
-                },
-                "CumplidoProveedorId": {
-                    "$ref": "#/definitions/models.CumplidoProveedor"
-                },
-                "DocumentoId": {
-                    "type": "integer",
-                    "format": "int64"
-                },
-                "FechaCreacion": {
-                    "type": "string",
-                    "format": "datetime"
-                },
-                "FechaModificacion": {
-                    "type": "string",
-                    "format": "datetime"
-                },
-                "Id": {
-                    "type": "integer",
-                    "format": "int64"
-                }
-            }
+            "type": "object"
         },
         "models.TipoDocumento": {
             "title": "TipoDocumento",

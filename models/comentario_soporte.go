@@ -9,7 +9,7 @@ type ComentarioSoporte struct {
 	FechaModificacion      time.Time
 	CambioEstadoCumplidoId *CambioEstadoCumplido
 	Activo                 bool
-	SoportePagoId          *SoportePago
+	SoporteCumplidoId      *SoporteCumplido
 }
 
 type RespuestaComentarioSoporte struct {

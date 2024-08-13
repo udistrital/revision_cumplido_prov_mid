@@ -5,7 +5,6 @@ import (
 	"github.com/astaxie/beego/logs"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/helpers/helper_generar_documento"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/helpers/helpers_ordenador"
-	"io/ioutil"
 	"net/http"
 )
 
@@ -17,6 +16,7 @@ type RevisionCumplidoOrdenadorController struct {
 func (c *RevisionCumplidoOrdenadorController) URLMapping() {
 	c.Mapping("ObtenerPendientesRevisionOrdenador", c.ObtenerPendientesRevisionOrdenador)
 	c.Mapping("ListaCumplidosReversibles", c.ListaCumplidosReversibles)
+	c.Mapping("GenerarPdf", c.GenerarPdf)
 }
 
 //ObtenerPendientesRevisionOrdenador
@@ -155,10 +155,6 @@ func (c *RevisionCumplidoOrdenadorController) GenerarPdf() {
 	id_solicitud_pago := c.GetString(":id_solicitud_pago")
 	autorizacion, err := helpers_ordenador.GenerarAutorizacion(id_solicitud_pago)
 
-	helper_generar_documento.GenerarPdf(autorizacion)
-
-	// Leer el archivo PDF generado
-	pdfFile, err := ioutil.ReadFile("tabla.pdf")
 	if err != nil {
 		beego.Error("Error al leer el archivo PDF:", err)
 		c.Ctx.ResponseWriter.WriteHeader(http.StatusInternalServerError)
@@ -166,20 +162,14 @@ func (c *RevisionCumplidoOrdenadorController) GenerarPdf() {
 		return
 	}
 
-	// Establecer encabezados para la respuesta HTTP
-	c.Ctx.ResponseWriter.Header().Set("Content-Type", "application/pdf")
-	c.Ctx.ResponseWriter.Header().Set("Content-Disposition", "attachment; filename=tabla.pdf")
-
-	// Escribir el contenido del PDF en la respuesta
-	_, err = c.Ctx.ResponseWriter.Write(pdfFile)
+	file := helper_generar_documento.GenerarPdf(autorizacion)
 	if err != nil {
-		beego.Error("Error al escribir el archivo PDF en la respuesta:", err)
-		c.Ctx.ResponseWriter.WriteHeader(http.StatusInternalServerError)
-		c.Ctx.ResponseWriter.Write([]byte("Error al enviar el archivo PDF"))
-		return
+		c.Ctx.Output.SetStatus(400)
+		c.Data["json"] = err
+	} else if file == "" {
+		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 204, "Message": "No hay datos", "Data": ""}
+	} else {
+		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": file}
 	}
-
-	// Opcional: Enviar una respuesta JSON si deseas informar sobre el éxito de la operación
-	c.Data["json"] = map[string]string{"status": "success"}
 	c.ServeJSON()
 }
