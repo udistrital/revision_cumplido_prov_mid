@@ -140,6 +140,7 @@ func CreateInformeSeguimiento(numero_contrato_suscrito int, vigencia_contrato st
 		outputError = map[string]interface{}{"funcion": "/CreateInformeSeguimiento", "err": error, "status": "502"}
 		return informe_seguimiento, outputError
 	}
+
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetMargins(25, 20, 25)
 	pdf.SetAutoPageBreak(true, 20)
@@ -210,6 +211,16 @@ func CreateInformeSeguimiento(numero_contrato_suscrito int, vigencia_contrato st
 		contrato.NumeroContratoSuscrito,
 		"08/04/2024", //formatear_fecha(acta_inicio.FechaInicio)
 		contrato.TipoContrato,
+		numero_cuenta_factura,
+		supervisor,
+		verificarJefe(info_contrato),
+		contrato.Vigencia,
+		contrato.NombreDependencia)
+
+	pdf = footer(pdf,
+		contrato.NumeroContratoSuscrito,
+		"08/04/2024",           //formatear_fecha(acta_inicio.FechaInicio)
+		"Contrato de comisión", //contrato.TipoContrato
 		numero_cuenta_factura,
 		supervisor,
 		verificarJefe(info_contrato),

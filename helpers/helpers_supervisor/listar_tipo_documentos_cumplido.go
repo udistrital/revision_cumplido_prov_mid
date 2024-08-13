@@ -18,7 +18,6 @@ func GetTiposDocumentosCumplido() (tipos_documento []models.DocumentoCumplido, o
 
 	//var respuesta_peticion map[string]interface{}
 	var tipo_documento []models.TipoDocumento
-
 	//fmt.Println("UrlcrudAgora: ", beego.AppConfig.String("UrlcrudCore")+"/tipo_documento/?query=DominioTipoDocumento.Id:12")
 	if response, err := getJsonTest(beego.AppConfig.String("UrlcrudCore")+"/tipo_documento/?query=DominioTipoDocumento.Id:12&limit=0", &tipo_documento); err == nil && response == 200 {
 		//LimpiezaRespuestaRefactor(respuesta_peticion, &tipo_documento)
