@@ -26,7 +26,7 @@ func init() {
 		),
 		beego.NSNamespace("/solicitud-pago",
 			beego.NSInclude(
-				&controllers.CambioEstadoSoporteOrdenadorController{},
+				&controllers.CambioEstadoCumplidoController{},
 			),
 		),
 		beego.NSNamespace("/ordenador",

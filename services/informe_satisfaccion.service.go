@@ -21,7 +21,7 @@ import (
 
 func ObtenerInformacionProveedor(numero_contrato_suscrito string, vigencia string) (informacion_proveedor models.InformacionContratoProveedor, outputError map[string]interface{}) {
 
-	contrato_contratista, err := helpers.ObtenerInformacionContratoContratista(numero_contrato_suscrito, vigencia)
+	contrato_contratista, err := helpers.ObtenerInformacionContratoProveedor(numero_contrato_suscrito, vigencia)
 	if err == nil {
 		contratistas, err := ContratosContratistaTemp(contrato_contratista.InformacionContratista.Documento.Numero)
 		if err == nil {
@@ -55,7 +55,7 @@ func ContratosContratistaTemp(numero_documento string) (contrato_proveedor []mod
 				continue
 			}
 			var informacion_contrato_contratista models.InformacionContratoContratista
-			informacion_contrato_contratista, outputError = helpers.ObtenerInformacionContratoContratista(contrato_persona.NumeroContrato, contrato_persona.Vigencia)
+			informacion_contrato_contratista, outputError = helpers.ObtenerInformacionContratoProveedor(contrato_persona.NumeroContrato, contrato_persona.Vigencia)
 			// se llena el contrato original en el indice 0
 
 			if cdprp, outputError := helpers.ObtenerRP(contrato_persona.NumeroCDP, contrato_persona.Vigencia); outputError == nil {
@@ -362,9 +362,9 @@ func ObtenerBalanceFinancieroContrato(numero_contrato_suscrito string, vigencia_
 		}
 	}()
 
-	informacion_contrato, err := helpers.ObtenerInformacionContratoContratista(numero_contrato_suscrito, vigencia_contrato)
+	informacion_contrato, err := helpers.ObtenerInformacionContratoProveedor(numero_contrato_suscrito, vigencia_contrato)
 	if err == nil {
-		informacion_contratista, err := helpers.ObtenerContratosContratista(informacion_contrato.InformacionContratista.Documento.Numero)
+		informacion_contratista, err := helpers.ObtenerContratosProveedor(informacion_contrato.InformacionContratista.Documento.Numero)
 		if err == nil {
 			contrato, err := helpers.ObtenerInformacionContrato(numero_contrato_suscrito, vigencia_contrato)
 			if err == nil {

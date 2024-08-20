@@ -264,7 +264,7 @@ func ObtenerComprimidoSoportes(id_cumplido_proveedor string) (documentos_comprim
 
 	var informacion_contrato_contratista models.InformacionContratoContratista
 	for _, cumplido := range cumplidos_proveedor {
-		informacion_contrato_contratista, error = helpers.ObtenerInformacionContratoContratista(cumplido.NumeroContrato, strconv.Itoa(cumplido.VigenciaContrato))
+		informacion_contrato_contratista, error = helpers.ObtenerInformacionContratoProveedor(cumplido.NumeroContrato, strconv.Itoa(cumplido.VigenciaContrato))
 
 		if error == nil {
 			fmt.Println("Nombre: ", informacion_contrato_contratista)

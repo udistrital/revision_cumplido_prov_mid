@@ -9,12 +9,12 @@ import (
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 )
 
-func ObtenerContratosContratista(numero_documento string) (contrato_proveedor []models.InformacionContratoProveedor, outputError map[string]interface{}) {
+func ObtenerContratosProveedor(numero_documento string) (contrato_proveedor []models.InformacionContratoProveedor, outputError map[string]interface{}) {
 
 	defer func() {
 		if err := recover(); err != nil {
 			//fmt.Println("error", err)
-			outputError = map[string]interface{}{"funcion": "/ContratosContratista", "err": err, "status": "502"}
+			outputError = map[string]interface{}{"funcion": "/ObtenerContratosProveedor", "err": err, "status": "502"}
 			panic(outputError)
 		}
 	}()
@@ -38,7 +38,7 @@ func ObtenerContratosContratista(numero_documento string) (contrato_proveedor []
 					continue
 				}
 				var informacion_contrato_contratista models.InformacionContratoContratista
-				informacion_contrato_contratista, outputError = ObtenerInformacionContratoContratista(contrato_persona.NumeroContrato, contrato_persona.Vigencia)
+				informacion_contrato_contratista, outputError = ObtenerInformacionContratoProveedor(contrato_persona.NumeroContrato, contrato_persona.Vigencia)
 				// se llena el contrato original en el indice 0
 
 				if cdprp, outputError := ObtenerRP(contrato_persona.NumeroCDP, contrato_persona.Vigencia); outputError == nil {
@@ -60,7 +60,7 @@ func ObtenerContratosContratista(numero_documento string) (contrato_proveedor []
 							contrato_proveedor_individual.TipoContrato = tipo_contrato.TipoContrato
 						} else {
 							logs.Error(err)
-							outputError = map[string]interface{}{"funcion": "/contratosContratista/GetContratosPersona", "err": err, "status": "502"}
+							outputError = map[string]interface{}{"funcion": "/ObtenerContratosProveedor/GetContratosPersona", "err": err, "status": "502"}
 							return nil, outputError
 
 						}
@@ -77,7 +77,7 @@ func ObtenerContratosContratista(numero_documento string) (contrato_proveedor []
 		}
 	} else {
 		logs.Error(outputError)
-		outputError = map[string]interface{}{"funcion": "/contratosContratista/GetContratosPersona", "err": outputError, "status": "502"}
+		outputError = map[string]interface{}{"funcion": "/ObtenerContratosProveedor/GetContratosPersona", "err": outputError, "status": "502"}
 		return nil, outputError
 	}
 	return contrato_proveedor, nil
@@ -169,11 +169,11 @@ func ObtenerContratosPersona(num_documento string) (contratos_persona models.Inf
 
 }
 
-func ObtenerInformacionContratoContratista(num_contrato_suscrito string, vigencia string) (informacion_contrato_contratista models.InformacionContratoContratista, outputError map[string]interface{}) {
+func ObtenerInformacionContratoProveedor(num_contrato_suscrito string, vigencia string) (informacion_contrato_contratista models.InformacionContratoContratista, outputError map[string]interface{}) {
 
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/GetInformacionContratoContratista", "err": err, "status": "502"}
+			outputError = map[string]interface{}{"funcion": "/ObtenerInformacionContratoProveedor", "err": err, "status": "502"}
 			panic(outputError)
 		}
 	}()
@@ -189,17 +189,17 @@ func ObtenerInformacionContratoContratista(num_contrato_suscrito string, vigenci
 				return informacion_contrato_contratista, nil
 			} else {
 				logs.Error(err)
-				outputError = map[string]interface{}{"funcion": "/GetInformacionContratoContratista", "err": err, "status": "502"}
+				outputError = map[string]interface{}{"funcion": "/ObtenerInformacionContratoProveedor", "err": err, "status": "502"}
 				return informacion_contrato_contratista, outputError
 			}
 		} else {
 			logs.Error(error_json.Error())
-			outputError = map[string]interface{}{"funcion": "/GetInformacionContratoContratista", "err": error_json.Error(), "status": "502"}
+			outputError = map[string]interface{}{"funcion": "/ObtenerInformacionContratoProveedor", "err": error_json.Error(), "status": "502"}
 			return informacion_contrato_contratista, outputError
 		}
 	} else {
 		logs.Error(err)
-		outputError = map[string]interface{}{"funcion": "/getInformacionContratosContratista", "err": err, "status": "502"}
+		outputError = map[string]interface{}{"funcion": "/ObtenerInformacionContratoProveedor", "err": err, "status": "502"}
 		return informacion_contrato_contratista, outputError
 	}
 }

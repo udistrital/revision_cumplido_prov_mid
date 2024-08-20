@@ -17,7 +17,7 @@ type RevisionCumplidoOrdenadorController struct {
 func (c *RevisionCumplidoOrdenadorController) URLMapping() {
 	c.Mapping("ObtenerCumplidosPendientesRevisionOrdenador", c.ObtenerCumplidosPendientesRevisionOrdenador)
 	c.Mapping("ListaCumplidosReversibles", c.ListaCumplidosReversibles)
-	c.Mapping("GenerarPdf", c.GenerarPdf)
+	c.Mapping("GenerarPdfAutorizacionPago", c.GenerarPdfAutorizacionPago)
 }
 
 // ObtenerCumplidosPendientesRevisionOrdenador
@@ -151,7 +151,7 @@ func (c *RevisionCumplidoOrdenadorController) ObtenerCertificado() {
 // Success 200 {object}
 // @Failure 403
 // @router /certificado-aprobacion-pago/:id_solicitud_pago [get]
-func (c *RevisionCumplidoOrdenadorController) GenerarPdf() {
+func (c *RevisionCumplidoOrdenadorController) GenerarPdfAutorizacionPago() {
 
 	id_solicitud_pago := c.GetString(":id_solicitud_pago")
 	autorizacion, err := services.GenerarAutorizacionPago(id_solicitud_pago)

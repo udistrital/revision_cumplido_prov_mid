@@ -78,7 +78,7 @@ func ObtenerSolicitudesCumplidos(documento string, estado string) (cumplidosInfo
 	}
 
 	for _, cumplido := range cumplidos {
-		info_contrato, err := helpers.ObtenerInformacionContratoContratista(cumplido.CumplidoProveedorId.NumeroContrato, strconv.Itoa(cumplido.CumplidoProveedorId.VigenciaContrato))
+		info_contrato, err := helpers.ObtenerInformacionContratoProveedor(cumplido.CumplidoProveedorId.NumeroContrato, strconv.Itoa(cumplido.CumplidoProveedorId.VigenciaContrato))
 		if err != nil {
 
 			errorMessage := fmt.Sprintf("%v", err)
@@ -92,7 +92,7 @@ func ObtenerSolicitudesCumplidos(documento string, estado string) (cumplidosInfo
 			return nil, errorOutput
 		}
 
-		if proveedor, err := helpers.ObtenerContratosContratista(info_contrato.InformacionContratista.Documento.Numero); err == nil && proveedor != nil {
+		if proveedor, err := helpers.ObtenerContratosProveedor(info_contrato.InformacionContratista.Documento.Numero); err == nil && proveedor != nil {
 
 			var vigencia, _ = strconv.Atoi(proveedor[0].Vigencia)
 			contrato := models.SolicituRevisionCumplidoProveedor{
@@ -136,7 +136,7 @@ func ListaCumplidosReversibles(docuemento_ordenador string) (soliciudes []models
 		return nil, e
 	}
 	for _, cumplido := range cumplidos {
-		info_contrato, err := helpers.ObtenerInformacionContratoContratista(cumplido.CumplidoProveedorId.NumeroContrato, strconv.Itoa(cumplido.CumplidoProveedorId.VigenciaContrato))
+		info_contrato, err := helpers.ObtenerInformacionContratoProveedor(cumplido.CumplidoProveedorId.NumeroContrato, strconv.Itoa(cumplido.CumplidoProveedorId.VigenciaContrato))
 		if err != nil {
 
 			errorMessage := fmt.Sprintf("%v", err)
@@ -162,7 +162,7 @@ func ListaCumplidosReversibles(docuemento_ordenador string) (soliciudes []models
 			return nil, errorOutput
 		}
 
-		if proveedor, err := helpers.ObtenerContratosContratista(info_contrato.InformacionContratista.Documento.Numero); err == nil && proveedor != nil {
+		if proveedor, err := helpers.ObtenerContratosProveedor(info_contrato.InformacionContratista.Documento.Numero); err == nil && proveedor != nil {
 
 			var vigencia, _ = strconv.Atoi(proveedor[0].Vigencia)
 			contrato := models.SolicituRevisionCumplidoProveedor{

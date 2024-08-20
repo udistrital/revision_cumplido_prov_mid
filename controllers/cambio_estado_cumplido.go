@@ -9,12 +9,12 @@ import (
 )
 
 // EstadoSoporteController operations for EstadoSoporte
-type CambioEstadoSoporteOrdenadorController struct {
+type CambioEstadoCumplidoController struct {
 	beego.Controller
 }
 
 // URLMapping ...
-func (c *CambioEstadoSoporteOrdenadorController) URLMapping() {
+func (c *CambioEstadoCumplidoController) URLMapping() {
 	c.Mapping("CambioEstadoCumplido", c.CambioEstadoCumplido)
 
 }
@@ -28,7 +28,7 @@ func (c *CambioEstadoSoporteOrdenadorController) URLMapping() {
 // @Success 200 {object} models.CambioEstadoCumplidoResponse
 // @Failure 502 {object} map[string]interface{}
 // @router /cambio-estado [post]
-func (c *CambioEstadoSoporteOrdenadorController) CambioEstadoCumplido() {
+func (c *CambioEstadoCumplidoController) CambioEstadoCumplido() {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
