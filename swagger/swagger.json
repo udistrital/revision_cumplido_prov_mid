@@ -87,7 +87,7 @@
                     "ordenador"
                 ],
                 "description": "Metodo para que el ordenador  Obtenga los contratos para la aprobacion de pago",
-                "operationId": "RevisionCumplidoOrdenadorController.ObtenerPendientesRevisionOrdenador",
+                "operationId": "RevisionCumplidoOrdenadorController.ObtenerCumplidosPendientesRevisionOrdenador",
                 "parameters": [
                     {
                         "in": "path",
@@ -104,33 +104,13 @@
                 }
             }
         },
-        "/ping/ping": {
-            "get": {
-                "tags": [
-                    "ping"
-                ],
-                "description": "Realiza una prueba de ping y devuelve el estado.",
-                "operationId": "PingController.PingTest",
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/map[string]interface{}{\"Success\":true,\"Status\":\"200\",\"Message\":\"Successful\",\"Data\":{}}"
-                        }
-                    },
-                    "500": {
-                        "description": "{object} map[string]interface{}{\"Success\":false,\"Status\":\"500\",\"Message\":\"Internal Server Error\"}"
-                    }
-                }
-            }
-        },
         "/solicitud-pago/cambio-estado": {
             "post": {
                 "tags": [
                     "solicitud-pago"
                 ],
                 "description": "Cambia el estado de pago del proveedor",
-                "operationId": "EstadoSoporteController.CambioEstadoPago",
+                "operationId": "CambioEstadoSoporteOrdenadorController.CambioEstadoCumplido",
                 "parameters": [
                     {
                         "in": "query",
@@ -229,7 +209,7 @@
                     "solicitud-pago"
                 ],
                 "description": "Subir un soporte de pago",
-                "operationId": "SoportesCumplidoController.SubirSoporte",
+                "operationId": "SoportesCumplidoController.SubirSoporteCumplido",
                 "parameters": [
                     {
                         "in": "body",
@@ -310,7 +290,7 @@
                     "solicitud-pago"
                 ],
                 "description": "Obtener los documentos de soporte de pago mensual y comprimirlos en un archivo ZIP",
-                "operationId": "SoportesCumplidoController.GetSoportesComprimido",
+                "operationId": "SoportesCumplidoController.ObtenerComprimidoSoportes",
                 "parameters": [
                     {
                         "in": "path",
@@ -342,7 +322,7 @@
                     "solicitud-pago"
                 ],
                 "description": "Obtener los documentos de soporte de pago mensual",
-                "operationId": "SoportesCumplidoController.GetDocumentosPagoMensual",
+                "operationId": "SoportesCumplidoController.ObtenerDocumentosPagoMensual",
                 "parameters": [
                     {
                         "in": "path",
@@ -406,7 +386,7 @@
                     "supervisor"
                 ],
                 "description": "Obtener el balance financiero de un contrato",
-                "operationId": "InformeSeguimientoController.GetBalanceFinancieroContrato",
+                "operationId": "InformeSeguimientoController.ObtenerBalanceFinancieroContrato",
                 "parameters": [
                     {
                         "in": "path",
@@ -471,7 +451,7 @@
                     "supervisor"
                 ],
                 "description": "Genera un informe de seguimiento para un contrato suscrito",
-                "operationId": "InformeSeguimientoController.GenerateInformeSeguimiento",
+                "operationId": "InformeSeguimientoController.GenerarInformeSatisfaccion",
                 "parameters": [
                     {
                         "in": "body",
@@ -505,7 +485,7 @@
                     "supervisor"
                 ],
                 "description": "get solicitudes de contrato",
-                "operationId": "SolicitudContratoController.GetSolicitudesContrato",
+                "operationId": "SolicitudesCumplidosContratoController.ObtenerSolicitudesContrato",
                 "parameters": [
                     {
                         "in": "path",
@@ -544,7 +524,7 @@
                     "supervisor"
                 ],
                 "description": "get tipos de documentos cumplido",
-                "operationId": "ListarTipoDocumentosCumplidoController.GetTiposDocumentosCumplido",
+                "operationId": "ListarTipoDocumentosCumplidoController.ObtenerTiposDocumentosCumplido",
                 "responses": {
                     "200": {
                         "description": "",
@@ -565,10 +545,6 @@
     "definitions": {
         "map[string]interface{}": {
             "title": "map[string]interface{}",
-            "type": "object"
-        },
-        "map[string]interface{}{\"Success\":true,\"Status\":\"200\",\"Message\":\"Successful\",\"Data\":{}}": {
-            "title": "map[string]interface{}{\"Success\":true,\"Status\":\"200\",\"Message\":\"Successful\",\"Data\":{}}",
             "type": "object"
         },
         "models.BalanceContrato": {
