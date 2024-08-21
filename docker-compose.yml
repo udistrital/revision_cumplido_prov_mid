@@ -13,7 +13,7 @@ services:
     env_file: 
       - .env
     ports: 
-      - "${CUMPLIDOS_PROVEEDORES_MID_ADMIN_PORT}:${CUMPLIDOS_PROVEEDORES_MID_ADMIN_PORT}"  
+      - "${REVISION_CUMPLIDOS_PROOVEDORES_HTTP_PORT}:${REVISION_CUMPLIDOS_PROOVEDORES_HTTP_PORT}"  
     working_dir: /go/src
     command: sh -c 'cd ${API_BASE_DIR}/${API_NAME};go get -u github.com/beego/bee ;go get -v -u ./...; pwd;go mod init; bee run -downdoc=true -gendoc=true'
 
