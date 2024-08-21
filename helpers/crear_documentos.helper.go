@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/astaxie/beego"
 	"github.com/jung-kurt/gofpdf"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 )
@@ -19,7 +18,7 @@ import (
 func Header(pdf *gofpdf.Fpdf, tipo_documento string, proceso string, codigo string, version string, fecha_aprobacion string) *gofpdf.Fpdf {
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
 
-	path := beego.AppConfig.String("StaticPath")
+	path := "static"
 
 	pdf.SetFont("Times", "", 12)
 	pdf.SetMargins(10, 10, 10)

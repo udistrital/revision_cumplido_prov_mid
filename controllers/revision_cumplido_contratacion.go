@@ -60,7 +60,7 @@ func (c *RevisionCumplidoContratacionController) ObtenerCumplidosPendientesContr
 // Success 200 {object}
 // @Failure 403
 // @router /certificado-aprobacion-pago/:id_solicitud_pago [get]
-func (c *RevisionCumplidoContratacionController) GenerarPdf() {
+func (c *RevisionCumplidoContratacionController) GenerarAutorizacionPago() {
 
 	id_solicitud_pago := c.GetString(":id_solicitud_pago")
 	autorizacion, err := services.GenerarAutorizacionPago(id_solicitud_pago)

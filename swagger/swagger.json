@@ -110,7 +110,7 @@
                     "solicitud-pago"
                 ],
                 "description": "Cambia el estado de pago del proveedor",
-                "operationId": "CambioEstadoSoporteOrdenadorController.CambioEstadoCumplido",
+                "operationId": "CambioEstadoCumplidoController.CambioEstadoCumplido",
                 "parameters": [
                     {
                         "in": "query",
