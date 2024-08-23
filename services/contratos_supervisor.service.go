@@ -22,7 +22,7 @@ func ObtenerContratosSupervisor(documento_supervisor string) (contratos_supervis
 	if dependencias_supervisor, outputError := ObtenerDependenciasSupervisor(documento_supervisor); outputError == nil {
 		for _, dependencia := range dependencias_supervisor {
 			contratos_supervisor.Dependencias_supervisor = append(contratos_supervisor.Dependencias_supervisor, dependencia)
-			if contratos_dependencia, outputError := ObtenerContratosDependenciaFiltro(dependencia.Codigo, documento_supervisor); outputError == nil {
+			if contratos_dependencia, outputError := ObtenerContratosDependenciaFiltroTemp(dependencia.Codigo, "2024-05", "2024-05"); outputError == nil {
 				for _, contrato := range contratos_dependencia.Contratos.Contrato {
 					contrato_proveedor, err := helpers.ObtenerInformacionContratoProveedor(contrato.NumeroContrato, contrato.Vigencia)
 					if err == nil {

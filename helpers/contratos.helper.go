@@ -25,6 +25,8 @@ func ObtenerContratosProveedor(numero_documento string) (contrato_proveedor []mo
 		for _, contrato_persona := range contratos_persona.ContratosPersonas.ContratoPersona {
 			contrato_persona.FechaFin = time.Date(contrato_persona.FechaFin.Year(), contrato_persona.FechaFin.Month(), contrato_persona.FechaFin.Day(), 0, 0, 0, 0, contrato_persona.FechaFin.Location())
 			if time.Now().Before(contrato_persona.FechaFin) {
+				//fmt.Println("Contrato Persona: ", contrato_persona)
+				//fmt.Println("Fecha fin contrato: ", contrato_persona.FechaFin)
 				var contrato models.InformacionContrato
 				contrato, outputError = ObtenerInformacionContrato(contrato_persona.NumeroContrato, contrato_persona.Vigencia)
 
@@ -138,38 +140,44 @@ func ObtenerContratosPersona(num_documento string) (contratos_persona models.Inf
 	if response, err := GetJsonTest(beego.AppConfig.String("UrlcrudAgora")+"/informacion_proveedor/?query=NumDocumento:"+num_documento, &proveedor); err == nil && response == 200 {
 		if len(proveedor) > 0 {
 			if response, err := GetJsonTest(beego.AppConfig.String("UrlcrudAgora")+"/contrato_general/?query=Contratista:"+strconv.Itoa(proveedor[0].Id)+"&sortby=FechaRegistro&order=desc", &contratos); err == nil && response == 200 {
-				acta_inicio, err := ObtenerActaInicio(contratos[0].ContratoSuscrito[0].NumeroContratoSuscrito, contratos[0].ContratoSuscrito[0].Vigencia)
-				if err == nil {
-					if response, err := GetJsonTest(beego.AppConfig.String("UrlcrudAgora")+"/contrato_disponibilidad/?query=NumeroContrato:"+contratos[0].Id+",Vigencia:"+strconv.Itoa(contratos[0].VigenciaContrato), &contrato_disponibilidad); err == nil && response == 200 {
-						contratoPersona := struct {
-							NumeroContrato string    `json:"numero_contrato"`
-							Vigencia       string    `json:"vigencia"`
-							NumeroCDP      string    `json:"cdp"`
-							FechaInicio    time.Time `json:"fecha_inicio"`
-							FechaFin       time.Time `json:"fecha_fin"`
-						}{
-							NumeroContrato: contratos[0].ContratoSuscrito[0].NumeroContratoSuscrito,
-							Vigencia:       strconv.Itoa(contratos[0].ContratoSuscrito[0].Vigencia),
-							NumeroCDP:      strconv.Itoa(contrato_disponibilidad[0].NumeroCdp),
-							FechaInicio:    acta_inicio.FechaInicio,
-							FechaFin:       acta_inicio.FechaFin,
+				if len(contratos) > 0 {
+					if len(contratos[0].ContratoSuscrito) > 0 {
+						acta_inicio, err := ObtenerActaInicio(contratos[0].ContratoSuscrito[0].NumeroContratoSuscrito, contratos[0].ContratoSuscrito[0].Vigencia)
+						if err == nil {
+							if response, err := GetJsonTest(beego.AppConfig.String("UrlcrudAgora")+"/contrato_disponibilidad/?query=NumeroContrato:"+contratos[0].Id+",Vigencia:"+strconv.Itoa(contratos[0].VigenciaContrato), &contrato_disponibilidad); err == nil && response == 200 {
+								if len(contrato_disponibilidad) > 0 {
+									fmt.Println("Tamaño contrato disponibilidad: ", len(contrato_disponibilidad))
+									contratoPersona := struct {
+										NumeroContrato string    `json:"numero_contrato"`
+										Vigencia       string    `json:"vigencia"`
+										NumeroCDP      string    `json:"cdp"`
+										FechaInicio    time.Time `json:"fecha_inicio"`
+										FechaFin       time.Time `json:"fecha_fin"`
+									}{
+										NumeroContrato: contratos[0].ContratoSuscrito[0].NumeroContratoSuscrito,
+										Vigencia:       strconv.Itoa(contratos[0].ContratoSuscrito[0].Vigencia),
+										NumeroCDP:      strconv.Itoa(contrato_disponibilidad[0].NumeroCdp),
+										FechaInicio:    acta_inicio.FechaInicio,
+										FechaFin:       acta_inicio.FechaFin,
+									}
+									contratos_persona.ContratosPersonas.ContratoPersona = append(contratos_persona.ContratosPersonas.ContratoPersona, contratoPersona)
+								}
+							}
+						} else {
+							outputError = map[string]interface{}{"funcion": "/ObtenerContratosPersona", "message": "Error al obtener la acta de inicio", "err": err, "status": "502"}
+							return contratos_persona, outputError
 						}
-						contratos_persona.ContratosPersonas.ContratoPersona = append(contratos_persona.ContratosPersonas.ContratoPersona, contratoPersona)
-						fmt.Println("contratos_persona", contratos_persona)
 
-					} else {
-						outputError = map[string]interface{}{"funcion": "/ObtenerContratosPersona", "message": "Error al obtener la información del contrato de disponibilidad", "err": err, "status": "502"}
-						return contratos_persona, outputError
 					}
-
-				} else {
-					outputError = map[string]interface{}{"funcion": "/ObtenerContratosPersona", "message": "Error al obtener la información del acta de inicio", "err": err, "status": "502"}
-					return contratos_persona, outputError
 				}
+
 			} else {
-				outputError = map[string]interface{}{"funcion": "/ObtenerContratosPersona", "message": "Error al la informacion del contrato del proveedor", "err": err, "status": "502"}
+				outputError = map[string]interface{}{"funcion": "/ObtenerContratosPersona", "message": "Error al obtener el contrato general del proveedor", "err": err, "status": "502"}
 				return contratos_persona, outputError
 			}
+		} else {
+			outputError = map[string]interface{}{"funcion": "/ObtenerContratosPersona", "message": "El proveedor no existe", "status": "502"}
+			return contratos_persona, outputError
 		}
 	} else {
 		outputError = map[string]interface{}{"funcion": "/ObtenerContratosPersona", "message": "Error al obtener la información del proveedor", "err": err, "status": "502"}
@@ -177,7 +185,6 @@ func ObtenerContratosPersona(num_documento string) (contratos_persona models.Inf
 	}
 
 	return contratos_persona, nil
-
 }
 
 func ObtenerInformacionContratoProveedor(num_contrato_suscrito string, vigencia string) (informacion_contrato_proveedor models.DatosContratoProveedor, outputError map[string]interface{}) {
@@ -254,35 +261,54 @@ func ObtenerRP(numero_cdp string, vigencia_cdp string) (rp models.InformacionCdp
 
 func ObtenerActaInicio(numero_contrato_suscrito string, vigencia_contrato int) (acta_inicio models.ActaInicio, outputError map[string]interface{}) {
 	var contratos_suscrito []models.ContratoSuscrito
+	fmt.Println("URL contrato suscrito: ", beego.AppConfig.String("UrlcrudAgora")+"/contrato_suscrito/?query=NumeroContratoSuscrito:"+numero_contrato_suscrito+",Vigencia:"+strconv.Itoa(vigencia_contrato))
 	if response, err := GetJsonTest(beego.AppConfig.String("UrlcrudAgora")+"/contrato_suscrito/?query=NumeroContratoSuscrito:"+numero_contrato_suscrito+",Vigencia:"+strconv.Itoa(vigencia_contrato), &contratos_suscrito); (err == nil) && (response == 200) {
 		if len(contratos_suscrito) > 0 {
+			fmt.Println("Tamaño contrato suscrito: ", len(contratos_suscrito))
 			var actasInicio []models.ActaInicio
+			//fmt.Println("URL acta inicio: ", beego.AppConfig.String("UrlcrudAgora")+"/acta_inicio/?query=NumeroContrato:"+contratos_suscrito[0].NumeroContrato.Id+",Vigencia:"+strconv.Itoa(contratos_suscrito[0].Vigencia))
 			if response, err := GetJsonTest(beego.AppConfig.String("UrlcrudAgora")+"/acta_inicio/?query=NumeroContrato:"+contratos_suscrito[0].NumeroContrato.Id+",Vigencia:"+strconv.Itoa(contratos_suscrito[0].Vigencia), &actasInicio); (err == nil) && (response == 200) {
 				if len(actasInicio) == 0 {
-					acta_inicio.Id = 0
-					acta_inicio.NumeroContrato = contratos_suscrito[0].NumeroContratoSuscrito
-					acta_inicio.Vigencia = contratos_suscrito[0].Vigencia
-					acta_inicio.FechaInicio = contratos_suscrito[0].FechaSuscripcion
-					acta_inicio.Descripcion = "No se ha registrado acta de inicio"
+					var contratos_generales []models.ContratoGeneral
+					fmt.Println("URL contrato general: ", beego.AppConfig.String("UrlcrudAgora")+"/contrato_general/?query=Id:"+contratos_suscrito[0].NumeroContrato.Id)
+					if respuesta, err := GetJsonTest(beego.AppConfig.String("UrlcrudAgora")+"/contrato_general/?query=Id:"+contratos_suscrito[0].NumeroContrato.Id+",VigenciaContrato:"+strconv.Itoa(contratos_suscrito[0].Vigencia), &contratos_generales); (err == nil) && (respuesta == 200) {
+						//fmt.Println("Contrato general: ", contratos_generales)
+						if len(contratos_generales) > 0 {
+							acta_inicio.Id = 0
+							acta_inicio.NumeroContrato = contratos_suscrito[0].NumeroContratoSuscrito
+							acta_inicio.Vigencia = contratos_suscrito[0].Vigencia
+							acta_inicio.FechaInicio = contratos_suscrito[0].FechaSuscripcion
+							acta_inicio.Descripcion = "No se ha registrado acta de inicio"
 
-					switch contratos_suscrito[0].NumeroContrato.UnidadEjecucion.Id {
-					case 205:
-						acta_inicio.FechaFin = acta_inicio.FechaInicio.AddDate(0, 0, contratos_suscrito[0].NumeroContrato.PlazoEjecucion)
-					case 206:
-						acta_inicio.FechaFin = acta_inicio.FechaInicio.AddDate(0, contratos_suscrito[0].NumeroContrato.PlazoEjecucion, 0)
-					case 207:
-						acta_inicio.FechaFin = acta_inicio.FechaInicio.AddDate(contratos_suscrito[0].NumeroContrato.PlazoEjecucion, 0, 0)
-					default:
-						outputError = map[string]interface{}{"funcion": "/ObtenerActaInicio", "message": "La unidad de ejecucuion no es un valor de tiempo", "status": "502"}
+							fmt.Println("Tamaño contrato general: ", len(contratos_generales))
+							switch contratos_generales[0].UnidadEjecucion.Id {
+							case 205:
+								acta_inicio.FechaFin = acta_inicio.FechaInicio.AddDate(0, 0, contratos_generales[0].PlazoEjecucion)
+							case 206:
+								acta_inicio.FechaFin = acta_inicio.FechaInicio.AddDate(0, contratos_generales[0].PlazoEjecucion, 0)
+							case 207:
+								acta_inicio.FechaFin = acta_inicio.FechaInicio.AddDate(contratos_generales[0].PlazoEjecucion, 0, 0)
+							default:
+								outputError = map[string]interface{}{"funcion": "/ObtenerActaInicio", "message": "La unidad de ejecucuion no es un valor de tiempo", "status": "502"}
+								return acta_inicio, outputError
+							}
+							//fmt.Println("Acta inicio: ", acta_inicio)
+							return acta_inicio, nil
+						} else {
+							outputError = map[string]interface{}{"funcion": "/ObtenerActaInicio", "message": "No existe el contrato general ingresado", "status": "502"}
+							return acta_inicio, outputError
+						}
+					} else {
+						outputError = map[string]interface{}{"funcion": "/ObtenerActaInicio", "message": "Error al obtener el contrato general", "status": "502"}
 						return acta_inicio, outputError
 					}
 				} else {
 					acta_inicio = actasInicio[0]
-					return acta_inicio, nil
 				}
 			} else {
+				fmt.Println("Error al obtener la acta de inicio: ", err)
 				outputError = map[string]interface{}{"funcion": "/ObtenerActaInicio", "err": err, "message": "Error al obtener la acta de inicio", "status": "502"}
-				return acta_inicio, outputError
+				//return acta_inicio, outputError
 			}
 		} else {
 			outputError = map[string]interface{}{"funcion": "/ObtenerActaInicio", "err": err, "message": "No existe el contrato suscrito ingresado", "status": "502"}
