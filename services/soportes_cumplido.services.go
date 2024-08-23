@@ -262,18 +262,18 @@ func ObtenerComprimidoSoportes(id_cumplido_proveedor string) (documentos_comprim
 		}
 	}
 
-	var informacion_contrato_contratista models.InformacionContratoContratista
+	var informacion_contrato_proveedor models.DatosContratoProveedor
 	for _, cumplido := range cumplidos_proveedor {
-		informacion_contrato_contratista, error = helpers.ObtenerInformacionContratoProveedor(cumplido.NumeroContrato, strconv.Itoa(cumplido.VigenciaContrato))
+		informacion_contrato_proveedor, error = helpers.ObtenerInformacionContratoProveedor(cumplido.NumeroContrato, strconv.Itoa(cumplido.VigenciaContrato))
 
 		if error == nil {
-			fmt.Println("Nombre: ", informacion_contrato_contratista)
-			documentos_comprimido.Nombre = informacion_contrato_contratista.InformacionContratista.NombreCompleto + "_" + cumplido.NumeroContrato + "_" + informacion_contrato_contratista.InformacionContratista.Documento.Numero + "_" + strconv.Itoa(int(cumplido.FechaCreacion.Month())) + "_" + strconv.Itoa(cumplido.FechaCreacion.Year())
+			fmt.Println("Nombre: ", informacion_contrato_proveedor)
+			documentos_comprimido.Nombre = informacion_contrato_proveedor.InformacionContratista.NombreCompleto + "_" + cumplido.NumeroContrato + "_" + informacion_contrato_proveedor.InformacionContratista.Documento.Numero + "_" + strconv.Itoa(int(cumplido.FechaCreacion.Month())) + "_" + strconv.Itoa(cumplido.FechaCreacion.Year())
 		} else {
 			outputError := map[string]interface{}{
 				"Success": false,
 				"Status":  502,
-				"Message": "Error al Buscar los datos del contratista",
+				"Message": "Error al Buscar los datos del proveedor",
 			}
 			return documentos_comprimido, outputError
 		}
@@ -337,13 +337,11 @@ func SubirSoporteCumplido(solicitud_pago_id int, tipo_documento string, item_id 
 		},
 	}
 
-	fmt.Println("Data: ", data)
-
 	var respuesta map[string]interface{}
 
 	// Realizar la solicitud
 
-	fmt.Println("URL Subir documento gestor documental: ", beego.AppConfig.String("UrlGestorDocumental")+"/document/upload")
+	//fmt.Println("URL Subir documento gestor documental: ", beego.AppConfig.String("UrlGestorDocumental")+"/document/upload")
 	if err := helpers.SendJson(beego.AppConfig.String("UrlGestorDocumental")+"/document/upload", "POST", &respuesta, data); err == nil {
 		id := respuesta["res"].(map[string]interface{})["Id"].(float64)
 		soporte := models.BodySoportePago{
@@ -353,7 +351,6 @@ func SubirSoporteCumplido(solicitud_pago_id int, tipo_documento string, item_id 
 			FechaModificacion:   time.Now(),
 			Activo:              true,
 		}
-		fmt.Println("Soporte: ", soporte)
 		var res map[string]interface{}
 		if err == nil {
 			if err := helpers.SendJson(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido", "POST", &res, soporte); err == nil {

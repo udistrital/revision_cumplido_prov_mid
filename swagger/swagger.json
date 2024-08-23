@@ -891,15 +891,7 @@
         },
         "models.InformeSeguimiento": {
             "title": "InformeSeguimiento",
-            "type": "object",
-            "properties": {
-                "archivo": {
-                    "type": "string"
-                },
-                "file": {
-                    "type": "string"
-                }
-            }
+            "type": "object"
         },
         "models.RespuestaComentarioSoporte": {
             "title": "RespuestaComentarioSoporte",

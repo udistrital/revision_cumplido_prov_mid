@@ -26,7 +26,7 @@ func ObtenerSolicitudesCumplidosContrato(numero_contrato string, vigencia string
 			if err == nil {
 				estado_cumplido := models.CumplidosContrato{
 					NumeroContrato:      estado.CumplidoProveedorId.NumeroContrato,
-					FechaCreacion:       estado.FechaCreacion.String(),
+					FechaCreacion:       estado.FechaCreacion,
 					Periodo:             "",
 					EstadoCumplido:      estado.EstadoCumplidoId.Nombre,
 					CumplidoProveedorId: estado.CumplidoProveedorId,

@@ -378,7 +378,7 @@ func DocumentoEnLista(documentos []string, documento string) bool {
 
 }
 
-func CrearPdfInformeSatisfaccion(dependencia string, nombre_proveedor string, numero_nit string, cumplimiento_contrato bool, tipo_contrato string, fecha_inicio time.Time, numero_contrato string, cdp string, vigencia_cdp string, crp string, vigencia_crp string, cargo string, tipo_factura string, numero_cuenta_factura string, valor_total_contrato int, periodo_inicio string, periodo_fin string, saldo_contrato int, fecha_fin time.Time, tipo_cuenta string, numero_cuenta string, nombre_banco string, supervisor string, vigencia string) (informe_seguimiento models.InformeSeguimiento, outputError interface{}) {
+func CrearPdfInformeSatisfaccion(dependencia string, nombre_proveedor string, numero_nit string, cumplimiento_contrato bool, tipo_contrato string, fecha_inicio time.Time, numero_contrato string, cdp string, vigencia_cdp string, rp string, vigencia_rp string, cargo string, tipo_factura string, numero_cuenta_factura string, valor_total_contrato int, periodo_inicio string, periodo_fin string, saldo_contrato int, fecha_fin time.Time, tipo_cuenta string, numero_cuenta string, nombre_banco string, supervisor string, vigencia string) (informe_satisfaccion models.InformeSatisfaccion, outputError interface{}) {
 
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetMargins(25, 20, 25)
@@ -386,7 +386,7 @@ func CrearPdfInformeSatisfaccion(dependencia string, nombre_proveedor string, nu
 
 	pdf.SetHeaderFunc(func() {
 		pdf = Header(pdf, "CUMPLIDO A SATISFACCIÓN POR PARTE DE LA DEPENDENCIA", "Gestión Contractual", "GC-PR-003-FR-012", "05", "13/10/2021")
-		pdf.Ln(30)
+		pdf.Ln(20)
 	})
 
 	pdf.AddPage()
@@ -402,8 +402,8 @@ func CrearPdfInformeSatisfaccion(dependencia string, nombre_proveedor string, nu
 		numero_contrato,
 		cdp,
 		vigencia_cdp,
-		crp,
-		vigencia_crp,
+		rp,
+		vigencia_rp,
 		cargo)
 
 	pdf = body_segunda_parte(
@@ -432,8 +432,8 @@ func CrearPdfInformeSatisfaccion(dependencia string, nombre_proveedor string, nu
 
 	encodedFile := encodePDF(pdf)
 	nombre := "prueba"
-	informe_seguimiento = models.InformeSeguimiento{File: encodedFile, Archivo: nombre}
-	return informe_seguimiento, nil
+	informe_satisfaccion = models.InformeSatisfaccion{File: encodedFile, Archivo: nombre}
+	return informe_satisfaccion, nil
 }
 
 func body_primera_parte(pdf *gofpdf.Fpdf, dependencia string, nombre_proveedor string, numero_nit string, cumplimiento_contrato bool, tipo_contrato string, fecha_inicio time.Time, numero_contrato string, cdp string, vigencia_cdp string, crp string, vigencia_crp string, cargo string) *gofpdf.Fpdf {
@@ -474,6 +474,7 @@ func ObtenerMes(mes int) string {
 
 func body_segunda_parte(pdf *gofpdf.Fpdf, tipo_factura string, numero_cuenta_factura string, valor_total_contrato int, periodo_inicio string, periodo_fin string, saldo_contrato int, fecha_inicio time.Time, fecha_fin time.Time, tipo_cuenta string, numero_cuenta string, nombre_banco string) *gofpdf.Fpdf {
 
+	fmt.Println("Periodo inicio", periodo_inicio)
 	pdf.SetFont("Times", "", 10)
 
 	tr := pdf.UnicodeTranslatorFromDescriptor("")

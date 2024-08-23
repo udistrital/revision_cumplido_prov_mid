@@ -22,25 +22,25 @@ func ObtenerContratosSupervisor(documento_supervisor string) (contratos_supervis
 	if dependencias_supervisor, outputError := ObtenerDependenciasSupervisor(documento_supervisor); outputError == nil {
 		for _, dependencia := range dependencias_supervisor {
 			contratos_supervisor.Dependencias_supervisor = append(contratos_supervisor.Dependencias_supervisor, dependencia)
-			if contratos_dependencia, outputError := ObtenerContratosDependenciaFiltroTemp(dependencia.Codigo, "2024-05", "2024-05"); outputError == nil {
+			if contratos_dependencia, outputError := ObtenerContratosDependenciaFiltro(dependencia.Codigo, documento_supervisor); outputError == nil {
 				for _, contrato := range contratos_dependencia.Contratos.Contrato {
-					contrato_contratista, err := helpers.ObtenerInformacionContratoProveedor(contrato.NumeroContrato, contrato.Vigencia)
+					contrato_proveedor, err := helpers.ObtenerInformacionContratoProveedor(contrato.NumeroContrato, contrato.Vigencia)
 					if err == nil {
-						contratos_supervisor.NombreSupervisor = contrato_contratista.InformacionContratista.Supervisor.Nombre
-						contratistas, err := helpers.ObtenerContratosProveedor(contrato_contratista.InformacionContratista.Documento.Numero)
+						contratos_supervisor.NombreSupervisor = contrato_proveedor.InformacionContratista.Supervisor.Nombre
+						proveedores, err := helpers.ObtenerContratosProveedor(contrato_proveedor.InformacionContratista.Documento.Numero)
 						if err == nil {
 
-							for _, contratista := range contratistas {
-								contratos_supervisor.Contratos = append(contratos_supervisor.Contratos, contratista)
+							for _, proveedor := range proveedores {
+								contratos_supervisor.Contratos = append(contratos_supervisor.Contratos, proveedor)
 							}
 						} else {
 							logs.Error(err)
-							outputError = map[string]interface{}{"funcion": "/ContratosSupervisor/ContratosContratista", "err": err, "status": "502"}
+							outputError = map[string]interface{}{"funcion": "/ContratosSupervisor/ObtenerContratosProveedor", "err": err, "status": "502"}
 							return contratos_supervisor, outputError
 						}
 					} else {
 						logs.Error(err)
-						outputError = map[string]interface{}{"funcion": "/ContratosSupervisor/ContratosContratista", "err": err, "status": "502"}
+						outputError = map[string]interface{}{"funcion": "/ContratosSupervisor/ObtenerContratosProveedor", "err": err, "status": "502"}
 						return contratos_supervisor, outputError
 					}
 				}
@@ -192,48 +192,4 @@ func ObtenerContratosDependenciaFiltroTemp(dependencia string, fecha_inicio stri
 		}
 	}
 	return
-}
-
-func ObtenerActaInicio(numero_contrato_suscrito string, vigencia_contrato int) (acta_inicio models.ActaInicio, outputError map[string]interface{}) {
-	var contratos_suscrito []models.ContratoSuscrito
-	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlcrudAgora")+"/contrato_suscrito/?query=NumeroContratoSuscrito:"+numero_contrato_suscrito+",Vigencia:"+strconv.Itoa(vigencia_contrato), &contratos_suscrito); (err == nil) && (response == 200) {
-		if len(contratos_suscrito) > 0 {
-			var actasInicio []models.ActaInicio
-			if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlcrudAgora")+"/acta_inicio/?query=NumeroContrato:"+contratos_suscrito[0].NumeroContrato.Id+",Vigencia:"+strconv.Itoa(contratos_suscrito[0].Vigencia), &actasInicio); (err == nil) && (response == 200) {
-				if len(actasInicio) == 0 {
-					acta_inicio.Id = 0
-					acta_inicio.NumeroContrato = contratos_suscrito[0].NumeroContratoSuscrito
-					acta_inicio.Vigencia = contratos_suscrito[0].Vigencia
-					acta_inicio.FechaInicio = contratos_suscrito[0].FechaSuscripcion
-					acta_inicio.Descripcion = "No se ha registrado acta de inicio"
-
-					switch contratos_suscrito[0].NumeroContrato.UnidadEjecucion.Id {
-					case 205:
-						acta_inicio.FechaFin = acta_inicio.FechaInicio.AddDate(0, 0, contratos_suscrito[0].NumeroContrato.PlazoEjecucion)
-					case 206:
-						acta_inicio.FechaFin = acta_inicio.FechaInicio.AddDate(0, contratos_suscrito[0].NumeroContrato.PlazoEjecucion, 0)
-					case 207:
-						acta_inicio.FechaFin = acta_inicio.FechaInicio.AddDate(contratos_suscrito[0].NumeroContrato.PlazoEjecucion, 0, 0)
-					default:
-						outputError = map[string]interface{}{"funcion": "/ObtenerInformacionContratosContratista", "message": "La unidad de ejecucuion no es un valor de tiempo", "status": "502"}
-						return acta_inicio, outputError
-					}
-				} else {
-					acta_inicio = actasInicio[0]
-					return acta_inicio, nil
-				}
-			} else {
-				outputError = map[string]interface{}{"funcion": "/ObtenerActaInicio", "err": err, "message": "Error al obtener la acta de inicio", "status": "502"}
-				return acta_inicio, outputError
-			}
-		} else {
-			outputError = map[string]interface{}{"funcion": "/ObtenerActaInicio", "err": err, "message": "No existe el contrato suscrito ingresado", "status": "502"}
-			return acta_inicio, outputError
-		}
-	} else {
-		outputError = map[string]interface{}{"funcion": "/ObtenerActaInicio", "err": err, "message": "Error al obtener el contrato suscrito", "status": "502"}
-		return acta_inicio, outputError
-	}
-
-	return acta_inicio, outputError
 }
