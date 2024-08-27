@@ -32,7 +32,7 @@ func ObtenerCumplidosOrdenador(docuemento_ordenador string, estado string) (camb
 	var urlRequest = beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores") + "/cambio_estado_cumplido/?query=DocumentoResponsable:" + docuemento_ordenador + ",EstadoCumplidoId.CodigoAbreviación:" + estado
 
 	response, err := helpers.GetJsonWSO2Test(urlRequest, &cambios_estado)
-	fmt.Println(response)
+	//fmt.Println(response)
 	if err != nil || response != 200 {
 		errorMessage := fmt.Sprintf("%v", err)
 		errorOutput = map[string]interface{}{
@@ -233,7 +233,7 @@ func GenerarAutorizacionPago(id_solicitud_pago string) (datos_documento *models.
 	url_request := beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores") + "/cambio_estado_cumplido/?query=CumplidoProveedorId:" + id_solicitud_pago + ",EstadoCumplidoId.CodigoAbreviación:PRO,Activo:true"
 	response, err := helpers.GetJsonWSO2Test(url_request, &respuesta_cambioEstado)
 	var cambio_estado []models.CambioEstadoCumplido
-	fmt.Println(url_request)
+	//fmt.Println(url_request)
 	if err != nil || response != 200 {
 		errorMessage := fmt.Sprintf("%v", err)
 		errorOutput = map[string]interface{}{
@@ -248,7 +248,7 @@ func GenerarAutorizacionPago(id_solicitud_pago string) (datos_documento *models.
 
 	if respuesta_cambioEstado["Data"] != nil {
 
-		fmt.Println(len(cambio_estado))
+		//fmt.Println(len(cambio_estado))
 
 		data := respuesta_cambioEstado["Data"]
 		if len(data.([]interface{})) > 0 {
@@ -260,7 +260,7 @@ func GenerarAutorizacionPago(id_solicitud_pago string) (datos_documento *models.
 
 		if len(cambio_estado) < 0 {
 			return nil, nil
-			fmt.Println("entro por que esta vacio?")
+			//fmt.Println("entro por que esta vacio?")
 		}
 
 		// Obtiene información de los contratos
@@ -302,7 +302,7 @@ func GenerarAutorizacionPago(id_solicitud_pago string) (datos_documento *models.
 
 			url_request_documentos := beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores") + "/soporte_cumplido?query=CumplidoProveedorId.id:" + id_solicitud_pago
 			responseDocuementos, error_documentos := helpers.GetJsonWSO2Test(url_request_documentos, &respuesta_documentos)
-			fmt.Println(url_request_documentos)
+			//fmt.Println(url_request_documentos)
 			var documentosCargados []models.SoporteCumplido
 			if respuesta_documentos["Data"] != nil {
 				if len(respuesta_documentos["Data"].([]interface{})[0].(map[string]interface{})) != 0 {
@@ -338,7 +338,7 @@ func GenerarAutorizacionPago(id_solicitud_pago string) (datos_documento *models.
 				lista_documentos_cargados_strings = append(lista_documentos_cargados_strings, documento.TipoDocumento.CodigoAbreviacion)
 			}
 
-			fmt.Println("documentos", lista_documentos_cargados_strings)
+			//fmt.Println("documentos", lista_documentos_cargados_strings)
 			indexRespuestaOrdenador := len(respuesta) - 1
 			datos_documento := &models.DocuementoAutorizacionPago{
 				NombreOrdenador:    info_ordenador[indexRespuestaOrdenador].NomProveedor,

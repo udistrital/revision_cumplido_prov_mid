@@ -52,6 +52,33 @@ func init() {
             Filters: nil,
             Params: nil})
 
+    beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:PruebaController"] = append(beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:PruebaController"],
+        beego.ControllerComments{
+            Method: "ObtenerContratosDependencia",
+            Router: "/contratos-dependencia/:dependencia",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:PruebaController"] = append(beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:PruebaController"],
+        beego.ControllerComments{
+            Method: "ObtenerInformacionContratoProveedor",
+            Router: "/informacion-contrato-proveedor/:numero_contrato_suscrito/:vigencia",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:PruebaController"] = append(beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:PruebaController"],
+        beego.ControllerComments{
+            Method: "ObtenerDependenciasSupervisorPrueba",
+            Router: "/prueba-dependencias/:documento_supervisor",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
     beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:RevisionCumplidoContratacionController"] = append(beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:RevisionCumplidoContratacionController"],
         beego.ControllerComments{
             Method: "GenerarAutorizacionPago",

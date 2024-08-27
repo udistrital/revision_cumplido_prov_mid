@@ -36,7 +36,7 @@ func GetJsonTest(url string, target interface{}) (status int, err error) {
 	r, err := http.Get(url)
 	fmt.Println(err)
 	if err != nil {
-		fmt.Println("r", r)
+		//fmt.Println("r", r)
 		return r.StatusCode, err
 	}
 	defer func() {
@@ -60,7 +60,7 @@ func SendJson(url string, trequest string, target interface{}, datajson interfac
 	req, err := http.NewRequest(trequest, url, b)
 	req.Header.Set("Content-Type", "application/json")
 	r, err := client.Do(req)
-	fmt.Println("Respuesta de la peticion: ", r.StatusCode)
+	//fmt.Println("Respuesta de la peticion: ", r.StatusCode)
 	if err != nil {
 		beego.Error("error", err)
 		return err

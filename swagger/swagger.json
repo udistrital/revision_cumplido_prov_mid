@@ -860,9 +860,6 @@
                 "NombreProveedor": {
                     "type": "string"
                 },
-                "NumDocumentoSupervisor": {
-                    "type": "string"
-                },
                 "NumeroCdp": {
                     "type": "string"
                 },

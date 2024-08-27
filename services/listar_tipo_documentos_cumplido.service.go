@@ -1,8 +1,6 @@
 package services
 
 import (
-	"fmt"
-
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/helpers"
@@ -23,7 +21,6 @@ func ObtenerTiposDocumentosCumplido() (tipos_documento []models.DocumentoCumplid
 	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlDocumentosCrud")+"/tipo_documento/?query=DominioTipoDocumento.Id:12&limit=0", &tipo_documento); err == nil && response == 200 {
 		//LimpiezaRespuestaRefactor(respuesta_peticion, &tipo_documento)
 		for _, tipo := range tipo_documento {
-			fmt.Println("Tipo: ", tipo)
 			var documento models.DocumentoCumplido
 			documento.IdTipoDocumento = tipo.Id
 			documento.Nombre = tipo.Nombre

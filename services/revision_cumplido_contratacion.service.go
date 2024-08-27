@@ -30,7 +30,7 @@ func ObtenerCumplidosPorEstado(estado string) (cambios_estado_limpios []models.C
 	var urlRequest = beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores") + "/cambio_estado_cumplido/?query=EstadoCumplidoId.CodigoAbreviación:" + estado
 
 	response, err := helpers.GetJsonWSO2Test(urlRequest, &cambios_estado)
-	fmt.Println(response)
+	//fmt.Println(response)
 	if err != nil || response != 200 {
 		errorMessage := fmt.Sprintf("%v", err)
 		errorOutput = map[string]interface{}{

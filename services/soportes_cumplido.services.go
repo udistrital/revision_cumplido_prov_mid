@@ -267,7 +267,7 @@ func ObtenerComprimidoSoportes(id_cumplido_proveedor string) (documentos_comprim
 		informacion_contrato_proveedor, error = helpers.ObtenerInformacionContratoProveedor(cumplido.NumeroContrato, strconv.Itoa(cumplido.VigenciaContrato))
 
 		if error == nil {
-			fmt.Println("Nombre: ", informacion_contrato_proveedor)
+			//fmt.Println("Nombre: ", informacion_contrato_proveedor)
 			documentos_comprimido.Nombre = informacion_contrato_proveedor.InformacionContratista.NombreCompleto + "_" + cumplido.NumeroContrato + "_" + informacion_contrato_proveedor.InformacionContratista.Documento.Numero + "_" + strconv.Itoa(int(cumplido.FechaCreacion.Month())) + "_" + strconv.Itoa(cumplido.FechaCreacion.Year())
 		} else {
 			outputError := map[string]interface{}{
@@ -313,7 +313,7 @@ func SubirSoporteCumplido(solicitud_pago_id int, tipo_documento string, item_id 
 	var cumplido_proveedor []models.CumplidoProveedor
 	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cumplido_proveedor/?query=Id:"+strconv.Itoa(solicitud_pago_id), &respuesta_peticion); err == nil && response == 200 {
 		helpers.LimpiezaRespuestaRefactor(respuesta_peticion, &cumplido_proveedor)
-		fmt.Println("Cumplido proveedor: ", cumplido_proveedor)
+		//fmt.Println("Cumplido proveedor: ", cumplido_proveedor)
 	} else {
 		outputError = map[string]interface{}{"funcion": "/SubirSoporteCumplido", "status": "502", "mensaje": "Error al consultar el cumplido proveedor"}
 		return soporte_pago, outputError

@@ -27,7 +27,6 @@ func CambioEstadoCumplido(estado_cumplido_id int, cumplido_proveedor_id int, doc
 	var respuesta map[string]interface{}
 	var estado_cumplido []models.EstadoCumplido
 	var cambios_anteriores []models.CambioEstadoCumplido
-	//fmt.Println(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores") + "/cambio_estado_cumplido/?query=CumplidoProveedorId.Id:" + strconv.Itoa(cumplido_proveedor_id) + ",Activo:true&sortby=FechaCreacion&order=desc")
 	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/?query=CumplidoProveedorId.Id:"+strconv.Itoa(cumplido_proveedor_id)+",Activo:true&sortby=FechaCreacion&order=desc", &respuesta_peticion); err == nil && response == 200 {
 		helpers.LimpiezaRespuestaRefactor(respuesta_peticion, &cambios_anteriores)
 		documento, _ := strconv.Atoi(documento_responsable)

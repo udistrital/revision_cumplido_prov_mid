@@ -90,7 +90,7 @@ func Header(pdf *gofpdf.Fpdf, tipo_documento string, proceso string, codigo stri
 func GenerarPdfAutorizacionPago(autorizacion *models.DocuementoAutorizacionPago) string {
 
 	if autorizacion == nil {
-		fmt.Println("Error al generar el documento")
+		//fmt.Println("Error al generar el documento")
 		return ""
 
 	}
@@ -101,7 +101,7 @@ func GenerarPdfAutorizacionPago(autorizacion *models.DocuementoAutorizacionPago)
 	month := int(now.Month())
 	year := now.Year()
 	day := now.Day()
-	fmt.Print("Generando documento")
+	//fmt.Print("Generando documento")
 	pdf.SetFont("Times", "", 12)
 	pdf.SetMargins(15, 10, 15)
 
@@ -209,7 +209,7 @@ func CrearTablaDocumentos(pdf *gofpdf.Fpdf, cellx float64, cellY float64, autori
 	pdf.SetFont("Times", "", 10)
 	for key, value := range docuementos() {
 		cellY += 7
-		fmt.Println("yyyy", cellY)
+		//fmt.Println("yyyy", cellY)
 		pdf.SetXY(startX, cellY)
 		pdf.CellFormat(col1Width, 7, tr(value), "1", 0, "L", false, 0, "")
 
@@ -248,7 +248,7 @@ func body2(pdf *gofpdf.Fpdf, cellx float64, cellY float64, month int, day int, y
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
 	cellY += 10
 	pdf.SetXY(29, cellY)
-	fmt.Println(autorizacion.DocumentoProveedor)
+	//fmt.Println(autorizacion.DocumentoProveedor)
 	pdf.MultiCell(153, 5, tr(fmt.Sprintf(`Autorizo a la Tesorería General a girar a favor de %s con C.C., NIT, TI, OTROS Nº %s para realizar el giro una vez sean deducidos los descuentos de Ley correspondientes. El valor bruto de la presente autorización es de _______________ pesos m/cte. ($____________). `, tr(autorizacion.NombreProveedor), tr(autorizacion.DocumentoProveedor))), "", "", false)
 	cellY += 35
 	pdf.SetXY(29, cellY)
@@ -474,7 +474,7 @@ func ObtenerMes(mes int) string {
 
 func body_segunda_parte(pdf *gofpdf.Fpdf, tipo_factura string, numero_cuenta_factura string, valor_total_contrato int, periodo_inicio string, periodo_fin string, saldo_contrato int, fecha_inicio time.Time, fecha_fin time.Time, tipo_cuenta string, numero_cuenta string, nombre_banco string) *gofpdf.Fpdf {
 
-	fmt.Println("Periodo inicio", periodo_inicio)
+	//fmt.Println("Periodo inicio", periodo_inicio)
 	pdf.SetFont("Times", "", 10)
 
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
