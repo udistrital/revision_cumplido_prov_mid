@@ -33,7 +33,7 @@ func (c *CambioEstadoCumplidoController) CambioEstadoCumplido() {
 		if err := recover(); err != nil {
 			log.Println(err)
 			localError := err.(map[string]interface{})
-			c.Data["message"] = (beego.AppConfig.String("appname") + "/" + "EstadoPagoController" + "/" + (localError["funcion"]).(string))
+			c.Data["message"] = (beego.AppConfig.String("appname") + "/" + "CambioEstadoCumplidoController" + "/" + (localError["funcion"]).(string))
 			c.Data["data"] = (localError["err"])
 			if status, ok := localError["status"]; ok {
 				c.Abort(status.(string))
@@ -45,10 +45,8 @@ func (c *CambioEstadoCumplidoController) CambioEstadoCumplido() {
 
 	// Estructura para recibir el cuerpo de la solicitud
 	type BodyParams struct {
-		EstadoCumplidoID     int    `json:"EstadoCumplidoId"`
-		CumplidoProveedorID  int    `json:"CumplidoProveedorId"`
-		DocumentoResponsable string `json:"DocumentoResponsable"`
-		CargoResponsable     string `json:"CargoResponsable"`
+		CodigoAbreviacionEstadoCumplido string `json:"CodigoAbreviacionEstadoCumplido"`
+		CumplidoProveedorID             int    `json:"CumplidoProveedorId"`
 	}
 
 	var v BodyParams
@@ -56,7 +54,7 @@ func (c *CambioEstadoCumplidoController) CambioEstadoCumplido() {
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
 	// Llamada al helper para cambiar el estado de pago
-	response, outputError := services.CambioEstadoCumplido(v.EstadoCumplidoID, v.CumplidoProveedorID, v.DocumentoResponsable, v.CargoResponsable)
+	response, outputError := services.CambioEstadoCumplido(v.CodigoAbreviacionEstadoCumplido, v.CumplidoProveedorID)
 
 	if outputError != nil {
 		c.Data["json"] = outputError

@@ -16,5 +16,6 @@ type CambioEstadoCumplido struct {
 type CambioEstadoCumplidoResponse struct {
 	CumplidoProveedorId  int
 	DocumentoResponsable int
+	CargoResponsable     string
 	EstadoCumplido       *EstadoCumplido
 }

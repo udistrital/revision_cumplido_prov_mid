@@ -479,6 +479,78 @@
                 }
             }
         },
+        "/supervisor/obtener-ordenador-contrato/{numero_contrato_suscrito}/{vigencia}": {
+            "get": {
+                "tags": [
+                    "supervisor"
+                ],
+                "description": "Obtiene la información del ordenador de un contrato",
+                "operationId": "PruebasController.ObtenerOrdenadorContrato",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "numero_contrato_suscrito",
+                        "description": "Número del contrato suscrito",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "vigencia",
+                        "description": "Vigencia del contrato",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.OrdenadorContratoProveedor"
+                        }
+                    },
+                    "502": {
+                        "description": "{object} map[string]interface{}"
+                    }
+                }
+            }
+        },
+        "/supervisor/obtener-supervisor-contrato/{numero_contrato_suscrito}/{vigencia}": {
+            "get": {
+                "tags": [
+                    "supervisor"
+                ],
+                "description": "Obtiene la información del supervisor de un contrato",
+                "operationId": "PruebasController.ObtenerSupervisorContrato",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "numero_contrato_suscrito",
+                        "description": "Número del contrato suscrito",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "vigencia",
+                        "description": "Vigencia del contrato",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.SupervisorContratoProveedor"
+                        }
+                    },
+                    "502": {
+                        "description": "{object} map[string]interface{}"
+                    }
+                }
+            }
+        },
         "/supervisor/solicitudes-contrato/{numero_contrato}/{vigencia}": {
             "get": {
                 "tags": [
@@ -543,6 +615,14 @@
         }
     },
     "definitions": {
+        "22384.0xc0004cb980.false": {
+            "title": "false",
+            "type": "object"
+        },
+        "25589.0xc00050a060.false": {
+            "title": "false",
+            "type": "object"
+        },
         "map[string]interface{}": {
             "title": "map[string]interface{}",
             "type": "object"
@@ -639,6 +719,9 @@
             "title": "CambioEstadoCumplidoResponse",
             "type": "object",
             "properties": {
+                "CargoResponsable": {
+                    "type": "string"
+                },
                 "CumplidoProveedorId": {
                     "type": "integer",
                     "format": "int64"
@@ -667,9 +750,6 @@
                     "items": {
                         "$ref": "#/definitions/models.Dependencia"
                     }
-                },
-                "nombre_supervisor": {
-                    "type": "string"
                 }
             }
         },
@@ -826,7 +906,7 @@
                 "Activo": {
                     "type": "boolean"
                 },
-                "CodigoAbreviación": {
+                "CodigoAbreviacion": {
                     "type": "string"
                 },
                 "Descripcion": {
@@ -890,6 +970,15 @@
             "title": "InformeSeguimiento",
             "type": "object"
         },
+        "models.OrdenadorContratoProveedor": {
+            "title": "OrdenadorContratoProveedor",
+            "type": "object",
+            "properties": {
+                "contratos": {
+                    "$ref": "#/definitions/22384.0xc0004cb980.false"
+                }
+            }
+        },
         "models.RespuestaComentarioSoporte": {
             "title": "RespuestaComentarioSoporte",
             "type": "object",
@@ -910,6 +999,15 @@
         "models.SoportePago": {
             "title": "SoportePago",
             "type": "object"
+        },
+        "models.SupervisorContratoProveedor": {
+            "title": "SupervisorContratoProveedor",
+            "type": "object",
+            "properties": {
+                "contratos": {
+                    "$ref": "#/definitions/25589.0xc00050a060.false"
+                }
+            }
         },
         "models.TipoDocumento": {
             "title": "TipoDocumento",
@@ -967,7 +1065,7 @@
     "tags": [
         {
             "name": "supervisor",
-            "description": "Informe_seguimientoController operations for Informe_seguimiento\n"
+            "description": "PruebasController operations for Pruebas\n"
         },
         {
             "name": "solicitud-pago",

@@ -52,28 +52,19 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:PruebaController"] = append(beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:PruebaController"],
+    beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:PruebasController"] = append(beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:PruebasController"],
         beego.ControllerComments{
-            Method: "ObtenerContratosDependencia",
-            Router: "/contratos-dependencia/:dependencia",
+            Method: "ObtenerOrdenadorContrato",
+            Router: "/obtener-ordenador-contrato/:numero_contrato_suscrito/:vigencia",
             AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:PruebaController"] = append(beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:PruebaController"],
+    beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:PruebasController"] = append(beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:PruebasController"],
         beego.ControllerComments{
-            Method: "ObtenerInformacionContratoProveedor",
-            Router: "/informacion-contrato-proveedor/:numero_contrato_suscrito/:vigencia",
-            AllowHTTPMethods: []string{"get"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
-    beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:PruebaController"] = append(beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:PruebaController"],
-        beego.ControllerComments{
-            Method: "ObtenerDependenciasSupervisorPrueba",
-            Router: "/prueba-dependencias/:documento_supervisor",
+            Method: "ObtenerSupervisorContrato",
+            Router: "/obtener-supervisor-contrato/:numero_contrato_suscrito/:vigencia",
             AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,

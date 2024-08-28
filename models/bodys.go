@@ -18,7 +18,7 @@ type BodyCambioEstadoCumplido struct {
 	EstadoCumplidoId     EstadoCumplido    `json:"EstadoCumplidoId"`
 	CumplidoProveedorId  CumplidoProveedor `json:"CumplidoProveedorId"`
 	DocumentoResponsable int               `json:"DocumentoResponsable"`
-	CargoResponsable     string            `json:"CargoReponsable"`
+	CargoResponsable     string            `json:"CargoResponsable"`
 	Activo               bool              `json:"Activo"`
 	FechaCreacion        time.Time         `json:"FechaCreacion"`
 	FechaModificacion    time.Time         `json:"FechaModificacion"`
