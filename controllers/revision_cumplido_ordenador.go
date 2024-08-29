@@ -45,7 +45,7 @@ func (c *RevisionCumplidoOrdenadorController) ObtenerCumplidosPendientesRevision
 
 	documento_ordenador := c.GetString(":documento_ordenador")
 
-	dependencias, err := services.ObtenerSolicitudesCumplidos(documento_ordenador, "PRO,Activo:true")
+	dependencias, err := services.ObtenerSolicitudesCumplidos(documento_ordenador)
 
 	if err != nil {
 		c.Ctx.Output.SetStatus(400)

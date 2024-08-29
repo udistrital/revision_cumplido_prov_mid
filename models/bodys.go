@@ -44,4 +44,5 @@ type BodyInformeSeguimiento struct {
 	TipoCuenta             string `json:"TipoDocumentoCobroId"`
 	NumeroCuenta           string `json:"NumeroCuenta"`
 	BancoId                int    `json:"BancoId"`
+	CumplimientoContrato   string `json:"CumplimientoContrato"`
 }

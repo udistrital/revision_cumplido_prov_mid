@@ -378,10 +378,10 @@ func DocumentoEnLista(documentos []string, documento string) bool {
 
 }
 
-func CrearPdfInformeSatisfaccion(dependencia string, nombre_proveedor string, numero_nit string, cumplimiento_contrato bool, tipo_contrato string, fecha_inicio time.Time, numero_contrato string, cdp string, vigencia_cdp string, rp string, vigencia_rp string, cargo string, tipo_factura string, numero_cuenta_factura string, valor_total_contrato int, periodo_inicio string, periodo_fin string, saldo_contrato int, fecha_fin time.Time, tipo_cuenta string, numero_cuenta string, nombre_banco string, supervisor string, vigencia string) (informe_satisfaccion models.InformeSatisfaccion, outputError interface{}) {
+func CrearPdfInformeSatisfaccion(dependencia string, nombre_proveedor string, numero_nit string, cumplimiento_contrato string, tipo_contrato string, fecha_inicio time.Time, numero_contrato string, cdp string, vigencia_cdp string, rp string, vigencia_rp string, cargo string, tipo_factura string, numero_cuenta_factura string, valor_total_contrato int, periodo_inicio string, periodo_fin string, saldo_contrato int, fecha_fin time.Time, tipo_cuenta string, numero_cuenta string, nombre_banco string, supervisor string, vigencia string) (informe_satisfaccion models.InformeSatisfaccion, outputError interface{}) {
 
 	pdf := gofpdf.New("P", "mm", "A4", "")
-	pdf.SetMargins(25, 20, 25)
+	pdf.SetMargins(30, 20, 30)
 	pdf.SetAutoPageBreak(true, 20)
 
 	pdf.SetHeaderFunc(func() {
@@ -436,22 +436,14 @@ func CrearPdfInformeSatisfaccion(dependencia string, nombre_proveedor string, nu
 	return informe_satisfaccion, nil
 }
 
-func body_primera_parte(pdf *gofpdf.Fpdf, dependencia string, nombre_proveedor string, numero_nit string, cumplimiento_contrato bool, tipo_contrato string, fecha_inicio time.Time, numero_contrato string, cdp string, vigencia_cdp string, crp string, vigencia_crp string, cargo string) *gofpdf.Fpdf {
+func body_primera_parte(pdf *gofpdf.Fpdf, dependencia string, nombre_proveedor string, numero_nit string, cumplimiento_contrato string, tipo_contrato string, fecha_inicio time.Time, numero_contrato string, cdp string, vigencia_cdp string, crp string, vigencia_crp string, cargo string) *gofpdf.Fpdf {
 
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
 	pdf.SetFont("Times", "", 10)
-
 	pdf.CellFormat(0, 8, tr("UNIVERSIDAD DISTRITAL FRANCISCO JOSÉ DE CALDAS"), "", 1, "C", false, 0, "")
 	pdf.CellFormat(0, 8, tr("("+dependencia+")"), "", 1, "C", false, 0, "")
 	pdf.CellFormat(0, 8, tr(fmt.Sprintf(`En ejercicio de las funciones de (%s)`, VerificarJefe(cargo))), "", 1, "C", false, 0, "")
 	pdf.CellFormat(0, 8, tr("CERTIFICA"), "", 1, "C", false, 0, "")
-
-	var cumplimiento string
-	if cumplimiento_contrato {
-		cumplimiento = "totalmente"
-	} else {
-		cumplimiento = "parcialmente"
-	}
 
 	// Espacio después de la certificación
 
@@ -459,7 +451,8 @@ func body_primera_parte(pdf *gofpdf.Fpdf, dependencia string, nombre_proveedor s
 	pdf.SetFont("Times", "", 10)
 	pdf.SetMargins(30, 30, 30)
 	pdf.MultiCell(0, 8, "", "", "J", false)
-	pdf.MultiCell(0, 8, tr(fmt.Sprintf(`Que el contratista %s identificado con NIT %s cumplió %s a satisfacción con las obligaciones y objeto del %s Nro. %s de fecha %s garantizada y perfeccionada con Certificado de Disponibilidad Presupuestal No. %s de %s y Certificado de Registro Presupuestal No. %s de %s.`, nombre_proveedor, numero_nit, cumplimiento, tipo_contrato, numero_contrato, formatear_fecha(fecha_inicio), cdp, vigencia_cdp, crp, vigencia_crp)), "", "", false)
+	pdf.SetMargins(30, 30, 30)
+	pdf.MultiCell(0, 8, tr(fmt.Sprintf(`Que el contratista %s identificado con NIT %s cumplió %s a satisfacción con las obligaciones y objeto del %s Nro. %s de fecha %s garantizada y perfeccionada con Certificado de Disponibilidad Presupuestal No. %s de %s y Certificado de Registro Presupuestal No. %s de %s.`, nombre_proveedor, numero_nit, cumplimiento_contrato, tipo_contrato, numero_contrato, formatear_fecha(fecha_inicio), cdp, vigencia_cdp, crp, vigencia_crp)), "", "", false)
 	pdf.Ln(5)
 	pdf.SetMargins(30, 30, 30)
 	pdf.MultiCell(0, 8, tr(`Que conforme con los documentos aportados el contratista cumple con la afiliación y pagos al Sistema General de Seguridad Social de Salud y Pensiones Riesgos Laborales y las obligaciones parafiscales por el período y desembolso aquí causados y autorizados. Así mismo los documentos requeridos (RUT con impresión actualizada Certificado de Cámara de Comercio “no mayor a 90 días” cuenta bancaria fotocopia de la Cédula Actas de Entrega de Elementos o Remisiones Informes de Seguimiento de Supervisión Evaluación del Proveedor y Actas de Liquidación “si se requiere”) para el giro respectivo.`), "", "", false)
@@ -493,10 +486,9 @@ func body_segunda_parte(pdf *gofpdf.Fpdf, tipo_factura string, numero_cuenta_fac
 	pdf.Ln(5)
 	pdf.SetMargins(30, 30, 30)
 	pdf.MultiCell(0, 8, tr(fmt.Sprintf(`Que el presente pago se encuentra en cumplimiento dentro del tiempo de ejecución del contrato del %s al %s.`, formatear_fecha(fecha_inicio), formatear_fecha(fecha_fin))), "", "J", false)
-
 	pdf.SetMargins(30, 30, 30)
 	pdf.MultiCell(0, 8, "", "", "J", false)
-	pdf.MultiCell(0, 8, tr(fmt.Sprintf(`Que tal valor debe girarse por petición del contratista a la Cuenta %s  No. %s del Banco %s.`, tipo_cuenta, numero_cuenta, strings.ToUpper(nombre_banco))), "", "J", false)
+	pdf.MultiCell(0, 8, tr(fmt.Sprintf(`Que tal valor debe girarse por petición del contratista a la %s  No. %s del Banco %s.`, tipo_cuenta, numero_cuenta, strings.ToUpper(nombre_banco))), "", "J", false)
 
 	return pdf
 }

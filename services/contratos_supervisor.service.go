@@ -25,7 +25,7 @@ func ObtenerContratosSupervisor(documento_supervisor string) (contratos_supervis
 			contratos_dependencia, err := ObtenerContratosDependencia(dependencia.Codigo)
 			if err == nil {
 				for _, contrato := range contratos_dependencia.Contratos.Contrato {
-					informacion_contrato_proveedor, err := ObtenerInformacionContratoProveedor(contrato.NumeroContrato, contrato.Vigencia)
+					informacion_contrato_proveedor, err := helpers.ObtenerInformacionContratoProveedor(contrato.NumeroContrato, contrato.Vigencia)
 					if err == nil {
 						for _, contrato_proveedor := range informacion_contrato_proveedor {
 							contratos_supervisor.Contratos = append(contratos_supervisor.Contratos, contrato_proveedor)
@@ -48,72 +48,6 @@ func ObtenerContratosSupervisor(documento_supervisor string) (contratos_supervis
 		return contratos_supervisor, outputError
 	}
 	return contratos_supervisor, nil
-}
-
-func ObtenerInformacionContratoProveedor(numero_contrato_suscrito string, vigencia string) (contratos_proveedor []models.InformacionContratoProveedor, outputError map[string]interface{}) {
-	defer func() {
-		if err := recover(); err != nil {
-			outputError = map[string]interface{}{
-				"Success": false,
-				"Status":  502,
-				"Message": "Error al obtener la informacion del contrato del proveedor",
-				"Error":   err,
-			}
-		}
-	}()
-
-	var respuesta_peticion map[string]interface{}
-	if response, err := helpers.GetJsonWSO2Test(beego.AppConfig.String("UrlAdministrativaJBPM")+"/informacion_contrato_proveedor/"+numero_contrato_suscrito+"/"+vigencia, &respuesta_peticion); err == nil && response == 200 {
-		if respuesta_peticion != nil {
-			if contratosMap, exito := respuesta_peticion["proveedor"].(map[string]interface{}); exito {
-				for _, contratoList := range contratosMap {
-					if list, exito := contratoList.([]interface{}); exito {
-						for _, contrato := range list {
-							contratoMap := contrato.(map[string]interface{})
-							rp, err := helpers.ObtenerRP(contratoMap["numero_cdp"].(string), contratoMap["vigencia_cdp"].(string))
-							if err == nil {
-								contrato_proveedor := models.InformacionContratoProveedor{
-									TipoContrato:           contratoMap["tipo_contrato"].(string),
-									NumeroContratoSuscrito: contratoMap["numero_contrato_suscrito"].(string),
-									Vigencia:               contratoMap["vigencia"].(string),
-									NumeroRp:               rp.CdpXRp.CdpRp[0].RpNumeroRegistro,
-									VigenciaRp:             rp.CdpXRp.CdpRp[0].RpVigencia,
-									NombreProveedor:        contratoMap["proveedor"].(string),
-									NombreDependencia:      contratoMap["dependencia"].(string),
-									NumeroCdp:              contratoMap["numero_cdp"].(string),
-									VigenciaCdp:            contratoMap["vigencia_cdp"].(string),
-									Rubro:                  contratoMap["rubro"].(string),
-								}
-								contratos_proveedor = append(contratos_proveedor, contrato_proveedor)
-							} else {
-								logs.Error(err)
-								outputError = map[string]interface{}{"funcion": "/ObtenerInformacionContratoProveedor/", "err": err, "status": "502"}
-								return contratos_proveedor, outputError
-							}
-						}
-					} else {
-						logs.Error("Error al obtener la informacion del contrato del proveedor")
-						outputError = map[string]interface{}{"funcion": "/ObtenerInformacionContratoProveedor/", "err": "Error al obtener la informacion del contrato del proveedor", "status": "502"}
-						return contratos_proveedor, outputError
-					}
-				}
-			} else {
-				logs.Error("Error al obtener la informacion del contrato del proveedor")
-				outputError = map[string]interface{}{"funcion": "/ObtenerInformacionContratoProveedor/", "err": "Error al obtener la informacion del contrato del proveedor", "status": "502"}
-				return contratos_proveedor, outputError
-			}
-		} else {
-			logs.Error("Error al obtener la informacion del contrato del proveedor")
-			outputError = map[string]interface{}{"funcion": "/ObtenerInformacionContratoProveedor/", "err": "Error al obtener la informacion del contrato del proveedor", "status": "502"}
-			return contratos_proveedor, outputError
-		}
-	} else {
-		logs.Error(err)
-		outputError = map[string]interface{}{"funcion": "/ObtenerInformacionContratoProveedor/", "err": err, "status": "502"}
-		return contratos_proveedor, outputError
-	}
-
-	return contratos_proveedor, nil
 }
 
 func ObtenerContratosDependencia(dependencia string) (contratos_dependencia models.ContratoDependencia, outputError map[string]interface{}) {

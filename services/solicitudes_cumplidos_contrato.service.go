@@ -53,7 +53,6 @@ func ObtenerUltimoEstadoCumplidoProveedor(cumplido_proveedor_id string) (estado_
 	}()
 
 	var respuesta_peticion map[string]interface{}
-	//fmt.Println("URL cambio estado: ", beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/?query=CumplidoProveedorId.Id:"+cumplido_proveedor_id+"&sortby=FechaCreacion&order=desc&limit=1")
 	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/?query=CumplidoProveedorId.Id:"+cumplido_proveedor_id+"&sortby=FechaCreacion&order=desc&limit=1", &respuesta_peticion); err == nil && response == 200 {
 		if len(respuesta_peticion["Data"].([]interface{})) > 0 {
 			estado_josn, err := json.Marshal(respuesta_peticion["Data"].([]interface{})[0])

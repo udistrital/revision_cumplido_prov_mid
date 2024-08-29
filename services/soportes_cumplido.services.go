@@ -262,13 +262,12 @@ func ObtenerComprimidoSoportes(id_cumplido_proveedor string) (documentos_comprim
 		}
 	}
 
-	var informacion_contrato_proveedor models.DatosContratoProveedor
 	for _, cumplido := range cumplidos_proveedor {
-		informacion_contrato_proveedor, error = helpers.ObtenerInformacionContratoProveedor(cumplido.NumeroContrato, strconv.Itoa(cumplido.VigenciaContrato))
+		informacion_contrato_proveedor, error := helpers.ObtenerInformacionContratoProveedor(cumplido.NumeroContrato, strconv.Itoa(cumplido.VigenciaContrato))
 
 		if error == nil {
 			//fmt.Println("Nombre: ", informacion_contrato_proveedor)
-			documentos_comprimido.Nombre = informacion_contrato_proveedor.InformacionContratista.NombreCompleto + "_" + cumplido.NumeroContrato + "_" + informacion_contrato_proveedor.InformacionContratista.Documento.Numero + "_" + strconv.Itoa(int(cumplido.FechaCreacion.Month())) + "_" + strconv.Itoa(cumplido.FechaCreacion.Year())
+			documentos_comprimido.Nombre = informacion_contrato_proveedor[0].NombreProveedor + "_" + cumplido.NumeroContrato + "_" + "_" + strconv.Itoa(int(cumplido.FechaCreacion.Month())) + "_" + strconv.Itoa(cumplido.FechaCreacion.Year())
 		} else {
 			outputError := map[string]interface{}{
 				"Success": false,

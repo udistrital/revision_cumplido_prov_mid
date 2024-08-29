@@ -12,7 +12,7 @@ type CumplidoProveedor struct {
 }
 
 type SolicituRevisionCumplidoProveedor struct {
-	Id                int
+	CumplidoId        int
 	TipoContrato      string
 	NumeroContrato    string
 	VigenciaContrato  int

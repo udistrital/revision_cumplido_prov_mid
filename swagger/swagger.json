@@ -615,11 +615,11 @@
         }
     },
     "definitions": {
-        "22384.0xc0004cb980.false": {
+        "22445.0xc0004de2a0.false": {
             "title": "false",
             "type": "object"
         },
-        "25589.0xc00050a060.false": {
+        "25650.0xc0004de960.false": {
             "title": "false",
             "type": "object"
         },
@@ -646,6 +646,9 @@
                 "BancoId": {
                     "type": "integer",
                     "format": "int64"
+                },
+                "CumplimientoContrato": {
+                    "type": "string"
                 },
                 "NumeroContratoSuscrito": {
                     "type": "integer",
@@ -975,7 +978,7 @@
             "type": "object",
             "properties": {
                 "contratos": {
-                    "$ref": "#/definitions/22384.0xc0004cb980.false"
+                    "$ref": "#/definitions/22445.0xc0004de2a0.false"
                 }
             }
         },
@@ -1005,7 +1008,7 @@
             "type": "object",
             "properties": {
                 "contratos": {
-                    "$ref": "#/definitions/25589.0xc00050a060.false"
+                    "$ref": "#/definitions/25650.0xc0004de960.false"
                 }
             }
         },

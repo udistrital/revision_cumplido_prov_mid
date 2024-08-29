@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"strconv"
-	"strings"
 
 	"github.com/astaxie/beego"
 
@@ -15,45 +14,56 @@ import (
 func ObtenerBalanceFinancieroContrato(numero_contrato_suscrito string, vigencia_contrato string) (balance_contrato models.BalanceContrato, outputError map[string]interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/GetBalanceContrato", "err": err, "status": "502"}
+			outputError = map[string]interface{}{"funcion": "/ObtenerBalanceFinancieroContrato", "err": err, "status": "502"}
 			panic(outputError)
 		}
 	}()
 
 	informacion_contrato, err := helpers.ObtenerInformacionContratoProveedor(numero_contrato_suscrito, vigencia_contrato)
 	if err == nil {
-		informacion_contratista, err := helpers.ObtenerContratosProveedor(informacion_contrato.InformacionContratista.Documento.Numero)
+		contrato_general, err := ObtenerContratoGeneralProveedor(numero_contrato_suscrito, vigencia_contrato)
 		if err == nil {
-			contrato, err := helpers.ObtenerInformacionContrato(numero_contrato_suscrito, vigencia_contrato)
+			valor_girado, err := ObtenerValorGiradoPorCdp(informacion_contrato[0].NumeroCdp, informacion_contrato[0].VigenciaCdp, strconv.Itoa(contrato_general.UnidadEjecutora))
 			if err == nil {
-				valor_girado, err := ObtenerValorGiradoPorCdp(informacion_contratista[0].NumeroCdp, informacion_contratista[0].VigenciaCdp, contrato.Contrato.UnidadEjecutora)
+				total_contrato := contrato_general.ValorContrato
 				if err == nil {
-					total_contrato, err := strconv.ParseFloat(informacion_contrato.InformacionContratista.ValorContrato, 64)
-					if err == nil {
-						saldo_contrato := int(total_contrato) - valor_girado
-						balance_contrato.TotalContrato = strings.Split(informacion_contrato.InformacionContratista.ValorContrato, ".")[0]
-						balance_contrato.Saldo = strconv.Itoa(saldo_contrato)
-						return balance_contrato, nil
-					} else {
-						outputError = map[string]interface{}{"funcion": "/GetBalanceContrato", "err": err, "status": "502"}
-						return balance_contrato, outputError
-					}
-
+					saldo_contrato := int(total_contrato) - valor_girado
+					balance_contrato.TotalContrato = strconv.FormatFloat(total_contrato, 'f', 0, 64)
+					balance_contrato.Saldo = strconv.Itoa(saldo_contrato)
+					return balance_contrato, nil
 				} else {
-					outputError = map[string]interface{}{"funcion": "/GetBalanceContrato", "err": err, "status": "502"}
+					outputError = map[string]interface{}{"funcion": "/ObtenerBalanceFinancieroContrato", "err": err, "status": "502"}
 					return balance_contrato, outputError
 				}
+
+			} else {
+				outputError = map[string]interface{}{"funcion": "/ObtenerBalanceFinancieroContrato", "err": err, "status": "502"}
+				return balance_contrato, outputError
 			}
-		} else {
-			outputError = map[string]interface{}{"funcion": "/GetBalanceContrato", "err": err, "status": "502"}
-			return balance_contrato, outputError
 		}
-	} else {
-		outputError = map[string]interface{}{"funcion": "/GetBalanceContrato", "err": err, "status": "502"}
-		return balance_contrato, outputError
 	}
 
-	return balance_contrato, outputError
+	return balance_contrato, nil
+}
+
+func ObtenerContratoGeneralProveedor(numero_contrato_suscrito string, vigencia_contrato string) (contrato_general models.ContratoGeneral, outputError map[string]interface{}) {
+	defer func() {
+		if err := recover(); err != nil {
+			outputError = map[string]interface{}{"funcion": "/ObtenerContratoGeneralProveedor", "err": err, "status": "502"}
+			panic(outputError)
+		}
+	}()
+
+	var contrato []models.ContratoGeneral
+	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlcrudAgora")+"/contrato_general/?query=ContratoSuscrito.NumeroContratoSuscrito:"+numero_contrato_suscrito+",VigenciaContrato:"+vigencia_contrato, &contrato); (err == nil) && (response == 200) {
+		if len(contrato) > 0 {
+			return contrato[0], nil
+		} else {
+			outputError = map[string]interface{}{"funcion": "/ObtenerContratoGeneralProveedor", "err": errors.New("No se encontró contrato"), "status": "404"}
+			return contrato[0], outputError
+		}
+	}
+	return contrato_general, outputError
 }
 
 func ObtenerValorGiradoPorCdp(cdp string, vigencia_cdp string, unidad_ejecucion string) (valor_girado int, err error) {
@@ -94,40 +104,75 @@ func ObtenerValorGiradoPorCdp(cdp string, vigencia_cdp string, unidad_ejecucion 
 
 func ObtenerInformacionInformeSatisfaccion(numero_contrato_suscrito string, vigencia string) (informacion_informe models.InformacionInformeSatisfaccion, outputError map[string]interface{}) {
 
-	contrato_contratista, err := helpers.ObtenerInformacionContratoProveedor(numero_contrato_suscrito, vigencia)
+	defer func() {
+		if err := recover(); err != nil {
+			outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "err": err, "status": "502"}
+			panic(outputError)
+		}
+	}()
+
+	var informacion_proveedor []models.InformacionProveedor
+	informacion_contrato, err := helpers.ObtenerInformacionContratoProveedor(numero_contrato_suscrito, vigencia)
 	if err == nil {
-		contratistas, err := helpers.ObtenerContratosProveedor(contrato_contratista.InformacionContratista.Documento.Numero)
+		contrato_general, err := ObtenerContratoGeneralProveedor(numero_contrato_suscrito, vigencia)
 		if err == nil {
-			informacion_informe.Dependencia = contratistas[0].NombreDependencia
-			informacion_informe.NombreProveedor = contratistas[0].NombreProveedor
-			informacion_informe.DocumentoProveedor = contrato_contratista.InformacionContratista.Documento.Numero
-			informacion_informe.TipoContrato = contratistas[0].TipoContrato
-			informacion_informe.Cdp = contratistas[0].NumeroCdp
-			informacion_informe.VigenciaCdp = contratistas[0].VigenciaCdp
-			informacion_informe.Rp = contratistas[0].NumeroRp
-			informacion_informe.VigenciaRp = contratistas[0].VigenciaRp
-			contratos_persona, err := helpers.ObtenerContratosPersona(contrato_contratista.InformacionContratista.Documento.Numero)
-			if err == nil {
-				informacion_informe.FechaInicio = contratos_persona.ContratosPersonas.ContratoPersona[0].FechaInicio
-				informacion_informe.FechaFin = contratos_persona.ContratosPersonas.ContratoPersona[0].FechaFin
+			if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlcrudAgora")+"/informacion_proveedor/?query=Id:"+strconv.Itoa(contrato_general.Contratista), &informacion_proveedor); (err == nil) && (response == 200) {
+				if len(informacion_proveedor) > 0 {
+					vigencia_contrato, _ := strconv.Atoi(vigencia)
+					acta_inicio, err := helpers.ObtenerActaInicio(numero_contrato_suscrito, vigencia_contrato)
+					if err == nil {
+						balance_general, err := ObtenerBalanceFinancieroContrato(numero_contrato_suscrito, vigencia)
+						if err == nil {
+							total_contrato, _ := strconv.Atoi(balance_general.TotalContrato)
+							saldo, _ := strconv.Atoi(balance_general.Saldo)
+							informacion_informe.Dependencia = informacion_contrato[0].NombreDependencia
+							informacion_informe.NombreProveedor = informacion_contrato[0].NombreProveedor
+							informacion_informe.DocumentoProveedor = informacion_proveedor[0].NumDocumento
+							informacion_informe.TipoContrato = informacion_contrato[0].TipoContrato
+							informacion_informe.FechaInicio = acta_inicio.FechaInicio
+							informacion_informe.NumeroContratoSuscrito = numero_contrato_suscrito
+							informacion_informe.Cdp = informacion_contrato[0].NumeroCdp
+							informacion_informe.VigenciaCdp = informacion_contrato[0].VigenciaCdp
+							informacion_informe.Rp = informacion_contrato[0].NumeroRp
+							informacion_informe.VigenciaRp = informacion_contrato[0].VigenciaRp
+							informacion_informe.CargoSupervisor = contrato_general.Supervisor.Cargo
+							informacion_informe.ValorTotalContrato = total_contrato
+							informacion_informe.SaldoContrato = saldo
+							informacion_informe.FechaFin = acta_inicio.FechaFin
+							informacion_informe.Supervisor = contrato_general.Supervisor.Nombre
+						} else {
+							outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "message": "No fue posible obtener el balance financiero del contrato", "err": err, "status": "502"}
+							return informacion_informe, outputError
+						}
+
+					} else {
+						outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "message": "No fue posible obtener el acta de inicio", "err": err, "status": "502"}
+						return informacion_informe, outputError
+					}
+				} else {
+					outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "message": "No fue posible obtener la informacion del proveedor", "status": "404"}
+					return informacion_informe, outputError
+				}
 			} else {
-				outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "err": err, "status": "502"}
+				outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "message": "No fue posible obtener la informacion del proveedor", "err": err, "status": "502"}
 				return informacion_informe, outputError
 			}
-			informacion_informe.Supervisor = contrato_contratista.InformacionContratista.Supervisor.Nombre
-			informacion_informe.CargoSupervisor = contrato_contratista.InformacionContratista.Supervisor.Cargo
 		} else {
-			outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "err": err, "status": "502"}
+			outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "message": "No fue posible obtener el contrato general", "err": err, "status": "502"}
 			return informacion_informe, outputError
 		}
+
+	} else {
+		outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "message": "No fue posible obtener la informacion del contrato", "err": err, "status": "502"}
+		return informacion_informe, outputError
 	}
+
 	return informacion_informe, nil
 }
 
 func ObtenerBanco(banco_id int) (banco models.Banco, outputError map[string]interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
-			//fmt.Println("error", err)
 			outputError = map[string]interface{}{"funcion": "/GetBanco", "err": err, "status": "502"}
 			panic(outputError)
 		}
@@ -153,10 +198,9 @@ func ObtenerBanco(banco_id int) (banco models.Banco, outputError map[string]inte
 	return respuesta_banco, nil
 }
 
-func CrearInformeSatisfaccion(numero_contrato_suscrito int, vigencia_contrato string, tipo_pago string, periodo_inicio string, periodo_fin string, tipo_factura string, numero_cuenta_factura string, valor_pagar int, tipo_cuenta string, numero_cuenta string, banco_id int) (informe_satisfaccion models.InformeSatisfaccion, outputError map[string]interface{}) {
+func CrearInformeSatisfaccion(numero_contrato_suscrito int, vigencia_contrato string, cumplimiento_contrato string, tipo_pago string, periodo_inicio string, periodo_fin string, tipo_factura string, numero_cuenta_factura string, valor_pagar int, tipo_cuenta string, numero_cuenta string, banco_id int) (informe_satisfaccion models.InformeSatisfaccion, outputError map[string]interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
-			//fmt.Println("error", err)
 			outputError = map[string]interface{}{"funcion": "/CrearInformeSatisfaccion", "err": err, "status": "502"}
 			panic(outputError)
 		}
@@ -186,7 +230,7 @@ func CrearInformeSatisfaccion(numero_contrato_suscrito int, vigencia_contrato st
 		informe_satisfaccion, _ = helpers.CrearPdfInformeSatisfaccion(informacion_informe_satisfaccion.Dependencia,
 			informacion_informe_satisfaccion.NombreProveedor,
 			informacion_informe_satisfaccion.DocumentoProveedor,
-			informacion_informe_satisfaccion.CumplimientoTotal,
+			cumplimiento_contrato,
 			informacion_informe_satisfaccion.TipoContrato,
 			informacion_informe_satisfaccion.FechaInicio,
 			strconv.Itoa(numero_contrato_suscrito),
