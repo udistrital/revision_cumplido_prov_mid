@@ -1,11 +1,9 @@
 package controllers
 
 import (
-	"net/http"
-
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
-	"github.com/udistrital/revision_cumplidos_proveedores_mid/helpers"
+	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/services"
 )
 
@@ -48,13 +46,10 @@ func (c *RevisionCumplidoOrdenadorController) ObtenerCumplidosPendientesRevision
 	dependencias, err := services.ObtenerSolicitudesCumplidos(documento_ordenador)
 
 	if err != nil {
-		c.Ctx.Output.SetStatus(400)
-		c.Data["json"] = err
+		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 502, "Message": "Consulta completa", "Data": err}
 	} else if dependencias == nil {
-		println("2")
 		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 204, "Message": "No hay datos", "Data": dependencias}
 	} else {
-		println("3")
 		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": dependencias}
 	}
 	c.ServeJSON()
@@ -66,7 +61,7 @@ func (c *RevisionCumplidoOrdenadorController) ObtenerCumplidosPendientesRevision
 // @Param id de pago path string true  "id_solictud_de_pago"
 // Success 200 {object}
 // @Failure 403 :id_cumplido is empty
-// @router /revertir-solicitud-pago/:id_cumplido [get]
+// @router /revertir-solicitud-pago/:documento_ordenador [get]
 func (c *RevisionCumplidoOrdenadorController) ListaCumplidosReversibles() {
 
 	defer func() {
@@ -83,67 +78,20 @@ func (c *RevisionCumplidoOrdenadorController) ListaCumplidosReversibles() {
 		}
 	}()
 
-	id_cumplido := c.GetString(":id_cumplido")
+	id_cumplido := c.GetString(":documento_ordenador")
 	print(id_cumplido)
 
 	dependencias, err := services.ListaCumplidosReversibles(id_cumplido)
 
 	if err != nil {
-		c.Ctx.Output.SetStatus(400)
-		c.Data["json"] = err
+		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 502, "Message": "No hay datos", "Data": err}
 	} else if dependencias == nil {
-		println("2")
 		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 204, "Message": "No hay datos", "Data": dependencias}
 	} else {
-		println("3")
 		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": dependencias}
 	}
 	c.ServeJSON()
 }
-
-/*
-//
-//@Title ObtenerCertificado firmado de aprobacion pago.
-//@Description Metodo encargado de retornar el certificado firmado de aprobacion pago.
-//@Param body  body models.AutorizacionPago true "body para la autorizacion de pago"
-//Success 200 {object}
-// @Failure 403 :id_solicitud_pago is empty
-//@router /certificado-aprobacion-pago/:id_solicitud_pago [get]
-func (c *RevisionCumplidoOrdenadorController) ObtenerCertificado() {
-
-	helper_generar_documento.GenerarPdf()
-	defer func() {
-		if err := recover(); err != nil {
-			logs.Error(err)
-			localError := err.(map[string]interface{})
-			c.Data["message"] = beego.AppConfig.String("appname") + "/" + "RevisionCumplidoOrdenadorController" + "/" + (localError["funcion"]).(string)
-			c.Data["data"] = localError["err"]
-			if status, ok := localError["status"]; ok {
-				c.Abort(status.(string))
-			} else {
-				c.Abort("404")
-			}
-		}
-	}()
-
-	id_solicitud_pago := c.GetString(":id_solicitud_pago")
-	autorizacion, err := helpers_ordenador.GenerarAutorizacion(id_solicitud_pago)
-
-	if err != nil {
-		c.Ctx.Output.SetStatus(400)
-		c.Data["json"] = err
-	} else if autorizacion == nil {
-		println("2")
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 204, "Message": "No hay datos", "Data": autorizacion}
-	} else {
-		println("3")
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": autorizacion}
-	}
-	c.ServeJSON()
-}
-
-
-*/
 
 // generarDocumentoAutorizacion
 // @Title GnerarAutorizaxionPago
@@ -155,22 +103,12 @@ func (c *RevisionCumplidoOrdenadorController) GenerarPdfAutorizacionPago() {
 
 	id_solicitud_pago := c.GetString(":id_solicitud_pago")
 	autorizacion, err := services.GenerarAutorizacionPago(id_solicitud_pago)
-
 	if err != nil {
-		beego.Error("Error al leer el archivo PDF:", err)
-		c.Ctx.ResponseWriter.WriteHeader(http.StatusInternalServerError)
-		c.Ctx.ResponseWriter.Write([]byte("Error al generar el archivo PDF"))
-		return
-	}
-
-	file := helpers.GenerarPdfAutorizacionPago(autorizacion)
-	if err != nil {
-		c.Ctx.Output.SetStatus(400)
-		c.Data["json"] = err
-	} else if file == "" {
+		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 502, "Message": "No hay datos", "Data": err}
+	} else if (autorizacion == models.DocumentoAutorizacionPago{}) {
 		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 204, "Message": "No hay datos", "Data": ""}
 	} else {
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": file}
+		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Data": autorizacion}
 	}
 	c.ServeJSON()
 }

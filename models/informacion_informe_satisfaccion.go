@@ -19,4 +19,5 @@ type InformacionInformeSatisfaccion struct {
 	SaldoContrato          int
 	FechaFin               time.Time
 	Supervisor             string
+	DocumentoSupervisor    string
 }

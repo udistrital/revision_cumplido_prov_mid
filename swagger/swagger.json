@@ -15,20 +15,6 @@
     },
     "basePath": "/v1",
     "paths": {
-        "/contratacion/certificado-aprobacion-pago/{id_solicitud_pago}": {
-            "get": {
-                "tags": [
-                    "contratacion"
-                ],
-                "description": "Metodo",
-                "operationId": "RevisionCumplidoContratacionController.GnerarAutorizaxionPago",
-                "responses": {
-                    "403": {
-                        "description": ""
-                    }
-                }
-            }
-        },
         "/contratacion/solicitudes-pago/": {
             "get": {
                 "tags": [
@@ -57,7 +43,7 @@
                 }
             }
         },
-        "/ordenador/revertir-solicitud-pago/{id_cumplido}": {
+        "/ordenador/revertir-solicitud-pago/{documento_ordenador}": {
             "get": {
                 "tags": [
                     "ordenador"
@@ -386,7 +372,7 @@
                     "supervisor"
                 ],
                 "description": "Obtener el balance financiero de un contrato",
-                "operationId": "InformeSeguimientoController.ObtenerBalanceFinancieroContrato",
+                "operationId": "CumplidoSatisfaccionController.ObtenerBalanceFinancieroContrato",
                 "parameters": [
                     {
                         "in": "path",
@@ -445,13 +431,13 @@
                 }
             }
         },
-        "/supervisor/informe-seguimiento": {
+        "/supervisor/cumplido-satisfaccion": {
             "post": {
                 "tags": [
                     "supervisor"
                 ],
                 "description": "Genera un informe de seguimiento para un contrato suscrito",
-                "operationId": "InformeSeguimientoController.GenerarInformeSatisfaccion",
+                "operationId": "CumplidoSatisfaccionController.GenerarInformeSatisfaccion",
                 "parameters": [
                     {
                         "in": "body",
@@ -475,78 +461,6 @@
                     },
                     "502": {
                         "description": "\"Error al intentar generar el informe de seguimiento\""
-                    }
-                }
-            }
-        },
-        "/supervisor/obtener-ordenador-contrato/{numero_contrato_suscrito}/{vigencia}": {
-            "get": {
-                "tags": [
-                    "supervisor"
-                ],
-                "description": "Obtiene la información del ordenador de un contrato",
-                "operationId": "PruebasController.ObtenerOrdenadorContrato",
-                "parameters": [
-                    {
-                        "in": "query",
-                        "name": "numero_contrato_suscrito",
-                        "description": "Número del contrato suscrito",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "query",
-                        "name": "vigencia",
-                        "description": "Vigencia del contrato",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/models.OrdenadorContratoProveedor"
-                        }
-                    },
-                    "502": {
-                        "description": "{object} map[string]interface{}"
-                    }
-                }
-            }
-        },
-        "/supervisor/obtener-supervisor-contrato/{numero_contrato_suscrito}/{vigencia}": {
-            "get": {
-                "tags": [
-                    "supervisor"
-                ],
-                "description": "Obtiene la información del supervisor de un contrato",
-                "operationId": "PruebasController.ObtenerSupervisorContrato",
-                "parameters": [
-                    {
-                        "in": "query",
-                        "name": "numero_contrato_suscrito",
-                        "description": "Número del contrato suscrito",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "query",
-                        "name": "vigencia",
-                        "description": "Vigencia del contrato",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/models.SupervisorContratoProveedor"
-                        }
-                    },
-                    "502": {
-                        "description": "{object} map[string]interface{}"
                     }
                 }
             }
@@ -615,14 +529,6 @@
         }
     },
     "definitions": {
-        "22445.0xc0004de2a0.false": {
-            "title": "false",
-            "type": "object"
-        },
-        "25650.0xc0004de960.false": {
-            "title": "false",
-            "type": "object"
-        },
         "map[string]interface{}": {
             "title": "map[string]interface{}",
             "type": "object"
@@ -641,48 +547,7 @@
         },
         "models.BodyInformeSeguimiento": {
             "title": "BodyInformeSeguimiento",
-            "type": "object",
-            "properties": {
-                "BancoId": {
-                    "type": "integer",
-                    "format": "int64"
-                },
-                "CumplimientoContrato": {
-                    "type": "string"
-                },
-                "NumeroContratoSuscrito": {
-                    "type": "integer",
-                    "format": "int64"
-                },
-                "NumeroCuenta": {
-                    "type": "string"
-                },
-                "NumeroCuentaFactura": {
-                    "type": "string"
-                },
-                "PeriodoFin": {
-                    "type": "string"
-                },
-                "PeriodoInicio": {
-                    "type": "string"
-                },
-                "TipoDocumentoCobroId": {
-                    "type": "string"
-                },
-                "TipoFactura": {
-                    "type": "string"
-                },
-                "TipoPago": {
-                    "type": "string"
-                },
-                "ValorPagar": {
-                    "type": "integer",
-                    "format": "int64"
-                },
-                "VigenciaContrato": {
-                    "type": "string"
-                }
-            }
+            "type": "object"
         },
         "models.CambioEstadoCumplido": {
             "title": "CambioEstadoCumplido",
@@ -973,15 +838,6 @@
             "title": "InformeSeguimiento",
             "type": "object"
         },
-        "models.OrdenadorContratoProveedor": {
-            "title": "OrdenadorContratoProveedor",
-            "type": "object",
-            "properties": {
-                "contratos": {
-                    "$ref": "#/definitions/22445.0xc0004de2a0.false"
-                }
-            }
-        },
         "models.RespuestaComentarioSoporte": {
             "title": "RespuestaComentarioSoporte",
             "type": "object",
@@ -1002,15 +858,6 @@
         "models.SoportePago": {
             "title": "SoportePago",
             "type": "object"
-        },
-        "models.SupervisorContratoProveedor": {
-            "title": "SupervisorContratoProveedor",
-            "type": "object",
-            "properties": {
-                "contratos": {
-                    "$ref": "#/definitions/25650.0xc0004de960.false"
-                }
-            }
         },
         "models.TipoDocumento": {
             "title": "TipoDocumento",
@@ -1068,7 +915,7 @@
     "tags": [
         {
             "name": "supervisor",
-            "description": "PruebasController operations for Pruebas\n"
+            "description": "ListarTipoDocumentosCumplidoController operations for ListarTipoDocumentosCumplidoController\n"
         },
         {
             "name": "solicitud-pago",

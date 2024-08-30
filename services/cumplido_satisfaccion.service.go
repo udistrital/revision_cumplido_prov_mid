@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/astaxie/beego"
@@ -21,7 +22,7 @@ func ObtenerBalanceFinancieroContrato(numero_contrato_suscrito string, vigencia_
 
 	informacion_contrato, err := helpers.ObtenerInformacionContratoProveedor(numero_contrato_suscrito, vigencia_contrato)
 	if err == nil {
-		contrato_general, err := ObtenerContratoGeneralProveedor(numero_contrato_suscrito, vigencia_contrato)
+		contrato_general, err := helpers.ObtenerContratoGeneralProveedor(numero_contrato_suscrito, vigencia_contrato)
 		if err == nil {
 			valor_girado, err := ObtenerValorGiradoPorCdp(informacion_contrato[0].NumeroCdp, informacion_contrato[0].VigenciaCdp, strconv.Itoa(contrato_general.UnidadEjecutora))
 			if err == nil {
@@ -46,44 +47,20 @@ func ObtenerBalanceFinancieroContrato(numero_contrato_suscrito string, vigencia_
 	return balance_contrato, nil
 }
 
-func ObtenerContratoGeneralProveedor(numero_contrato_suscrito string, vigencia_contrato string) (contrato_general models.ContratoGeneral, outputError map[string]interface{}) {
-	defer func() {
-		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/ObtenerContratoGeneralProveedor", "err": err, "status": "502"}
-			panic(outputError)
-		}
-	}()
-
-	var contrato []models.ContratoGeneral
-	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlcrudAgora")+"/contrato_general/?query=ContratoSuscrito.NumeroContratoSuscrito:"+numero_contrato_suscrito+",VigenciaContrato:"+vigencia_contrato, &contrato); (err == nil) && (response == 200) {
-		if len(contrato) > 0 {
-			return contrato[0], nil
-		} else {
-			outputError = map[string]interface{}{"funcion": "/ObtenerContratoGeneralProveedor", "err": errors.New("No se encontró contrato"), "status": "404"}
-			return contrato[0], outputError
-		}
-	}
-	return contrato_general, outputError
-}
-
 func ObtenerValorGiradoPorCdp(cdp string, vigencia_cdp string, unidad_ejecucion string) (valor_girado int, err error) {
 	var temp_giros_tercero map[string]interface{}
 	var giros_tercero models.GirosTercero
 	valor_girado = 0
-	//fmt.Println(beego.AppConfig.String("UrlFinancieraJBPM") + "/" + "giros_tercero/" + cdp + "/" + vigencia_cdp + "/" + unidad_ejecucion)
 	if response, err := helpers.GetJsonWSO2Test(beego.AppConfig.String("UrlFinancieraJBPM")+"/giros_tercero/"+cdp+"/"+vigencia_cdp+"/"+unidad_ejecucion, &temp_giros_tercero); (err == nil) && (response == 200) {
 		json_giros_tercero, error_json := json.Marshal(temp_giros_tercero)
 		if error_json == nil {
 			if err := json.Unmarshal(json_giros_tercero, &giros_tercero); err == nil {
-				//fmt.Println("giros "+cdp, giros_tercero)
 				for _, giro := range giros_tercero.Giros.Tercero {
 					total_girado, err := strconv.Atoi(giro.ValorBrutoGirado)
-					//fmt.Println(total_girado)
 					if err == nil {
 						valor_girado = valor_girado + total_girado
 					}
 				}
-				//fmt.Println(valor_girado)
 				return valor_girado, nil
 
 			} else {
@@ -102,7 +79,7 @@ func ObtenerValorGiradoPorCdp(cdp string, vigencia_cdp string, unidad_ejecucion 
 	return
 }
 
-func ObtenerInformacionInformeSatisfaccion(numero_contrato_suscrito string, vigencia string) (informacion_informe models.InformacionInformeSatisfaccion, outputError map[string]interface{}) {
+func ObtenerInformacionCumplidoSatisfaccion(numero_contrato_suscrito string, vigencia string) (informacion_informe models.InformacionInformeSatisfaccion, outputError map[string]interface{}) {
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -113,8 +90,9 @@ func ObtenerInformacionInformeSatisfaccion(numero_contrato_suscrito string, vige
 
 	var informacion_proveedor []models.InformacionProveedor
 	informacion_contrato, err := helpers.ObtenerInformacionContratoProveedor(numero_contrato_suscrito, vigencia)
+	fmt.Println("informacion_contrato", informacion_contrato)
 	if err == nil {
-		contrato_general, err := ObtenerContratoGeneralProveedor(numero_contrato_suscrito, vigencia)
+		contrato_general, err := helpers.ObtenerContratoGeneralProveedor(numero_contrato_suscrito, vigencia)
 		if err == nil {
 			if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlcrudAgora")+"/informacion_proveedor/?query=Id:"+strconv.Itoa(contrato_general.Contratista), &informacion_proveedor); (err == nil) && (response == 200) {
 				if len(informacion_proveedor) > 0 {
@@ -140,6 +118,7 @@ func ObtenerInformacionInformeSatisfaccion(numero_contrato_suscrito string, vige
 							informacion_informe.SaldoContrato = saldo
 							informacion_informe.FechaFin = acta_inicio.FechaFin
 							informacion_informe.Supervisor = contrato_general.Supervisor.Nombre
+							informacion_informe.DocumentoSupervisor = strconv.Itoa(contrato_general.Supervisor.Documento)
 						} else {
 							outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "message": "No fue posible obtener el balance financiero del contrato", "err": err, "status": "502"}
 							return informacion_informe, outputError
@@ -198,7 +177,7 @@ func ObtenerBanco(banco_id int) (banco models.Banco, outputError map[string]inte
 	return respuesta_banco, nil
 }
 
-func CrearInformeSatisfaccion(numero_contrato_suscrito int, vigencia_contrato string, cumplimiento_contrato string, tipo_pago string, periodo_inicio string, periodo_fin string, tipo_factura string, numero_cuenta_factura string, valor_pagar int, tipo_cuenta string, numero_cuenta string, banco_id int) (informe_satisfaccion models.InformeSatisfaccion, outputError map[string]interface{}) {
+func CrearCumplidoSatisfaccion(numero_contrato_suscrito int, vigencia_contrato string, cumplimiento_contrato string, tipo_pago string, periodo_inicio string, periodo_fin string, tipo_factura string, numero_cuenta_factura string, valor_pagar int, tipo_cuenta string, numero_cuenta string, banco_id int) (informe_satisfaccion models.CumplidoSatisfaccion, outputError map[string]interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
 			outputError = map[string]interface{}{"funcion": "/CrearInformeSatisfaccion", "err": err, "status": "502"}
@@ -208,7 +187,7 @@ func CrearInformeSatisfaccion(numero_contrato_suscrito int, vigencia_contrato st
 
 	nombre_banco := ""
 
-	informacion_informe_satisfaccion, err := ObtenerInformacionInformeSatisfaccion(strconv.Itoa(numero_contrato_suscrito), vigencia_contrato)
+	informacion_informe_satisfaccion, err := ObtenerInformacionCumplidoSatisfaccion(strconv.Itoa(numero_contrato_suscrito), vigencia_contrato)
 	if err == nil {
 		banco, err := ObtenerBanco(banco_id)
 		if err == nil {
@@ -227,7 +206,7 @@ func CrearInformeSatisfaccion(numero_contrato_suscrito int, vigencia_contrato st
 		total_contrato, _ := strconv.Atoi(balance_contrato.TotalContrato)
 		saldo_contrato, _ := strconv.Atoi(balance_contrato.Saldo)
 
-		informe_satisfaccion, _ = helpers.CrearPdfInformeSatisfaccion(informacion_informe_satisfaccion.Dependencia,
+		informe_satisfaccion, _ = helpers.CrearPdfCumplidoSatisfaccion(informacion_informe_satisfaccion.Dependencia,
 			informacion_informe_satisfaccion.NombreProveedor,
 			informacion_informe_satisfaccion.DocumentoProveedor,
 			cumplimiento_contrato,
@@ -250,7 +229,8 @@ func CrearInformeSatisfaccion(numero_contrato_suscrito int, vigencia_contrato st
 			numero_cuenta,
 			nombre_banco,
 			informacion_informe_satisfaccion.Supervisor,
-			vigencia_contrato)
+			vigencia_contrato,
+			informacion_informe_satisfaccion.DocumentoSupervisor)
 	}
 
 	return informe_satisfaccion, nil

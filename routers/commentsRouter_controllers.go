@@ -25,7 +25,7 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:InformeSeguimientoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:InformeSeguimientoController"],
+    beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:CumplidoSatisfaccionController"] = append(beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:CumplidoSatisfaccionController"],
         beego.ControllerComments{
             Method: "ObtenerBalanceFinancieroContrato",
             Router: "/balance-financiero-contrato/:numero_contrato_suscrito/:vigencia_contrato",
@@ -34,10 +34,10 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:InformeSeguimientoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:InformeSeguimientoController"],
+    beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:CumplidoSatisfaccionController"] = append(beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:CumplidoSatisfaccionController"],
         beego.ControllerComments{
-            Method: "GenerarInformeSatisfaccion",
-            Router: "/informe-seguimiento",
+            Method: "GenerarCumplidoSatisfaccion",
+            Router: "/cumplido-satisfaccion",
             AllowHTTPMethods: []string{"post"},
             MethodParams: param.Make(),
             Filters: nil,
@@ -47,33 +47,6 @@ func init() {
         beego.ControllerComments{
             Method: "ObtenerTiposDocumentosCumplido",
             Router: "/tipos-documentos-cumplido",
-            AllowHTTPMethods: []string{"get"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
-    beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:PruebasController"] = append(beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:PruebasController"],
-        beego.ControllerComments{
-            Method: "ObtenerOrdenadorContrato",
-            Router: "/obtener-ordenador-contrato/:numero_contrato_suscrito/:vigencia",
-            AllowHTTPMethods: []string{"get"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
-    beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:PruebasController"] = append(beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:PruebasController"],
-        beego.ControllerComments{
-            Method: "ObtenerSupervisorContrato",
-            Router: "/obtener-supervisor-contrato/:numero_contrato_suscrito/:vigencia",
-            AllowHTTPMethods: []string{"get"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
-    beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:RevisionCumplidoContratacionController"] = append(beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:RevisionCumplidoContratacionController"],
-        beego.ControllerComments{
-            Method: "GenerarAutorizacionPago",
-            Router: "/certificado-aprobacion-pago/:id_solicitud_pago",
             AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,
@@ -100,7 +73,7 @@ func init() {
     beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:RevisionCumplidoOrdenadorController"] = append(beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:RevisionCumplidoOrdenadorController"],
         beego.ControllerComments{
             Method: "ListaCumplidosReversibles",
-            Router: "/revertir-solicitud-pago/:id_cumplido",
+            Router: "/revertir-solicitud-pago/:documento_ordenador",
             AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,

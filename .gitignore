@@ -20,9 +20,11 @@ lastupdate.tmp
 .vscode/
 .scannerwork/
 revision_cumplidos_proveedores_mid.exe
+revision_cumplidos_proveedores_mid
 .idea/
 *.iml
 *.iws
 *.ipr
 *.module
 *.workspace
+

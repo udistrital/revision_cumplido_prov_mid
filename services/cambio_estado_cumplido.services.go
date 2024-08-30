@@ -2,7 +2,6 @@ package services
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -31,17 +30,23 @@ func CambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_proveedor
 	var respuesta_estado_cumplido map[string]interface{}
 
 	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cumplido_proveedor/?query=Id:"+strconv.Itoa(cumplido_proveedor_id), &respuesta_cumplido_proveedor); (err == nil) && (response == 200) {
-		helpers.LimpiezaRespuestaRefactor(respuesta_cumplido_proveedor, &cumplido_proveedor)
-		if cumplido_proveedor != nil {
-			if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/estado_cumplido/?query=CodigoAbreviacion:"+codigo_abreviacion_cumplido, &respuesta_estado_cumplido); (err == nil) && (response == 200) {
-				helpers.LimpiezaRespuestaRefactor(respuesta_estado_cumplido, &estado_cumplido)
+		data := respuesta_cumplido_proveedor["Data"].([]interface{})
+		if len(data[0].(map[string]interface{})) > 0 {
+			helpers.LimpiezaRespuestaRefactor(respuesta_cumplido_proveedor, &cumplido_proveedor)
+			if cumplido_proveedor != nil {
+				if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/estado_cumplido/?query=CodigoAbreviacion:"+codigo_abreviacion_cumplido, &respuesta_estado_cumplido); (err == nil) && (response == 200) {
+					helpers.LimpiezaRespuestaRefactor(respuesta_estado_cumplido, &estado_cumplido)
+				} else {
+					outputError = map[string]interface{}{"funcion": "CambioEstadoCumplido", "status": "502", "mensaje": "Error al consultar el estado del cumplido"}
+					return respuesta_cambio_estado, outputError
+				}
+
 			} else {
-				outputError = map[string]interface{}{"funcion": "CambioEstadoCumplido", "status": "502", "mensaje": "Error al consultar el estado del cumplido"}
+				outputError = map[string]interface{}{"funcion": "CambioEstadoCumplido", "status": "502", "mensaje": "No se encontró el cumplido proveedor"}
 				return respuesta_cambio_estado, outputError
 			}
-
 		} else {
-			outputError = map[string]interface{}{"funcion": "CambioEstadoCumplido", "status": "502", "mensaje": "No se encontró el cumplido proveedor"}
+			outputError = map[string]interface{}{"funcion": "CambioEstadoCumplido", "status": "502", "mensaje": "El cumplido proveedor ingresado no existe"}
 			return respuesta_cambio_estado, outputError
 		}
 	} else {
@@ -50,7 +55,6 @@ func CambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_proveedor
 	}
 
 	body_cambio_estado, outputError := CrearBodyCambioEstadoCumplido(codigo_abreviacion_cumplido, cumplido_proveedor[0], estado_cumplido[0])
-	fmt.Println("body_cambio_estado", body_cambio_estado)
 	if outputError != nil {
 		return respuesta_cambio_estado, outputError
 	}
@@ -119,66 +123,48 @@ func CrearBodyCambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_
 		body_cambio_estado.CumplidoProveedorId = cumplido_proveedor
 		body_cambio_estado.DocumentoResponsable = 0
 		body_cambio_estado.CargoResponsable = "Contratación"
-		body_cambio_estado.Activo = true
-		body_cambio_estado.FechaCreacion = time.Now()
-		body_cambio_estado.FechaModificacion = time.Now()
 	case "RC":
 		body_cambio_estado.EstadoCumplidoId = estado_cumplido
 		body_cambio_estado.CumplidoProveedorId = cumplido_proveedor
 		body_cambio_estado.DocumentoResponsable = 0
 		body_cambio_estado.CargoResponsable = "Contratación"
-		body_cambio_estado.Activo = true
-		body_cambio_estado.FechaCreacion = time.Now()
-		body_cambio_estado.FechaModificacion = time.Now()
 	case "AC":
 		body_cambio_estado.EstadoCumplidoId = estado_cumplido
 		body_cambio_estado.CumplidoProveedorId = cumplido_proveedor
 		body_cambio_estado.DocumentoResponsable = 0
 		body_cambio_estado.CargoResponsable = "Contratación"
-		body_cambio_estado.Activo = true
-		body_cambio_estado.FechaCreacion = time.Now()
-		body_cambio_estado.FechaModificacion = time.Now()
 	case "PRO":
-		ordenador_contrato, err := ObtenerOrdenadorContrato(cumplido_proveedor.NumeroContrato, strconv.Itoa(cumplido_proveedor.VigenciaContrato))
+		ordenador_contrato, err := helpers.ObtenerOrdenadorContrato(cumplido_proveedor.NumeroContrato, strconv.Itoa(cumplido_proveedor.VigenciaContrato))
 		if err == nil {
 			documento_ordenador, _ := strconv.Atoi(ordenador_contrato.Contratos.Ordenador[0].Documento)
 			body_cambio_estado.EstadoCumplidoId = estado_cumplido
 			body_cambio_estado.CumplidoProveedorId = cumplido_proveedor
 			body_cambio_estado.DocumentoResponsable = documento_ordenador
 			body_cambio_estado.CargoResponsable = ordenador_contrato.Contratos.Ordenador[0].RolOrdenador
-			body_cambio_estado.Activo = true
-			body_cambio_estado.FechaCreacion = time.Now()
-			body_cambio_estado.FechaModificacion = time.Now()
 		} else {
 			outputError = map[string]interface{}{"funcion": "CambioEstadoCumplido", "status": "502", "mensaje": "Error al obtener el ordenador del contrato"}
 			return body_cambio_estado, outputError
 		}
 	case "AO":
-		ordenador_contrato, err := ObtenerOrdenadorContrato(cumplido_proveedor.NumeroContrato, strconv.Itoa(cumplido_proveedor.VigenciaContrato))
+		ordenador_contrato, err := helpers.ObtenerOrdenadorContrato(cumplido_proveedor.NumeroContrato, strconv.Itoa(cumplido_proveedor.VigenciaContrato))
 		if err == nil {
 			documento_ordenador, _ := strconv.Atoi(ordenador_contrato.Contratos.Ordenador[0].Documento)
 			body_cambio_estado.EstadoCumplidoId = estado_cumplido
 			body_cambio_estado.CumplidoProveedorId = cumplido_proveedor
 			body_cambio_estado.DocumentoResponsable = documento_ordenador
 			body_cambio_estado.CargoResponsable = ordenador_contrato.Contratos.Ordenador[0].RolOrdenador
-			body_cambio_estado.Activo = true
-			body_cambio_estado.FechaCreacion = time.Now()
-			body_cambio_estado.FechaModificacion = time.Now()
 		} else {
 			outputError = map[string]interface{}{"funcion": "CambioEstadoCumplido", "status": "502", "mensaje": "Error al obtener el ordenador del contrato"}
 			return body_cambio_estado, outputError
 		}
 	case "RO":
-		ordenador_contrato, err := ObtenerOrdenadorContrato(cumplido_proveedor.NumeroContrato, strconv.Itoa(cumplido_proveedor.VigenciaContrato))
+		ordenador_contrato, err := helpers.ObtenerOrdenadorContrato(cumplido_proveedor.NumeroContrato, strconv.Itoa(cumplido_proveedor.VigenciaContrato))
 		if err == nil {
 			documento_ordenador, _ := strconv.Atoi(ordenador_contrato.Contratos.Ordenador[0].Documento)
 			body_cambio_estado.EstadoCumplidoId = estado_cumplido
 			body_cambio_estado.CumplidoProveedorId = cumplido_proveedor
 			body_cambio_estado.DocumentoResponsable = documento_ordenador
 			body_cambio_estado.CargoResponsable = ordenador_contrato.Contratos.Ordenador[0].RolOrdenador
-			body_cambio_estado.Activo = true
-			body_cambio_estado.FechaCreacion = time.Now()
-			body_cambio_estado.FechaModificacion = time.Now()
 		} else {
 			outputError = map[string]interface{}{"funcion": "CambioEstadoCumplido", "status": "502", "mensaje": "Error al obtener el ordenador del contrato"}
 			return body_cambio_estado, outputError
@@ -220,35 +206,6 @@ func ObtenerSupervisorContrato(numero_contrato_suscrito string, vigencia string)
 	return supervisor_contrato, outputError
 }
 
-func ObtenerOrdenadorContrato(numero_contrato_suscrito string, vigencia string) (ordenador_contrato models.OrdenadorContratoProveedor, outputError map[string]interface{}) {
-	defer func() {
-		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "ObtenerOrdenadorContrato", "err": err, "status": "502"}
-			panic(outputError)
-		}
-	}()
-
-	var respuesta_peticion map[string]interface{}
-
-	if response, err := helpers.GetJsonWSO2Test(beego.AppConfig.String("UrlAdministrativaJBPM")+"/informacion_ordenador_contrato/"+numero_contrato_suscrito+"/"+vigencia, &respuesta_peticion); err == nil && response == 200 {
-		json_ordenador, err_json := json.Marshal(respuesta_peticion)
-		if err_json == nil {
-			err := json.Unmarshal(json_ordenador, &ordenador_contrato)
-			if err != nil {
-				outputError = map[string]interface{}{"funcion": "ObtenerOrdenadorContrato", "status": "502", "mensaje": "Error al convertir el json"}
-				return ordenador_contrato, outputError
-			}
-		} else {
-			outputError = map[string]interface{}{"funcion": "ObtenerOrdenadorContrato", "status": "502", "mensaje": "Error al convertir el json"}
-			return ordenador_contrato, outputError
-		}
-	} else {
-		outputError = map[string]interface{}{"funcion": "ObtenerOrdenadorContrato", "status": "502", "mensaje": "Error al consultar el ordenador del contrato"}
-		return ordenador_contrato, outputError
-	}
-	return ordenador_contrato, outputError
-}
-
 func DesactivarCambiosAnterioresCumplido(cumplido_proveedor_id int) (ultimo_cambio_cumplido models.CambioEstadoCumplido, outputError map[string]interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -266,7 +223,6 @@ func DesactivarCambiosAnterioresCumplido(cumplido_proveedor_id int) (ultimo_camb
 			for _, cambio_anterior := range cambios_anteriores {
 				var respuesta_estado_anterior map[string]interface{}
 				cambio_anterior.Activo = false
-				cambio_anterior.FechaModificacion = time.Now()
 				err := helpers.SendJson(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/"+strconv.Itoa(cambio_anterior.Id), "PUT", &respuesta_estado_anterior, cambio_anterior)
 				if err != nil {
 					outputError = map[string]interface{}{"funcion": "DesactivarCambiosAnterioresCumplido", "status": "502", "mensaje": "Error al actualizar el estado de los cambios de estados anteriores"}

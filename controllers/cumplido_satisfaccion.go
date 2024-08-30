@@ -9,15 +9,15 @@ import (
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/services"
 )
 
-// Informe_seguimientoController operations for Informe_seguimiento
-type InformeSeguimientoController struct {
+// CumplidoSatisfaccionController operations for CumplidoSatisfaccion
+type CumplidoSatisfaccionController struct {
 	beego.Controller
 }
 
 // URLMapping ...
-func (c *InformeSeguimientoController) URLMapping() {
+func (c *CumplidoSatisfaccionController) URLMapping() {
 	c.Mapping("ObtenerBalanceFinancieroContrato", c.ObtenerBalanceFinancieroContrato)
-	c.Mapping("GenerarInformeSatisfaccion", c.GenerarInformeSatisfaccion)
+	c.Mapping("GenerarCumplidoSatisfaccion", c.GenerarCumplidoSatisfaccion)
 }
 
 // ObtenerBalanceFinancieroContrato ...
@@ -28,7 +28,7 @@ func (c *InformeSeguimientoController) URLMapping() {
 // @Success 200 {object} models.BalanceContrato
 // @Failure 502 Error procesando la solicitud
 // @router /balance-financiero-contrato/:numero_contrato_suscrito/:vigencia_contrato [get]
-func (c *InformeSeguimientoController) ObtenerBalanceFinancieroContrato() {
+func (c *CumplidoSatisfaccionController) ObtenerBalanceFinancieroContrato() {
 	defer func() {
 		if err := recover(); err != nil {
 			logs.Error(err)
@@ -66,8 +66,8 @@ func (c *InformeSeguimientoController) ObtenerBalanceFinancieroContrato() {
 // @Success 200 {object} models.InformeSeguimiento "Successful - Informe de seguimiento generado exitosamente"
 // @Failure 404 "No se encontró el recurso solicitado"
 // @Failure 502 "Error al intentar generar el informe de seguimiento"
-// @router /informe-seguimiento [post]
-func (c *InformeSeguimientoController) GenerarInformeSatisfaccion() {
+// @router /cumplido-satisfaccion [post]
+func (c *CumplidoSatisfaccionController) GenerarCumplidoSatisfaccion() {
 	defer func() {
 		if err := recover(); err != nil {
 			logs.Error(err)
@@ -82,12 +82,12 @@ func (c *InformeSeguimientoController) GenerarInformeSatisfaccion() {
 		}
 	}()
 
-	var v models.BodyInformeSeguimiento
+	var v models.BodyCumplidoSatisfaccion
 
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
-	if data, err := services.CrearInformeSatisfaccion(v.NumeroContratoSuscrito, v.VigenciaContrato, v.CumplimientoContrato, v.TipoPagoId, v.PeiodoInicio, v.PeriodoFin, v.TipoDocumentoCobroId, v.NumeroCuentaFactura, v.ValorPagar, v.TipoDocumentoCobroId, v.NumeroCuenta, v.BancoId); err == nil {
-		if (data == models.InformeSatisfaccion{}) {
+	if data, err := services.CrearCumplidoSatisfaccion(v.NumeroContratoSuscrito, v.VigenciaContrato, v.CumplimientoContrato, v.TipoPagoId, v.PeiodoInicio, v.PeriodoFin, v.TipoDocumentoCobroId, v.NumeroCuentaFactura, v.ValorPagar, v.TipoCuenta, v.NumeroCuenta, v.BancoId); err == nil {
+		if (data == models.CumplidoSatisfaccion{}) {
 			c.Ctx.Output.SetStatus(200)
 			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "No se pudo generar el informe de seguimiento", "Data": nil}
 		} else {

@@ -5,8 +5,6 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-	"io/ioutil"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -87,24 +85,18 @@ func Header(pdf *gofpdf.Fpdf, tipo_documento string, proceso string, codigo stri
 	return pdf
 }
 
-func GenerarPdfAutorizacionPago(autorizacion *models.DocuementoAutorizacionPago) string {
+func GenerarPdfAutorizacionPago(autorizacion models.DatosAutorizacionPago) string {
 
-	if autorizacion == nil {
-		//fmt.Println("Error al generar el documento")
-		return ""
-
-	}
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	now := time.Now()
-	//////Header
+	////// Header
 	cellX, cellY := 30.0, 10.0
 	month := int(now.Month())
 	year := now.Year()
 	day := now.Day()
-	//fmt.Print("Generando documento")
+
 	pdf.SetFont("Times", "", 12)
 	pdf.SetMargins(15, 10, 15)
-
 	pdf.SetFillColor(240, 240, 240)
 
 	pdf.SetFooterFunc(func() {
@@ -118,27 +110,10 @@ func GenerarPdfAutorizacionPago(autorizacion *models.DocuementoAutorizacionPago)
 
 	pdf = body(pdf, cellX, cellY, month, day, year, autorizacion)
 
-	file_name := fmt.Sprintf("AutorizacionPago_%s.pdf", autorizacion.NombreProveedor+"-"+autorizacion.DocumentoProveedor)
-	err := pdf.OutputFileAndClose(file_name + ".pdf")
-	if err != nil {
-		fmt.Println("Error al guardar el archivo PDF:", err)
-	} else {
-		fmt.Println("PDF generado exitosamente")
+	// Codifica el PDF a base64 utilizando la función encodePDF
+	base64Data := encodePDF(pdf)
 
-	}
-
-	fileData, err := ioutil.ReadFile(file_name + ".pdf")
-	if err != nil {
-		fmt.Println("Error al leer el archivo PDF:", err)
-		return ""
-	}
-
-	base64Data := base64.StdEncoding.EncodeToString(fileData)
-
-	err = os.Remove(file_name)
-	if err != nil {
-		fmt.Println("Error al eliminar el archivo temporal:", err)
-	}
+	// Retorna el PDF codificado en base64
 	return base64Data
 }
 
@@ -178,21 +153,21 @@ func header(pdf *gofpdf.Fpdf, cellX float64, cellY float64, cellX2 float64, cell
 	return pdf
 }
 
-func body(pdf *gofpdf.Fpdf, cellx float64, cellY float64, month int, day int, year int, autorizacion *models.DocuementoAutorizacionPago) *gofpdf.Fpdf {
+func body(pdf *gofpdf.Fpdf, cellx float64, cellY float64, month int, day int, year int, autorizacion models.DatosAutorizacionPago) *gofpdf.Fpdf {
 
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
 	formattedDate2 := tr(fmt.Sprintf("BOGOTÁ %s %d de %d", obtenerMes(int(month)), day, year))
 	pdf.Text(cellx, cellY+35, formattedDate2)
 
 	pdf.SetXY(29, 55)
-	pdf.MultiCell(153, 5, tr(fmt.Sprintf("Yo %s  en calidad de Ordenador del Gasto del (los) Rubro(s) __________________________, anexo los documentos detallados en la presente, como soporte a la orden de pago correspondiente.", autorizacion.NombreOrdenador)), "", "", false)
+	pdf.MultiCell(153, 5, tr(fmt.Sprintf("Yo %s  en calidad de Ordenador del Gasto del (los) Rubro(s) %s, anexo los documentos detallados en la presente, como soporte a la orden de pago correspondiente.", autorizacion.NombreOrdenador, autorizacion.Rubro)), "", "", false)
 	println(cellY, "y")
 	pdf = CrearTablaDocumentos(pdf, cellx, cellY-10, autorizacion)
 
 	return pdf
 }
 
-func CrearTablaDocumentos(pdf *gofpdf.Fpdf, cellx float64, cellY float64, autorizacion *models.DocuementoAutorizacionPago) *gofpdf.Fpdf {
+func CrearTablaDocumentos(pdf *gofpdf.Fpdf, cellx float64, cellY float64, autorizacion models.DatosAutorizacionPago) *gofpdf.Fpdf {
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
 	col1Width := 120.0
 	col2Width := 20.0
@@ -243,13 +218,13 @@ func CrearTablaDocumentos(pdf *gofpdf.Fpdf, cellx float64, cellY float64, autori
 	return pdf
 }
 
-func body2(pdf *gofpdf.Fpdf, cellx float64, cellY float64, month int, day int, year int, autorizacion *models.DocuementoAutorizacionPago) *gofpdf.Fpdf {
+func body2(pdf *gofpdf.Fpdf, cellx float64, cellY float64, month int, day int, year int, autorizacion models.DatosAutorizacionPago) *gofpdf.Fpdf {
 	pdf.SetFont("Times", "", 10)
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
 	cellY += 10
 	pdf.SetXY(29, cellY)
 	//fmt.Println(autorizacion.DocumentoProveedor)
-	pdf.MultiCell(153, 5, tr(fmt.Sprintf(`Autorizo a la Tesorería General a girar a favor de %s con C.C., NIT, TI, OTROS Nº %s para realizar el giro una vez sean deducidos los descuentos de Ley correspondientes. El valor bruto de la presente autorización es de _______________ pesos m/cte. ($____________). `, tr(autorizacion.NombreProveedor), tr(autorizacion.DocumentoProveedor))), "", "", false)
+	pdf.MultiCell(153, 5, tr(fmt.Sprintf(`Autorizo a la Tesorería General a girar a favor de %s con C.C., NIT, TI, OTROS Nº %s para realizar el giro una vez sean deducidos los descuentos de Ley correspondientes. El valor bruto de la presente autorización es de %s pesos m/cte. (%s). `, tr(autorizacion.NombreProveedor), tr(autorizacion.DocumentoProveedor), strings.ToUpper(ValorLetras(autorizacion.ValorPago)), FormatNumber(autorizacion.ValorPago, 0, ".", ","))), "", "", false)
 	cellY += 35
 	pdf.SetXY(29, cellY)
 	pdf.MultiCell(153, 5, tr("___________________________ "), "", "C", false)
@@ -378,15 +353,15 @@ func DocumentoEnLista(documentos []string, documento string) bool {
 
 }
 
-func CrearPdfInformeSatisfaccion(dependencia string, nombre_proveedor string, numero_nit string, cumplimiento_contrato string, tipo_contrato string, fecha_inicio time.Time, numero_contrato string, cdp string, vigencia_cdp string, rp string, vigencia_rp string, cargo string, tipo_factura string, numero_cuenta_factura string, valor_total_contrato int, periodo_inicio string, periodo_fin string, saldo_contrato int, fecha_fin time.Time, tipo_cuenta string, numero_cuenta string, nombre_banco string, supervisor string, vigencia string) (informe_satisfaccion models.InformeSatisfaccion, outputError interface{}) {
+func CrearPdfCumplidoSatisfaccion(dependencia string, nombre_proveedor string, numero_nit string, cumplimiento_contrato string, tipo_contrato string, fecha_inicio time.Time, numero_contrato string, cdp string, vigencia_cdp string, rp string, vigencia_rp string, cargo string, tipo_factura string, numero_cuenta_factura string, valor_total_contrato int, periodo_inicio string, periodo_fin string, saldo_contrato int, fecha_fin time.Time, tipo_cuenta string, numero_cuenta string, nombre_banco string, supervisor string, vigencia string, documento_supervisor string) (cumplido_satisfaccion models.CumplidoSatisfaccion, outputError interface{}) {
 
 	pdf := gofpdf.New("P", "mm", "A4", "")
-	pdf.SetMargins(30, 20, 30)
+	pdf.SetMargins(30, 30, 30)
 	pdf.SetAutoPageBreak(true, 20)
 
 	pdf.SetHeaderFunc(func() {
 		pdf = Header(pdf, "CUMPLIDO A SATISFACCIÓN POR PARTE DE LA DEPENDENCIA", "Gestión Contractual", "GC-PR-003-FR-012", "05", "13/10/2021")
-		pdf.Ln(20)
+		pdf.Ln(15)
 	})
 
 	pdf.AddPage()
@@ -428,16 +403,16 @@ func CrearPdfInformeSatisfaccion(dependencia string, nombre_proveedor string, nu
 		supervisor,
 		cargo,
 		vigencia,
-		dependencia)
+		dependencia,
+		documento_supervisor)
 
 	encodedFile := encodePDF(pdf)
 	nombre := "prueba"
-	informe_satisfaccion = models.InformeSatisfaccion{File: encodedFile, Archivo: nombre}
-	return informe_satisfaccion, nil
+	cumplido_satisfaccion = models.CumplidoSatisfaccion{File: encodedFile, Archivo: nombre}
+	return cumplido_satisfaccion, nil
 }
 
 func body_primera_parte(pdf *gofpdf.Fpdf, dependencia string, nombre_proveedor string, numero_nit string, cumplimiento_contrato string, tipo_contrato string, fecha_inicio time.Time, numero_contrato string, cdp string, vigencia_cdp string, crp string, vigencia_crp string, cargo string) *gofpdf.Fpdf {
-
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
 	pdf.SetFont("Times", "", 10)
 	pdf.CellFormat(0, 8, tr("UNIVERSIDAD DISTRITAL FRANCISCO JOSÉ DE CALDAS"), "", 1, "C", false, 0, "")
@@ -466,14 +441,12 @@ func ObtenerMes(mes int) string {
 }
 
 func body_segunda_parte(pdf *gofpdf.Fpdf, tipo_factura string, numero_cuenta_factura string, valor_total_contrato int, periodo_inicio string, periodo_fin string, saldo_contrato int, fecha_inicio time.Time, fecha_fin time.Time, tipo_cuenta string, numero_cuenta string, nombre_banco string) *gofpdf.Fpdf {
-
-	//fmt.Println("Periodo inicio", periodo_inicio)
+	pdf.SetMargins(30, 30, 30)
 	pdf.SetFont("Times", "", 10)
 
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
 
-	pdf.SetMargins(30, 30, 30)
-	pdf.MultiCell(0, 8, tr(fmt.Sprintf(`Que el valor causado de conformidad con la %s de Venta o Cuenta de cobro No. %s es %s PESOS $%s pesos m/cte.`, tipo_factura, numero_cuenta_factura, strings.ToUpper(ValorLetras(valor_total_contrato)), FormatNumber(valor_total_contrato, 0, ".", ","))), "", "J", false)
+	pdf.MultiCell(0, 8, tr(fmt.Sprintf(`Que el valor causado de conformidad con la %s No. %s es %s $%s pesos m/cte.`, tipo_factura, numero_cuenta_factura, strings.ToUpper(ValorLetras(valor_total_contrato)), FormatNumber(valor_total_contrato, 0, ".", ","))), "", "J", false)
 	pdf.Ln(5)
 	pdf.SetMargins(30, 30, 30)
 	pdf.MultiCell(0, 8, tr(fmt.Sprintf(`Que el valor total del contrato corresponde a %s $%s pesos m/cte.`, strings.ToUpper(ValorLetras(valor_total_contrato)), FormatNumber(valor_total_contrato, 0, ".", ","))), "", "J", false)
@@ -493,8 +466,8 @@ func body_segunda_parte(pdf *gofpdf.Fpdf, tipo_factura string, numero_cuenta_fac
 	return pdf
 }
 
-func footerInformeSeguimiento(pdf *gofpdf.Fpdf, contrato_suscrito string, fecha_inicio time.Time, tipo_contrato string, numero_factura string, supervisor string, cargo string, vigencia string, dependencia string) *gofpdf.Fpdf {
-
+func footerInformeSeguimiento(pdf *gofpdf.Fpdf, contrato_suscrito string, fecha_inicio time.Time, tipo_contrato string, numero_factura string, supervisor string, cargo string, vigencia string, dependencia string, documento_supervisor string) *gofpdf.Fpdf {
+	pdf.SetMargins(30, 30, 30)
 	dia := time.Now().Day()
 	mes := int(time.Now().Month())
 	año := time.Now().Year()
@@ -514,7 +487,7 @@ func footerInformeSeguimiento(pdf *gofpdf.Fpdf, contrato_suscrito string, fecha_
 	pdf.MultiCell(0, 8, tr(`__________________________`), "", "", false)
 	pdf.MultiCell(0, 8, tr(`NOMBRE`), "", "", false)
 	pdf.MultiCell(0, 8, tr(supervisor), "", "", false)
-	pdf.MultiCell(0, 8, tr(`C.C ______________ de Bogotá`), "", "", false)
+	pdf.MultiCell(0, 8, tr(fmt.Sprintf(`C.C %s de Bogotá`, documento_supervisor)), "", "", false)
 	pdf.MultiCell(0, 8, tr(fmt.Sprintf(`CARGO %s`, VerificarJefe(cargo))), "", "", false)
 	pdf.MultiCell(0, 8, tr(fmt.Sprintf(`DEPENDENCIA %s`, dependencia)), "", "", false)
 	pdf.MultiCell(0, 8, tr(fmt.Sprintf(`Supervisor %s Contrato/ Contrato de Comisión/Orden de Compra/Orden de Servicio/ Orden de Compra CCE) No. %s de %s.`, supervisor, contrato_suscrito, vigencia)), "", "", false)
@@ -540,7 +513,7 @@ func formatear_fecha(fecha time.Time) (fecha_formateada string) {
 func encodePDF(pdf *gofpdf.Fpdf) string {
 	var buffer bytes.Buffer
 	writer := bufio.NewWriter(&buffer)
-	pdf.OutputFileAndClose("/home/faidercamilo/go/src/github.com/udistrital/prueba.pdf") // para guardar el archivo localmente
+	//pdf.OutputFileAndClose("/home/faidercamilo/go/src/github.com/udistrital/prueba.pdf") // para guardar el archivo localmente
 	pdf.Output(writer)
 	writer.Flush()
 	encodedFile := base64.StdEncoding.EncodeToString(buffer.Bytes())

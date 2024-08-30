@@ -27,34 +27,44 @@ func AgregarComentarioSoporte(soporte_id string, cambio_estado_id string, coment
 
 	var respuesta_peticion map[string]interface{}
 	var comentario_soporte models.ComentarioSoporte
-	var soporte_pago models.SoporteCumplido
-	var cambio_estado_cumplido models.CambioEstadoCumplido
+	var soporte_pago []models.SoporteCumplido
+	var cambio_estado_cumplido []models.CambioEstadoCumplido
 
 	if soporte_id == "" || cambio_estado_id == "" || comentario == "" {
 		outputError = map[string]interface{}{"funcion": "/AgregarComentarioSoporte", "err": "Faltan datos en la solicitud", "status": "400"}
 		return respuesta, outputError
 	}
-
-	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido/"+soporte_id, &respuesta_peticion); (err == nil) && (response == 200) {
-		helpers.LimpiezaRespuestaRefactor(respuesta_peticion, &soporte_pago)
-		if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/"+cambio_estado_id, &respuesta_peticion); (err == nil) && (response == 200) {
-			helpers.LimpiezaRespuestaRefactor(respuesta_peticion, &cambio_estado_cumplido)
-			comentario_soporte.Comentario = comentario
-			comentario_soporte.SoporteCumplidoId = &soporte_pago
-			comentario_soporte.CambioEstadoCumplidoId = &cambio_estado_cumplido
-			if err := helpers.SendJson(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/comentario_soporte", "POST", &respuesta, comentario_soporte); err == nil {
-				respuesta.SoportePagoId = soporte_pago.Id
-				respuesta.CambioEstadoCumplidoId = cambio_estado_cumplido.Id
-				respuesta.Comentario = comentario
-				return respuesta, nil
+	fmt.Println("URL soporte cumplido: ", beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido/?query=Activo:true,DocumentoId:"+soporte_id)
+	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido/?query=Activo:true,DocumentoId:"+soporte_id, &respuesta_peticion); (err == nil) && (response == 200) {
+		data := respuesta_peticion["Data"].([]interface{})
+		if len(data[0].(map[string]interface{})) > 0 {
+			helpers.LimpiezaRespuestaRefactor(respuesta_peticion, &soporte_pago)
+			fmt.Println("Soporte pago: ", soporte_pago)
+			if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/?query=Id:"+cambio_estado_id+",CumplidoProveedorId:"+strconv.Itoa(soporte_pago[0].CumplidoProveedorId.Id), &respuesta_peticion); (err == nil) && (response == 200) {
+				helpers.LimpiezaRespuestaRefactor(respuesta_peticion, &cambio_estado_cumplido)
+				comentario_soporte.Comentario = comentario
+				comentario_soporte.SoporteCumplidoId = &soporte_pago[0]
+				comentario_soporte.CambioEstadoCumplidoId = &cambio_estado_cumplido[0]
+				comentario_soporte.FechaCreacion = time.Now()
+				comentario_soporte.FechaModificacion = time.Now()
+				if err := helpers.SendJson(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/comentario_soporte", "POST", &respuesta, comentario_soporte); err == nil {
+					respuesta.SoportePagoId = soporte_pago[0].Id
+					respuesta.CambioEstadoCumplidoId = cambio_estado_cumplido[0].Id
+					respuesta.Comentario = comentario
+					return respuesta, nil
+				} else {
+					outputError = map[string]interface{}{"funcion": "/AgregarComentarioSoporte/comentario_soporte", "err": err, "status": "502"}
+					return respuesta, outputError
+				}
 			} else {
-				outputError = map[string]interface{}{"funcion": "/AgregarComentarioSoporte/comentario_soporte", "err": err, "status": "502"}
+				outputError = map[string]interface{}{"funcion": "/AgregarComentarioSoporte/cambio_estado_cumplido", "err": err, "status": "502"}
 				return respuesta, outputError
 			}
 		} else {
-			outputError = map[string]interface{}{"funcion": "/AgregarComentarioSoporte/cambio_estado_cumplido", "err": err, "status": "502"}
+			outputError = map[string]interface{}{"funcion": "/AgregarComentarioSoporte/soporte_cumplido", "message": "El soporte cumplido no existe", "status": "502"}
 			return respuesta, outputError
 		}
+
 	}
 	return respuesta, outputError
 }

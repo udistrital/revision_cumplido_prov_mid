@@ -75,7 +75,7 @@ func SendJson(url string, trequest string, target interface{}, datajson interfac
 }
 
 func ValorLetras(n int) string {
-	var unidades = []string{"", "un", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve", "diez", "once", "doce", "trece", "catorce", "quince", "dieciséis", "diecisiete", "dieciocho", "diecinueve", "veinte"}
+	var unidades = []string{"", "uno", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve", "diez", "once", "doce", "trece", "catorce", "quince", "dieciséis", "diecisiete", "dieciocho", "diecinueve", "veinte"}
 	var decenas = []string{"", "", "veinti", "treinta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa"}
 	var centenas = []string{"", "cien", "doscientos", "trescientos", "cuatrocientos", "quinientos", "seiscientos", "setecientos", "ochocientos", "novecientos"}
 
@@ -88,7 +88,12 @@ func ValorLetras(n int) string {
 		if n == 1000000 {
 			return "un millón"
 		}
-		return fmt.Sprintf("%s millones %s", ValorLetras(n/1000000), ValorLetras(n%1000000))
+		millones := fmt.Sprintf("%s millones", ValorLetras(n/1000000))
+		resto := ValorLetras(n % 1000000)
+		if resto == "cero" {
+			return millones
+		}
+		return fmt.Sprintf("%s %s", millones, resto)
 	}
 
 	// Miles
@@ -96,7 +101,12 @@ func ValorLetras(n int) string {
 		if n == 1000 {
 			return "mil"
 		}
-		return fmt.Sprintf("%s mil %s", ValorLetras(n/1000), ValorLetras(n%1000))
+		miles := fmt.Sprintf("%s mil", ValorLetras(n/1000))
+		resto := ValorLetras(n % 1000)
+		if resto == "cero" {
+			return miles
+		}
+		return fmt.Sprintf("%s %s", miles, resto)
 	}
 
 	// Centenas
@@ -104,7 +114,12 @@ func ValorLetras(n int) string {
 		if n == 100 {
 			return "cien"
 		}
-		return fmt.Sprintf("%s %s", centenas[n/100], ValorLetras(n%100))
+		centenasStr := fmt.Sprintf("%s %s", centenas[n/100], ValorLetras(n%100))
+		resto := ValorLetras(n % 100)
+		if resto == "cero" {
+			return strings.TrimSpace(centenasStr)
+		}
+		return strings.TrimSpace(centenasStr)
 	}
 
 	// Decenas
