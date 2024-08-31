@@ -2,7 +2,6 @@ package services
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
@@ -14,7 +13,7 @@ func ObtenerContratosSupervisor(documento_supervisor string) (contratos_supervis
 
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/ContratosSupervisor", "err": err, "status": "502"}
+			outputError = map[string]interface{}{"funcion": "/ContratosSupervisor", "err": err, "status": "404"}
 			panic(outputError)
 		}
 	}()
@@ -30,18 +29,19 @@ func ObtenerContratosSupervisor(documento_supervisor string) (contratos_supervis
 					if err == nil {
 						contratos_supervisor.Contratos = append(contratos_supervisor.Contratos, informacion_contrato_proveedor...)
 					} else {
+						logs.Error(err)
 						continue
 					}
 				}
 			} else {
 				logs.Error(err)
-				outputError = map[string]interface{}{"funcion": "/ContratosSupervisor", "err": err, "status": "502"}
+				outputError = map[string]interface{}{"funcion": "/ContratosSupervisor", "err": err, "status": "404"}
 				return contratos_supervisor, outputError
 			}
 		}
 	} else {
 		logs.Error(err)
-		outputError = map[string]interface{}{"funcion": "/ContratosSupervisor", "err": err, "status": "502"}
+		outputError = map[string]interface{}{"funcion": "/ContratosSupervisor", "err": err, "status": "404"}
 		return contratos_supervisor, outputError
 	}
 	return contratos_supervisor, nil
@@ -52,7 +52,7 @@ func ObtenerContratosDependencia(dependencia string) (contratos_dependencia mode
 		if err := recover(); err != nil {
 			outputError = map[string]interface{}{
 				"Success": false,
-				"Status":  502,
+				"Status":  404,
 				"Message": "Error al obtener los contratos de la dependencia: " + dependencia,
 				"Error":   err,
 			}
@@ -60,7 +60,7 @@ func ObtenerContratosDependencia(dependencia string) (contratos_dependencia mode
 	}()
 
 	var respuesta_peticion map[string]interface{}
-	fmt.Println(beego.AppConfig.String("UrlAdministrativaJBPM") + "/contratos_proveedor_dependencia/" + dependencia)
+	//fmt.Println(beego.AppConfig.String("UrlAdministrativaJBPM") + "/contratos_proveedor_dependencia/" + dependencia)
 	if response, err := helpers.GetJsonWSO2Test(beego.AppConfig.String("UrlAdministrativaJBPM")+"/contratos_proveedor_dependencia/"+dependencia, &respuesta_peticion); err == nil && response == 200 {
 		if respuesta_peticion != nil {
 			respuesta_json, err_json := json.Marshal(respuesta_peticion)
@@ -69,12 +69,12 @@ func ObtenerContratosDependencia(dependencia string) (contratos_dependencia mode
 					return contratos_dependencia, nil
 				} else {
 					logs.Error(err)
-					outputError = map[string]interface{}{"funcion": "/ObtenerContratosDependencia/", "err": err.Error(), "status": "502"}
+					outputError = map[string]interface{}{"funcion": "/ObtenerContratosDependencia/", "err": err.Error(), "status": "404"}
 					return contratos_dependencia, outputError
 				}
 			} else {
 				logs.Error(err_json)
-				outputError = map[string]interface{}{"funcion": "/ObtenerContratosDependencia/", "err": err_json.Error(), "status": "502"}
+				outputError = map[string]interface{}{"funcion": "/ObtenerContratosDependencia/", "err": err_json.Error(), "status": "404"}
 				return contratos_dependencia, outputError
 			}
 		} else {
@@ -83,7 +83,7 @@ func ObtenerContratosDependencia(dependencia string) (contratos_dependencia mode
 		}
 	} else {
 		logs.Error(err)
-		outputError = map[string]interface{}{"funcion": "/ObtenerContratosDependencia/", "err": err, "status": "502"}
+		outputError = map[string]interface{}{"funcion": "/ObtenerContratosDependencia/", "err": err, "status": "404"}
 		return contratos_dependencia, outputError
 	}
 
@@ -94,7 +94,7 @@ func ObtenerDependenciasSupervisor(documento_supervisor string) (dependencias_su
 		if err := recover(); err != nil {
 			outputError = map[string]interface{}{
 				"Success": false,
-				"Status":  502,
+				"Status":  404,
 				"Message": "Error al consultar las dependencias del supervisor identificado con el documento: " + documento_supervisor,
 				"Error":   err,
 			}
@@ -102,7 +102,7 @@ func ObtenerDependenciasSupervisor(documento_supervisor string) (dependencias_su
 	}()
 
 	var respuesta_peticion map[string]interface{}
-	fmt.Println(beego.AppConfig.String("UrlAdministrativaProduccionJBPM") + "/dependencias_supervisor/" + documento_supervisor)
+	//fmt.Println(beego.AppConfig.String("UrlAdministrativaProduccionJBPM") + "/dependencias_supervisor/" + documento_supervisor)
 	if response, err := helpers.GetJsonWSO2Test(beego.AppConfig.String("UrlAdministrativaProduccionJBPM")+"/dependencias_supervisor/"+documento_supervisor, &respuesta_peticion); err == nil && response == 200 {
 		if respuesta_peticion != nil {
 			if dependenciasMap, ok := respuesta_peticion["dependencias"].(map[string]interface{}); ok {

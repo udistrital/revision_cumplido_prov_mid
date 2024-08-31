@@ -47,8 +47,8 @@ func (c *ContratosSupervisorController) ObtenerContratosSupervisor() {
 			c.Ctx.Output.SetStatus(200)
 			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Successful", "Data": data}
 		} else {
-			c.Ctx.Output.SetStatus(200)
-			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "No se encontro ningun contrato para el supervisor", "Data": nil}
+			c.Ctx.Output.SetStatus(404)
+			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "404", "Message": err, "Data": []map[string]interface{}{}}
 		}
 		c.ServeJSON()
 	} else {

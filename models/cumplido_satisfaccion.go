@@ -1,6 +1,6 @@
 package models
 
 type CumplidoSatisfaccion struct {
-	File    string `json:"file"`
-	Archivo string `json:"archivo"`
+	File    string `json:"File"`
+	Archivo string `json:"Archivo"`
 }

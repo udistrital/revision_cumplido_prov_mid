@@ -3,7 +3,6 @@ package controllers
 import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
-	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/services"
 )
 
@@ -43,14 +42,12 @@ func (c *SolicitudesCumplidosContratoController) ObtenerSolicitudesContrato() {
 	numero_contrato := c.Ctx.Input.Param(":numero_contrato")
 	vigencia := c.Ctx.Input.Param(":vigencia")
 
-	if data, err := services.ObtenerSolicitudesCumplidosContrato(numero_contrato, vigencia); err == nil {
-		if (data[0] != models.CumplidosContrato{}) {
-			c.Ctx.Output.SetStatus(200)
-			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Successful", "Data": data}
-		}
+	data, err := services.ObtenerSolicitudesCumplidosContrato(numero_contrato, vigencia)
+	if err == nil {
+		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": data}
 	} else {
 		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "404", "Message": "No se encontro ninguna solicitud de contrato", "Data": []map[string]interface{}{}}
+		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 404, "Message": err, "Data": []map[string]interface{}{}}
 	}
 	c.ServeJSON()
 }

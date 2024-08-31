@@ -134,7 +134,7 @@
                             "$ref": "#/definitions/models.CambioEstadoCumplidoResponse"
                         }
                     },
-                    "502": {
+                    "404": {
                         "description": "{object} map[string]interface{}"
                     }
                 }
@@ -181,9 +181,6 @@
                         }
                     },
                     "404": {
-                        "description": "\"No se encontró el soporte de pago o cambio de estado\""
-                    },
-                    "502": {
                         "description": "\"Error al intentar agregar el comentario\""
                     }
                 }
@@ -294,9 +291,6 @@
                         }
                     },
                     "404": {
-                        "description": "\"No se encontraron documentos de soporte\""
-                    },
-                    "502": {
                         "description": "\"Error al intentar obtener o comprimir los documentos\""
                     }
                 }
@@ -358,9 +352,6 @@
                         }
                     },
                     "404": {
-                        "description": "\"No se encontró el soporte de pago\""
-                    },
-                    "502": {
                         "description": "\"Error al intentar eliminar el soporte de pago\""
                     }
                 }
@@ -396,7 +387,7 @@
                             "$ref": "#/definitions/models.BalanceContrato"
                         }
                     },
-                    "502": {
+                    "404": {
                         "description": "Error procesando la solicitud"
                     }
                 }
@@ -457,9 +448,6 @@
                         }
                     },
                     "404": {
-                        "description": "\"No se encontró el recurso solicitado\""
-                    },
-                    "502": {
                         "description": "\"Error al intentar generar el informe de seguimiento\""
                     }
                 }
@@ -521,7 +509,7 @@
                             }
                         }
                     },
-                    "502": {
+                    "404": {
                         "description": "{object} map[string]interface{} \"Error interno del servidor\""
                     }
                 }

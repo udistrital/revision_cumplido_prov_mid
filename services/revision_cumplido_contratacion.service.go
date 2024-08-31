@@ -12,7 +12,7 @@ import (
 func ObtenerCumplidosPendientesContratacion() (cumplidosInfo []models.SolicituRevisionCumplidoProveedor, outputError interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/ObtenerCumplidosPendientesContratacion", "err": err, "status": "502"}
+			outputError = map[string]interface{}{"funcion": "/ObtenerCumplidosPendientesContratacion", "err": err, "status": "404"}
 			panic(outputError)
 		}
 	}()
@@ -44,21 +44,21 @@ func ObtenerCumplidosPendientesContratacion() (cumplidosInfo []models.SolicituRe
 						cumplidosInfo = append(cumplidosInfo, contrato)
 					} else {
 						logs.Error(err)
-						outputError = map[string]interface{}{"funcion": "/ObtenerCumplidosPendientesContratacion", "err": err, "status": "502"}
+						outputError = map[string]interface{}{"funcion": "/ObtenerCumplidosPendientesContratacion", "err": err, "status": "404"}
 						return cumplidosInfo, outputError
 					}
 				}
 			} else {
 				outputError = map[string]interface{}{
 					"Success": false,
-					"Status":  502,
+					"Status":  404,
 					"Message": "No se encontraron cumplidos pendientes",
 				}
 			}
 		} else {
 			outputError = map[string]interface{}{
 				"Success": false,
-				"Status":  502,
+				"Status":  404,
 				"Message": "No se encontraron cumplidos pendientes por revision de contratación",
 			}
 			return cumplidosInfo, outputError
@@ -66,7 +66,7 @@ func ObtenerCumplidosPendientesContratacion() (cumplidosInfo []models.SolicituRe
 
 	} else {
 		logs.Error(err)
-		outputError = map[string]interface{}{"funcion": "/ObtenerCumplidosPendientesContratacion", "err": err, "status": "502"}
+		outputError = map[string]interface{}{"funcion": "/ObtenerCumplidosPendientesContratacion", "err": err, "status": "404"}
 		return cumplidosInfo, outputError
 	}
 	return cumplidosInfo, outputError

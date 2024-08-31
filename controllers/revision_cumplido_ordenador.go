@@ -3,7 +3,6 @@ package controllers
 import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
-	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/services"
 )
 
@@ -43,14 +42,13 @@ func (c *RevisionCumplidoOrdenadorController) ObtenerCumplidosPendientesRevision
 
 	documento_ordenador := c.GetString(":documento_ordenador")
 
-	dependencias, err := services.ObtenerSolicitudesCumplidos(documento_ordenador)
+	solicitudes, err := services.ObtenerSolicitudesCumplidos(documento_ordenador)
 
-	if err != nil {
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 502, "Message": "Consulta completa", "Data": err}
-	} else if dependencias == nil {
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 204, "Message": "No hay datos", "Data": dependencias}
+	if err == nil {
+		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": solicitudes}
 	} else {
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": dependencias}
+		c.Ctx.Output.SetStatus(404)
+		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 404, "Message": err, "Data": []map[string]interface{}{}}
 	}
 	c.ServeJSON()
 }
@@ -81,14 +79,13 @@ func (c *RevisionCumplidoOrdenadorController) ListaCumplidosReversibles() {
 	id_cumplido := c.GetString(":documento_ordenador")
 	print(id_cumplido)
 
-	dependencias, err := services.ListaCumplidosReversibles(id_cumplido)
+	cumplidos_reversibles, err := services.ListaCumplidosReversibles(id_cumplido)
 
-	if err != nil {
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 502, "Message": "No hay datos", "Data": err}
-	} else if dependencias == nil {
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 204, "Message": "No hay datos", "Data": dependencias}
+	if err == nil {
+		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": cumplidos_reversibles}
 	} else {
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": dependencias}
+		c.Ctx.Output.SetStatus(404)
+		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 404, "Message": err, "Data": []map[string]interface{}{}}
 	}
 	c.ServeJSON()
 }
@@ -103,12 +100,11 @@ func (c *RevisionCumplidoOrdenadorController) GenerarPdfAutorizacionPago() {
 
 	id_solicitud_pago := c.GetString(":id_solicitud_pago")
 	autorizacion, err := services.GenerarAutorizacionPago(id_solicitud_pago)
-	if err != nil {
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 502, "Message": "No hay datos", "Data": err}
-	} else if (autorizacion == models.DocumentoAutorizacionPago{}) {
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 204, "Message": "No hay datos", "Data": ""}
+	if err == nil {
+		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": autorizacion}
 	} else {
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Data": autorizacion}
+		c.Ctx.Output.SetStatus(404)
+		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 404, "Message": err, "Data": []map[string]interface{}{}}
 	}
 	c.ServeJSON()
 }

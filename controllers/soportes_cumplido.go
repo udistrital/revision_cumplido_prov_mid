@@ -75,12 +75,12 @@ func (c *SoportesCumplidoController) SubirSoporteCumplido() {
 
 	// Llamada al helper para subir el soporte
 	soporte, err := services.SubirSoporteCumplido(soporteReq.SolicitudPagoID, soporteReq.TipoDocumento, soporteReq.ItemID, soporteReq.Observaciones, soporteReq.NombreArchivo, soporteReq.Archivo)
-	if err != nil {
-		panic(err)
+	if err == nil {
+		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": soporte}
+	} else {
+		c.Ctx.Output.SetStatus(404)
+		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 404, "Message": err, "Data": []map[string]interface{}{}}
 	}
-
-	// Respuesta exitosa
-	c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Successful", "Data": soporte}
 	c.ServeJSON()
 }
 
@@ -108,18 +108,15 @@ func (c *SoportesCumplidoController) ObtenerDocumentosPagoMensual() {
 
 	cumplido_proveedor_id := c.Ctx.Input.Param(":cumplido_proveedor_id")
 
-	if data, err := services.ObtenerDocumentosPagoMensual(cumplido_proveedor_id); err == nil {
-		if data == nil {
-			c.Ctx.Output.SetStatus(200)
-			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "No se encontraron documentos de soporte", "Data": nil}
-		} else {
-			c.Ctx.Output.SetStatus(200)
-			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Successful", "Data": data}
-		}
-		c.ServeJSON()
+	data, err := services.ObtenerDocumentosPagoMensual(cumplido_proveedor_id)
+	if err == nil {
+		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": data}
 	} else {
-		panic(err)
+		c.Ctx.Output.SetStatus(404)
+		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 404, "Message": err, "Data": []map[string]interface{}{}}
 	}
+	c.ServeJSON()
+
 }
 
 // EliminarSoporteCumplido ...
@@ -128,7 +125,7 @@ func (c *SoportesCumplidoController) ObtenerDocumentosPagoMensual() {
 // @Param	soporte_pago_id		path 	string	true		"ID del soporte de pago a eliminar"
 // @Success 200 {object} map[string]interface{} "Soporte de pago eliminado exitosamente"
 // @Failure 404 "No se encontró el soporte de pago"
-// @Failure 502 "Error al intentar eliminar el soporte de pago"
+// @Failure 404 "Error al intentar eliminar el soporte de pago"
 // @router /soportes/:soporte_pago_id [delete]
 func (c *SoportesCumplidoController) EliminarSoporteCumplido() {
 	defer func() {
@@ -147,14 +144,14 @@ func (c *SoportesCumplidoController) EliminarSoporteCumplido() {
 
 	soporte_pago_id := c.Ctx.Input.Param(":soporte_pago_id")
 
-	if data, err := services.EliminarSoporteCumplido(soporte_pago_id); err == nil {
-		c.Ctx.Output.SetStatus(200)
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Data": data}
-		c.ServeJSON()
+	data, err := services.EliminarSoporteCumplido(soporte_pago_id)
+	if err == nil {
+		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": data}
 	} else {
-		c.Data["json"] = err
-		c.ServeJSON()
+		c.Ctx.Output.SetStatus(404)
+		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 404, "Message": err, "Data": []map[string]interface{}{}}
 	}
+	c.ServeJSON()
 }
 
 // AgregarComentarioSoporte ...
@@ -165,7 +162,7 @@ func (c *SoportesCumplidoController) EliminarSoporteCumplido() {
 // @Param	comentario			body 	string	true		"Comentario a agregar"
 // @Success 200 {object} models.RespuestaComentarioSoporte "Comentario agregado exitosamente"
 // @Failure 404 "No se encontró el soporte de pago o cambio de estado"
-// @Failure 502 "Error al intentar agregar el comentario"
+// @Failure 404 "Error al intentar agregar el comentario"
 // @router /comentario-soporte [post]
 func (c *SoportesCumplidoController) AgregarComentarioSoporte() {
 	defer func() {
@@ -177,7 +174,7 @@ func (c *SoportesCumplidoController) AgregarComentarioSoporte() {
 			if status, ok := localError["status"]; ok {
 				c.Abort(status.(string))
 			} else {
-				c.Abort("502")
+				c.Abort("404")
 			}
 		}
 	}()
@@ -198,14 +195,14 @@ func (c *SoportesCumplidoController) AgregarComentarioSoporte() {
 		return
 	}
 
-	if res, err := services.AgregarComentarioSoporte(v.SoporteId, v.CambioEstadoId, v.Comentario); err == nil {
-		c.Ctx.Output.SetStatus(200)
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Comentario agregado exitosamente", "Data": res}
-		c.ServeJSON()
+	data, err := services.AgregarComentarioSoporte(v.SoporteId, v.CambioEstadoId, v.Comentario)
+	if err == nil {
+		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": data}
 	} else {
-		c.Data["json"] = err
-		c.ServeJSON()
+		c.Ctx.Output.SetStatus(404)
+		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 404, "Message": err, "Data": []map[string]interface{}{}}
 	}
+	c.ServeJSON()
 }
 
 // ObtenerComprimidoSoportes ...
@@ -214,7 +211,7 @@ func (c *SoportesCumplidoController) AgregarComentarioSoporte() {
 // @Param	id_cumplido_proveedor	path 	string	true		"ID del cumplido proveedor"
 // @Success 200 {object} models.DocumentosComprimido "Documentos comprimidos en formato base64"
 // @Failure 404 "No se encontraron documentos de soporte"
-// @Failure 502 "Error al intentar obtener o comprimir los documentos"
+// @Failure 404 "Error al intentar obtener o comprimir los documentos"
 // @router /soportes-comprimido/:id_cumplido_proveedor [get]
 func (c *SoportesCumplidoController) ObtenerComprimidoSoportes() {
 	defer func() {
@@ -235,11 +232,9 @@ func (c *SoportesCumplidoController) ObtenerComprimidoSoportes() {
 
 	data, err := services.ObtenerComprimidoSoportes(id_cumplido_proveedor)
 	if err == nil {
-		c.Ctx.Output.SetStatus(200)
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Documentos comprimidos exitosamente", "Data": data}
-		c.ServeJSON()
+		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": data}
 	} else {
-		c.Data["json"] = err
-		c.ServeJSON()
+		c.Ctx.Output.SetStatus(404)
+		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 404, "Message": err, "Data": []map[string]interface{}{}}
 	}
 }

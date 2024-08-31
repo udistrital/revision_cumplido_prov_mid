@@ -26,7 +26,7 @@ func (c *CambioEstadoCumplidoController) URLMapping() {
 // @Param documento_responsable query string true "Número del documento responsable"
 // @Param cargo_responsable query string true "Cargo del responsable"
 // @Success 200 {object} models.CambioEstadoCumplidoResponse
-// @Failure 502 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
 // @router /cambio-estado [post]
 func (c *CambioEstadoCumplidoController) CambioEstadoCumplido() {
 	defer func() {
@@ -38,7 +38,7 @@ func (c *CambioEstadoCumplidoController) CambioEstadoCumplido() {
 			if status, ok := localError["status"]; ok {
 				c.Abort(status.(string))
 			} else {
-				c.Abort("502")
+				c.Abort("404")
 			}
 		}
 	}()
@@ -57,8 +57,8 @@ func (c *CambioEstadoCumplidoController) CambioEstadoCumplido() {
 	response, outputError := services.CambioEstadoCumplido(v.CodigoAbreviacionEstadoCumplido, v.CumplidoProveedorID)
 
 	if outputError != nil {
-		c.Data["json"] = outputError
-		c.Ctx.Output.SetStatus(200)
+		c.Ctx.Output.SetStatus(404)
+		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "404", "Message": outputError, "Data": []map[string]interface{}{}}
 	} else {
 		c.Data["json"] = map[string]interface{}{
 			"Success": true,

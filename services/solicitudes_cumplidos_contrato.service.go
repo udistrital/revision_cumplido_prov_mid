@@ -12,7 +12,7 @@ import (
 func ObtenerSolicitudesCumplidosContrato(numero_contrato string, vigencia string) (solicitudes_cumplido []models.CumplidosContrato, outputError map[string]interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/ObtenerSolicitudesCumplidosContrato", "err": err, "status": "502"}
+			outputError = map[string]interface{}{"funcion": "/ObtenerSolicitudesCumplidosContrato", "err": err, "status": "404"}
 			panic(outputError)
 		}
 	}()
@@ -41,7 +41,7 @@ func ObtenerSolicitudesCumplidosContrato(numero_contrato string, vigencia string
 				solicitudes_cumplido = append(solicitudes_cumplido, solicitud_cumplido)
 
 			} else {
-				outputError = map[string]interface{}{"funcion": "ObtenerSolicitudesCumplidosContrato", "err": err, "status": "502"}
+				outputError = map[string]interface{}{"funcion": "ObtenerSolicitudesCumplidosContrato", "err": err, "status": "404"}
 				return nil, outputError
 			}
 		}
@@ -75,26 +75,29 @@ func ObtenerPeriodoInformacionPago(cumplido_proveedor_id int) (periodo_pago stri
 func ObtenerUltimoEstadoCumplidoProveedor(cumplido_proveedor_id string) (estado_cumplido models.CambioEstadoCumplido, outputError map[string]interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/GetUltimoEstadoCumplidoProveedor", "err": err, "status": "502"}
+			outputError = map[string]interface{}{"funcion": "/GetUltimoEstadoCumplidoProveedor", "err": err, "status": "404"}
 			panic(outputError)
 		}
 	}()
 
 	var respuesta_peticion map[string]interface{}
 	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/?query=Activo:true,CumplidoProveedorId.Id:"+cumplido_proveedor_id+"&sortby=FechaCreacion&order=desc&limit=1", &respuesta_peticion); err == nil && response == 200 {
-		if len(respuesta_peticion["Data"].([]interface{})) > 0 {
+		data := respuesta_peticion["Data"].([]interface{})
+		if len(data[0].(map[string]interface{})) > 0 {
 			estado_josn, err := json.Marshal(respuesta_peticion["Data"].([]interface{})[0])
 			if err == nil {
 				json.Unmarshal(estado_josn, &estado_cumplido)
 				return estado_cumplido, nil
 			} else {
-				outputError = map[string]interface{}{"funcion": "GetUltimoEstadoCumplidoProveedor", "err": err, "status": "502"}
+				outputError = map[string]interface{}{"funcion": "GetUltimoEstadoCumplidoProveedor", "err": err, "status": "404"}
 				return estado_cumplido, outputError
 			}
+		} else {
+			outputError = map[string]interface{}{"funcion": "GetUltimoEstadoCumplidoProveedor", "err": "No se encontraron estados para el cumplido", "status": "404"}
+			return estado_cumplido, outputError
 		}
 	} else {
-		outputError = map[string]interface{}{"funcion": "GetUltimoEstadoCumplidoProveedor", "err": err, "status": "502"}
+		outputError = map[string]interface{}{"funcion": "GetUltimoEstadoCumplidoProveedor", "err": err, "status": "404"}
 		return estado_cumplido, outputError
 	}
-	return estado_cumplido, outputError
 }

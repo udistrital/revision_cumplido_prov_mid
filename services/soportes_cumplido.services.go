@@ -34,13 +34,17 @@ func AgregarComentarioSoporte(soporte_id string, cambio_estado_id string, coment
 		outputError = map[string]interface{}{"funcion": "/AgregarComentarioSoporte", "err": "Faltan datos en la solicitud", "status": "400"}
 		return respuesta, outputError
 	}
-	fmt.Println("URL soporte cumplido: ", beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido/?query=Activo:true,DocumentoId:"+soporte_id)
+	//fmt.Println("URL soporte cumplido: ", beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido/?query=Activo:true,DocumentoId:"+soporte_id)
 	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido/?query=Activo:true,DocumentoId:"+soporte_id, &respuesta_peticion); (err == nil) && (response == 200) {
 		data := respuesta_peticion["Data"].([]interface{})
 		if len(data[0].(map[string]interface{})) > 0 {
 			helpers.LimpiezaRespuestaRefactor(respuesta_peticion, &soporte_pago)
-			fmt.Println("Soporte pago: ", soporte_pago)
 			if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/?query=Id:"+cambio_estado_id+",CumplidoProveedorId:"+strconv.Itoa(soporte_pago[0].CumplidoProveedorId.Id), &respuesta_peticion); (err == nil) && (response == 200) {
+				data := respuesta_peticion["Data"].([]interface{})
+				if len(data[0].(map[string]interface{})) == 0 {
+					outputError = map[string]interface{}{"funcion": "/AgregarComentarioSoporte/cambio_estado_cumplido", "message": "El cambio de estado no existe", "status": "404"}
+					return respuesta, outputError
+				}
 				helpers.LimpiezaRespuestaRefactor(respuesta_peticion, &cambio_estado_cumplido)
 				comentario_soporte.Comentario = comentario
 				comentario_soporte.SoporteCumplidoId = &soporte_pago[0]
@@ -53,15 +57,15 @@ func AgregarComentarioSoporte(soporte_id string, cambio_estado_id string, coment
 					respuesta.Comentario = comentario
 					return respuesta, nil
 				} else {
-					outputError = map[string]interface{}{"funcion": "/AgregarComentarioSoporte/comentario_soporte", "err": err, "status": "502"}
+					outputError = map[string]interface{}{"funcion": "/AgregarComentarioSoporte/comentario_soporte", "err": err, "status": "404"}
 					return respuesta, outputError
 				}
 			} else {
-				outputError = map[string]interface{}{"funcion": "/AgregarComentarioSoporte/cambio_estado_cumplido", "err": err, "status": "502"}
+				outputError = map[string]interface{}{"funcion": "/AgregarComentarioSoporte/cambio_estado_cumplido", "err": err, "status": "404"}
 				return respuesta, outputError
 			}
 		} else {
-			outputError = map[string]interface{}{"funcion": "/AgregarComentarioSoporte/soporte_cumplido", "message": "El soporte cumplido no existe", "status": "502"}
+			outputError = map[string]interface{}{"funcion": "/AgregarComentarioSoporte/soporte_cumplido", "message": "El soporte cumplido no existe", "status": "404"}
 			return respuesta, outputError
 		}
 
@@ -81,12 +85,16 @@ func EliminarSoporteCumplido(documento_id string) (response string, outputError 
 	var respuesta_peticion map[string]interface{}
 
 	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido/?limit=1&query=DocumentoId:"+documento_id+",Activo:true", &respuesta_peticion); (err == nil) && (response == 200) {
+		data := respuesta_peticion["Data"].([]interface{})
+		if len(data[0].(map[string]interface{})) == 0 {
+			return "No se encontró el soporte de pago o este ya se elimino con anterioridad", nil
+		}
 		helpers.LimpiezaRespuestaRefactor(respuesta_peticion, &soportes_pagos_mensuales)
 		if (soportes_pagos_mensuales[0] == models.SoporteCumplido{}) {
 			return "No se encontró el soporte de pago o este ya se elimino con anterioridad", nil
 		}
 	} else {
-		outputError = map[string]interface{}{"funcion": "/EliminarSoporteCumplido/soporte_cumplido", "err": err, "status": "502"}
+		outputError = map[string]interface{}{"funcion": "/EliminarSoporteCumplido/soporte_cumplido", "err": err, "status": "404"}
 		return "No se encontró el soporte de pago", outputError
 	}
 	var res map[string]interface{}
@@ -97,7 +105,7 @@ func EliminarSoporteCumplido(documento_id string) (response string, outputError 
 		response = delete_true
 		return response, nil
 	} else {
-		outputError = map[string]interface{}{"funcion": "/EliminarSoporteCumplido/soporte_cumplido", "err": err, "status": "502"}
+		outputError = map[string]interface{}{"funcion": "/EliminarSoporteCumplido/soporte_cumplido", "err": err, "status": "404"}
 		response = delect_false
 		return response, outputError
 	}
@@ -122,6 +130,11 @@ func ObtenerDocumentosPagoMensual(cumplido_proveedor_id string) (documentos []mo
 	var respuesta_peticion map[string]interface{}
 
 	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido/?limit=-1&query=CumplidoProveedorId.Id:"+cumplido_proveedor_id+",Activo:true", &respuesta_peticion); (err == nil) && (response == 200) {
+		data := respuesta_peticion["Data"].([]interface{})
+		if len(data[0].(map[string]interface{})) == 0 {
+			outputError = map[string]interface{}{"funcion": "/GetDocumentosPagoMensual/soporte_pago_mensual", "err": "No se encontraron soportes de pago", "status": "404"}
+			return nil, outputError
+		}
 		helpers.LimpiezaRespuestaRefactor(respuesta_peticion, &soportes_pagos_mensuales)
 		if len(soportes_pagos_mensuales) != 0 {
 			var ids_documentos []string
@@ -154,13 +167,13 @@ func ObtenerDocumentosPagoMensual(cumplido_proveedor_id string) (documentos []mo
 					}
 				} else {
 					logs.Error(err)
-					outputError = map[string]interface{}{"funcion": "/GetDocumentosPagoMensual/documento", "err": err, "status": "502", "Message": "No se encontraron documentos asociados al cumplido proveedor"}
+					outputError = map[string]interface{}{"funcion": "/GetDocumentosPagoMensual/documento", "err": err, "status": "404", "Message": "No se encontraron documentos asociados al cumplido proveedor"}
 					return nil, outputError
 				}
 
 			} else {
 				logs.Error(err)
-				outputError = map[string]interface{}{"funcion": "/GetDocumentosPagoMensual/documento", "err": err, "status": "502"}
+				outputError = map[string]interface{}{"funcion": "/GetDocumentosPagoMensual/documento", "err": err, "status": "404"}
 				return nil, outputError
 			}
 		} else {
@@ -169,7 +182,7 @@ func ObtenerDocumentosPagoMensual(cumplido_proveedor_id string) (documentos []mo
 
 	} else {
 		logs.Error(err)
-		outputError = map[string]interface{}{"funcion": "/GetDocumentosPagoMensual/soporte_pago_mensual", "err": err, "status": "502"}
+		outputError = map[string]interface{}{"funcion": "/GetDocumentosPagoMensual/soporte_pago_mensual", "err": err, "status": "404"}
 		return nil, outputError
 	}
 
@@ -181,7 +194,7 @@ func ObtenerComprimidoSoportes(id_cumplido_proveedor string) (documentos_comprim
 		if err := recover(); err != nil {
 			outputError = map[string]interface{}{
 				"Succes":  false,
-				"Status":  502,
+				"Status":  404,
 				"Message": "Error al descargar el .zip",
 				"Funcion": "SoportesComprimido",
 			}
@@ -198,7 +211,7 @@ func ObtenerComprimidoSoportes(id_cumplido_proveedor string) (documentos_comprim
 	if error != nil {
 		outputError = map[string]interface{}{
 			"Succes":  false,
-			"Status":  502,
+			"Status":  404,
 			"Message": "Error al obtener los documentos del pago",
 			"Funcion": "GetDocumentosPagoMensual",
 			"Error":   error,
@@ -219,7 +232,7 @@ func ObtenerComprimidoSoportes(id_cumplido_proveedor string) (documentos_comprim
 		if error != nil {
 			outputError = map[string]interface{}{
 				"Succes":  false,
-				"Status":  502,
+				"Status":  404,
 				"Message": "Error al decodificar el archivo base64",
 				"Error":   error,
 			}
@@ -232,7 +245,7 @@ func ObtenerComprimidoSoportes(id_cumplido_proveedor string) (documentos_comprim
 		if err != nil {
 			outputError = map[string]interface{}{
 				"Success": false,
-				"Status":  502,
+				"Status":  404,
 				"Message": "Error al crear la entrada en el archivo ZIP",
 				"Error":   err.Error(),
 			}
@@ -244,7 +257,7 @@ func ObtenerComprimidoSoportes(id_cumplido_proveedor string) (documentos_comprim
 		if err != nil {
 			outputError := map[string]interface{}{
 				"Success": false,
-				"Status":  502,
+				"Status":  404,
 				"Message": "Error al escribir el contenido del PDF en el archivo ZIP",
 				"Error":   err.Error(),
 			}
@@ -257,7 +270,7 @@ func ObtenerComprimidoSoportes(id_cumplido_proveedor string) (documentos_comprim
 	if err != nil {
 		outputError := map[string]interface{}{
 			"Success": false,
-			"Status":  502,
+			"Status":  404,
 			"Message": "Error al cerrar el archivo ZIP",
 			"Error":   err.Error(),
 		}
@@ -267,7 +280,8 @@ func ObtenerComprimidoSoportes(id_cumplido_proveedor string) (documentos_comprim
 	documentos_comprimido.File = base64.StdEncoding.EncodeToString(buf.Bytes())
 
 	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cumplido_proveedor/?query=Id:"+id_cumplido_proveedor, &respuesta_peticion); (err == nil) && (response == 200) {
-		if respuesta_peticion != nil {
+		data := respuesta_peticion["Data"].([]interface{})
+		if len(data[0].(map[string]interface{})) > 0 {
 			helpers.LimpiezaRespuestaRefactor(respuesta_peticion, &cumplidos_proveedor)
 		}
 	}
@@ -276,15 +290,15 @@ func ObtenerComprimidoSoportes(id_cumplido_proveedor string) (documentos_comprim
 		informacion_contrato_proveedor, error := helpers.ObtenerInformacionContratoProveedor(cumplido.NumeroContrato, strconv.Itoa(cumplido.VigenciaContrato))
 
 		if error == nil {
-			//fmt.Println("Nombre: ", informacion_contrato_proveedor)
 			documentos_comprimido.Nombre = informacion_contrato_proveedor[0].NombreProveedor + "_" + cumplido.NumeroContrato + "_" + "_" + strconv.Itoa(int(cumplido.FechaCreacion.Month())) + "_" + strconv.Itoa(cumplido.FechaCreacion.Year())
 		} else {
-			outputError := map[string]interface{}{
+			logs.Error(err)
+			outputError = map[string]interface{}{
 				"Success": false,
-				"Status":  502,
+				"Status":  404,
 				"Message": "Error al Buscar los datos del proveedor",
 			}
-			return documentos_comprimido, outputError
+			continue
 		}
 	}
 
@@ -294,27 +308,27 @@ func ObtenerComprimidoSoportes(id_cumplido_proveedor string) (documentos_comprim
 func SubirSoporteCumplido(solicitud_pago_id int, tipo_documento string, item_id int, observaciones string, nombre_archivo string, archivo string) (soporte_pago models.SoporteCumplido, outputError map[string]interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/SubirSoporteCumplido", "err": err, "status": "502"}
+			outputError = map[string]interface{}{"funcion": "/SubirSoporteCumplido", "err": err, "status": "404"}
 			panic(outputError)
 		}
 	}()
 
 	// Verificar que se envien todos los datos y que el archivo sea un PDF
 	if tipo_documento != "application/pdf" || archivo == "" || item_id == 0 || solicitud_pago_id == 0 {
-		outputError = map[string]interface{}{"funcion": "/SubirSoporteCumplido", "status": "502", "mensaje": "El archivo debe ser un PDF y no debe estar vacío"}
+		outputError = map[string]interface{}{"funcion": "/SubirSoporteCumplido", "status": "404", "mensaje": "El archivo debe ser un PDF y no debe estar vacío"}
 		return soporte_pago, outputError
 	}
 
 	// Convertir archivo Base64 a binario
 	decodedFile, err := base64.StdEncoding.DecodeString(archivo)
 	if err != nil {
-		outputError = map[string]interface{}{"funcion": "/SubirSoporteCumplido", "err": err, "status": "502", "mensaje": "Error al decodificar el archivo Base64"}
+		outputError = map[string]interface{}{"funcion": "/SubirSoporteCumplido", "err": err, "status": "404", "mensaje": "Error al decodificar el archivo Base64"}
 		return soporte_pago, outputError
 	}
 
 	// Verificar tamaño del archivo (máximo 1MB)
 	if len(decodedFile) > 1000000 {
-		outputError = map[string]interface{}{"funcion": "/SubirSoporteCumplido", "err": err, "status": "502", "mensaje": "El archivo no debe superar 1MB"}
+		outputError = map[string]interface{}{"funcion": "/SubirSoporteCumplido", "err": err, "status": "404", "mensaje": "El archivo no debe superar 1MB"}
 		return soporte_pago, outputError
 	}
 
@@ -322,9 +336,8 @@ func SubirSoporteCumplido(solicitud_pago_id int, tipo_documento string, item_id 
 	var cumplido_proveedor []models.CumplidoProveedor
 	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cumplido_proveedor/?query=Id:"+strconv.Itoa(solicitud_pago_id), &respuesta_peticion); err == nil && response == 200 {
 		helpers.LimpiezaRespuestaRefactor(respuesta_peticion, &cumplido_proveedor)
-		//fmt.Println("Cumplido proveedor: ", cumplido_proveedor)
 	} else {
-		outputError = map[string]interface{}{"funcion": "/SubirSoporteCumplido", "status": "502", "mensaje": "Error al consultar el cumplido proveedor"}
+		outputError = map[string]interface{}{"funcion": "/SubirSoporteCumplido", "status": "404", "mensaje": "Error al consultar el cumplido proveedor"}
 		return soporte_pago, outputError
 	}
 
@@ -361,23 +374,17 @@ func SubirSoporteCumplido(solicitud_pago_id int, tipo_documento string, item_id 
 			Activo:              true,
 		}
 		var res map[string]interface{}
-		if err == nil {
-			if err := helpers.SendJson(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido", "POST", &res, soporte); err == nil {
-				helpers.LimpiezaRespuestaRefactor(res, &soporte_pago)
-				return soporte_pago, nil
-			} else {
-				outputError = map[string]interface{}{"funcion": "/SubirSoporte", "status": "502", "error": err, "mensaje": "Error al subir el soporte"}
-				return soporte_pago, outputError
-			}
+		if err := helpers.SendJson(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido", "POST", &res, soporte); err == nil {
+			helpers.LimpiezaRespuestaRefactor(res, &soporte_pago)
+			return soporte_pago, nil
 		} else {
-			outputError = map[string]interface{}{"funcion": "/SubirSoporte", "status": "502", "error": err, "mensaje": "Error al convertir soporte a JSON"}
+			outputError = map[string]interface{}{"funcion": "/SubirSoporte", "status": "404", "error": err, "mensaje": "Error al subir el soporte"}
 			return soporte_pago, outputError
 		}
 
 	} else {
-		outputError = map[string]interface{}{"funcion": "/SubirSoporte", "status": "502", "error": err, "mensaje": "Error al subir el soporte"}
+		outputError = map[string]interface{}{"funcion": "/SubirSoporte", "status": "404", "error": err, "mensaje": "Error al subir el soporte"}
 		return soporte_pago, outputError
 	}
 
-	return soporte_pago, nil
 }

@@ -20,7 +20,7 @@ func (c *ListarTipoDocumentosCumplidoController) URLMapping() {
 // @Title ObtenerTiposDocumentosCumplido
 // @Description get tipos de documentos cumplido
 // @Success 200 {object} []models.DocumentoCumplido
-// @Failure 502 {object} map[string]interface{} "Error interno del servidor"
+// @Failure 404 {object} map[string]interface{} "Error interno del servidor"
 // @router /tipos-documentos-cumplido [get]
 func (c *ListarTipoDocumentosCumplidoController) ObtenerTiposDocumentosCumplido() {
 	defer func() {
@@ -42,8 +42,8 @@ func (c *ListarTipoDocumentosCumplidoController) ObtenerTiposDocumentosCumplido(
 			c.Ctx.Output.SetStatus(200)
 			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Successful", "Data": data}
 		} else {
-			c.Ctx.Output.SetStatus(200)
-			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "No se encontro ningun tipo de documento", "Data": nil}
+			c.Ctx.Output.SetStatus(404)
+			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "404", "Message": err, "Data": []map[string]interface{}{}}
 		}
 		c.ServeJSON()
 	} else {

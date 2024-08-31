@@ -26,7 +26,7 @@ func (c *CumplidoSatisfaccionController) URLMapping() {
 // @Param	numero_contrato_suscrito		path 	string	true		"Numero del contrato suscrito"
 // @Param	vigencia_contrato			path 	string	true		"Vigencia del contrato"
 // @Success 200 {object} models.BalanceContrato
-// @Failure 502 Error procesando la solicitud
+// @Failure 404 Error procesando la solicitud
 // @router /balance-financiero-contrato/:numero_contrato_suscrito/:vigencia_contrato [get]
 func (c *CumplidoSatisfaccionController) ObtenerBalanceFinancieroContrato() {
 	defer func() {
@@ -65,7 +65,7 @@ func (c *CumplidoSatisfaccionController) ObtenerBalanceFinancieroContrato() {
 // @Param	body	body 	models.BodyInformeSeguimiento	true	"Parámetros necesarios para generar el informe de seguimiento"
 // @Success 200 {object} models.InformeSeguimiento "Successful - Informe de seguimiento generado exitosamente"
 // @Failure 404 "No se encontró el recurso solicitado"
-// @Failure 502 "Error al intentar generar el informe de seguimiento"
+// @Failure 404 "Error al intentar generar el informe de seguimiento"
 // @router /cumplido-satisfaccion [post]
 func (c *CumplidoSatisfaccionController) GenerarCumplidoSatisfaccion() {
 	defer func() {
@@ -88,8 +88,8 @@ func (c *CumplidoSatisfaccionController) GenerarCumplidoSatisfaccion() {
 
 	if data, err := services.CrearCumplidoSatisfaccion(v.NumeroContratoSuscrito, v.VigenciaContrato, v.CumplimientoContrato, v.TipoPagoId, v.PeiodoInicio, v.PeriodoFin, v.TipoDocumentoCobroId, v.NumeroCuentaFactura, v.ValorPagar, v.TipoCuenta, v.NumeroCuenta, v.BancoId); err == nil {
 		if (data == models.CumplidoSatisfaccion{}) {
-			c.Ctx.Output.SetStatus(200)
-			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "No se pudo generar el informe de seguimiento", "Data": nil}
+			c.Ctx.Output.SetStatus(404)
+			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "404", "Message": err, "Data": []map[string]interface{}{}}
 		} else {
 			c.Ctx.Output.SetStatus(200)
 			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Successful", "Data": data}

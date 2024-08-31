@@ -38,12 +38,11 @@ func (c *RevisionCumplidoContratacionController) ObtenerCumplidosPendientesContr
 
 	dependencias, err := services.ObtenerCumplidosPendientesContratacion()
 
-	if err != nil {
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 502, "Message": "No hay datos", "Data": err}
-	} else if dependencias == nil {
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 204, "Message": "No hay datos", "Data": dependencias}
+	if err == nil {
+		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 204, "Message": "Cumplidos pendientes obtenidos satisfactoriamente", "Data": dependencias}
 	} else {
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": dependencias}
+		c.Ctx.Output.SetStatus(404)
+		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 404, "Message": err, "Data": []map[string]interface{}{}}
 	}
 	c.ServeJSON()
 }

@@ -10,16 +10,18 @@ import (
 func ObtenerTiposDocumentosCumplido() (tipos_documento []models.DocumentoCumplido, outputError map[string]interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/GetTiposDocumentosCumplido", "err": err, "status": "502"}
+			outputError = map[string]interface{}{"funcion": "/GetTiposDocumentosCumplido", "err": err, "status": "404"}
 			panic(outputError)
 		}
 	}()
 
-	//var respuesta_peticion map[string]interface{}
 	var tipo_documento []models.TipoDocumento
 	//fmt.Println("UrlcrudAgora: ", beego.AppConfig.String("UrlDocumentosCrud")+"/tipo_documento/?query=DominioTipoDocumento.Id:12")
 	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlDocumentosCrud")+"/tipo_documento/?query=DominioTipoDocumento.Id:12&limit=0", &tipo_documento); err == nil && response == 200 {
-		//LimpiezaRespuestaRefactor(respuesta_peticion, &tipo_documento)
+		if len(tipo_documento) == 0 {
+			outputError = map[string]interface{}{"funcion": "/GetTiposDocumentosCumplido", "err": "No se encontraron tipos de documentos", "status": "404"}
+			return nil, outputError
+		}
 		for _, tipo := range tipo_documento {
 			var documento models.DocumentoCumplido
 			documento.IdTipoDocumento = tipo.Id
@@ -37,7 +39,7 @@ func ObtenerTiposDocumentosCumplido() (tipos_documento []models.DocumentoCumplid
 		}
 	} else {
 		logs.Error(err)
-		outputError = map[string]interface{}{"funcion": "/GetTiposDocumentosCumplido", "err": "No se pudo obtener los tipos de documentos", "status": "502"}
+		outputError = map[string]interface{}{"funcion": "/GetTiposDocumentosCumplido", "err": "No se pudo obtener los tipos de documentos", "status": "404"}
 		return nil, outputError
 	}
 	return tipos_documento, nil

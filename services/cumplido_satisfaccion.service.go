@@ -15,7 +15,7 @@ import (
 func ObtenerBalanceFinancieroContrato(numero_contrato_suscrito string, vigencia_contrato string) (balance_contrato models.BalanceContrato, outputError map[string]interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/ObtenerBalanceFinancieroContrato", "err": err, "status": "502"}
+			outputError = map[string]interface{}{"funcion": "/ObtenerBalanceFinancieroContrato", "err": err, "status": "404"}
 			panic(outputError)
 		}
 	}()
@@ -27,18 +27,13 @@ func ObtenerBalanceFinancieroContrato(numero_contrato_suscrito string, vigencia_
 			valor_girado, err := ObtenerValorGiradoPorCdp(informacion_contrato[0].NumeroCdp, informacion_contrato[0].VigenciaCdp, strconv.Itoa(contrato_general.UnidadEjecutora))
 			if err == nil {
 				total_contrato := contrato_general.ValorContrato
-				if err == nil {
-					saldo_contrato := int(total_contrato) - valor_girado
-					balance_contrato.TotalContrato = strconv.FormatFloat(total_contrato, 'f', 0, 64)
-					balance_contrato.Saldo = strconv.Itoa(saldo_contrato)
-					return balance_contrato, nil
-				} else {
-					outputError = map[string]interface{}{"funcion": "/ObtenerBalanceFinancieroContrato", "err": err, "status": "502"}
-					return balance_contrato, outputError
-				}
+				saldo_contrato := int(total_contrato) - valor_girado
+				balance_contrato.TotalContrato = strconv.FormatFloat(total_contrato, 'f', 0, 64)
+				balance_contrato.Saldo = strconv.Itoa(saldo_contrato)
+				return balance_contrato, nil
 
 			} else {
-				outputError = map[string]interface{}{"funcion": "/ObtenerBalanceFinancieroContrato", "err": err, "status": "502"}
+				outputError = map[string]interface{}{"funcion": "/ObtenerBalanceFinancieroContrato", "err": err, "status": "404"}
 				return balance_contrato, outputError
 			}
 		}
@@ -52,6 +47,10 @@ func ObtenerValorGiradoPorCdp(cdp string, vigencia_cdp string, unidad_ejecucion 
 	var giros_tercero models.GirosTercero
 	valor_girado = 0
 	if response, err := helpers.GetJsonWSO2Test(beego.AppConfig.String("UrlFinancieraJBPM")+"/giros_tercero/"+cdp+"/"+vigencia_cdp+"/"+unidad_ejecucion, &temp_giros_tercero); (err == nil) && (response == 200) {
+		if temp_giros_tercero == nil {
+			err = errors.New("error en la consulta de giros_tercero")
+			return valor_girado, err
+		}
 		json_giros_tercero, error_json := json.Marshal(temp_giros_tercero)
 		if error_json == nil {
 			if err := json.Unmarshal(json_giros_tercero, &giros_tercero); err == nil {
@@ -64,33 +63,32 @@ func ObtenerValorGiradoPorCdp(cdp string, vigencia_cdp string, unidad_ejecucion 
 				return valor_girado, nil
 
 			} else {
-				err = errors.New("Error Unmarshal giros_tercero")
+				err = errors.New("error Unmarshal giros_tercero")
 				return valor_girado, err
 			}
 
 		} else {
-			err = errors.New("Error Marshal giros_tercero")
+			err = errors.New("error Marshal giros_tercero")
 			return valor_girado, err
 		}
 
 	} else {
 		return valor_girado, err
 	}
-	return
 }
 
 func ObtenerInformacionCumplidoSatisfaccion(numero_contrato_suscrito string, vigencia string) (informacion_informe models.InformacionInformeSatisfaccion, outputError map[string]interface{}) {
 
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "err": err, "status": "502"}
+			outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "err": err, "status": "404"}
 			panic(outputError)
 		}
 	}()
 
 	var informacion_proveedor []models.InformacionProveedor
 	informacion_contrato, err := helpers.ObtenerInformacionContratoProveedor(numero_contrato_suscrito, vigencia)
-	fmt.Println("informacion_contrato", informacion_contrato)
+	//fmt.Println("informacion_contrato", informacion_contrato)
 	if err == nil {
 		contrato_general, err := helpers.ObtenerContratoGeneralProveedor(numero_contrato_suscrito, vigencia)
 		if err == nil {
@@ -120,12 +118,12 @@ func ObtenerInformacionCumplidoSatisfaccion(numero_contrato_suscrito string, vig
 							informacion_informe.Supervisor = contrato_general.Supervisor.Nombre
 							informacion_informe.DocumentoSupervisor = strconv.Itoa(contrato_general.Supervisor.Documento)
 						} else {
-							outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "message": "No fue posible obtener el balance financiero del contrato", "err": err, "status": "502"}
+							outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "message": "No fue posible obtener el balance financiero del contrato", "err": err, "status": "404"}
 							return informacion_informe, outputError
 						}
 
 					} else {
-						outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "message": "No fue posible obtener el acta de inicio", "err": err, "status": "502"}
+						outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "message": "No fue posible obtener el acta de inicio", "err": err, "status": "404"}
 						return informacion_informe, outputError
 					}
 				} else {
@@ -133,16 +131,16 @@ func ObtenerInformacionCumplidoSatisfaccion(numero_contrato_suscrito string, vig
 					return informacion_informe, outputError
 				}
 			} else {
-				outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "message": "No fue posible obtener la informacion del proveedor", "err": err, "status": "502"}
+				outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "message": "No fue posible obtener la informacion del proveedor", "err": err, "status": "404"}
 				return informacion_informe, outputError
 			}
 		} else {
-			outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "message": "No fue posible obtener el contrato general", "err": err, "status": "502"}
+			outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "message": "No fue posible obtener el contrato general", "err": err, "status": "404"}
 			return informacion_informe, outputError
 		}
 
 	} else {
-		outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "message": "No fue posible obtener la informacion del contrato", "err": err, "status": "502"}
+		outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "message": "No fue posible obtener la informacion del contrato", "err": err, "status": "404"}
 		return informacion_informe, outputError
 	}
 
@@ -152,26 +150,27 @@ func ObtenerInformacionCumplidoSatisfaccion(numero_contrato_suscrito string, vig
 func ObtenerBanco(banco_id int) (banco models.Banco, outputError map[string]interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/GetBanco", "err": err, "status": "502"}
+			outputError = map[string]interface{}{"funcion": "/GetBanco", "err": err, "status": "404"}
 			panic(outputError)
 		}
 	}()
 
 	var respuesta_peticion map[string]interface{}
 	var respuesta_banco models.Banco
+	fmt.Println("Url Banco ", (beego.AppConfig.String("UrlCoreApi") + "/banco/" + strconv.Itoa(banco_id)))
 	if response, error := helpers.GetJsonTest(beego.AppConfig.String("UrlCoreApi")+"/banco/"+strconv.Itoa(banco_id), &respuesta_peticion); error == nil && response == 200 {
 		json_banco, err := json.Marshal(respuesta_peticion)
 		if err == nil {
 			if err := json.Unmarshal(json_banco, &respuesta_banco); err != nil {
-				outputError = map[string]interface{}{"funcion": "/GetBanco", "err": err, "status": "502"}
+				outputError = map[string]interface{}{"funcion": "/ObtenerBanco", "err": err, "status": "404"}
 				return respuesta_banco, outputError
 			}
 		} else {
-			outputError = map[string]interface{}{"funcion": "/GetBanco", "err": err, "status": "502"}
+			outputError = map[string]interface{}{"funcion": "/ObtenerBanco", "err": err, "status": "404"}
 			return respuesta_banco, outputError
 		}
 	} else {
-		outputError = map[string]interface{}{"funcion": "/GetBanco", "err": error, "status": "502"}
+		outputError = map[string]interface{}{"funcion": "/ObtenerBanco", "err": error, "status": "404"}
 		return respuesta_banco, outputError
 	}
 	return respuesta_banco, nil
@@ -180,7 +179,7 @@ func ObtenerBanco(banco_id int) (banco models.Banco, outputError map[string]inte
 func CrearCumplidoSatisfaccion(numero_contrato_suscrito int, vigencia_contrato string, cumplimiento_contrato string, tipo_pago string, periodo_inicio string, periodo_fin string, tipo_factura string, numero_cuenta_factura string, valor_pagar int, tipo_cuenta string, numero_cuenta string, banco_id int) (informe_satisfaccion models.CumplidoSatisfaccion, outputError map[string]interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/CrearInformeSatisfaccion", "err": err, "status": "502"}
+			outputError = map[string]interface{}{"funcion": "/CrearInformeSatisfaccion", "err": err, "status": "404"}
 			panic(outputError)
 		}
 	}()
@@ -193,13 +192,13 @@ func CrearCumplidoSatisfaccion(numero_contrato_suscrito int, vigencia_contrato s
 		if err == nil {
 			nombre_banco = banco.NombreBanco
 		} else {
-			outputError = map[string]interface{}{"funcion": "/CrearInformeSatisfaccion", "err": err, "status": "502"}
+			outputError = map[string]interface{}{"funcion": "/CrearInformeSatisfaccion", "err": err, "status": "404"}
 			return informe_satisfaccion, outputError
 		}
 
 		balance_contrato, err := ObtenerBalanceFinancieroContrato(strconv.Itoa(numero_contrato_suscrito), vigencia_contrato)
 		if err != nil {
-			outputError = map[string]interface{}{"funcion": "/CrearInformeSatisfaccion", "err": err, "status": "502"}
+			outputError = map[string]interface{}{"funcion": "/CrearInformeSatisfaccion", "err": err, "status": "404"}
 			return informe_satisfaccion, outputError
 		}
 

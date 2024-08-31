@@ -407,8 +407,8 @@ func CrearPdfCumplidoSatisfaccion(dependencia string, nombre_proveedor string, n
 		documento_supervisor)
 
 	encodedFile := encodePDF(pdf)
-	nombre := "prueba"
-	cumplido_satisfaccion = models.CumplidoSatisfaccion{File: encodedFile, Archivo: nombre}
+	nombre := "CumplidoSatisfaccion_" + strings.Join(strings.Fields(nombre_proveedor), "")
+	cumplido_satisfaccion = models.CumplidoSatisfaccion{File: nombre, Archivo: encodedFile}
 	return cumplido_satisfaccion, nil
 }
 
