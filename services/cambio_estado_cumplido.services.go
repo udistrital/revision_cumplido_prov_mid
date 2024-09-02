@@ -189,7 +189,7 @@ func ObtenerSupervisorContrato(numero_contrato_suscrito string, vigencia string)
 	var respuesta_peticion map[string]interface{}
 
 	if response, err := helpers.GetJsonWSO2Test(beego.AppConfig.String("UrlAdministrativaJBPM")+"/informacion_supervisor_contrato/"+numero_contrato_suscrito+"/"+vigencia, &respuesta_peticion); err == nil && response == 200 {
-		if respuesta_peticion["Contratos"] == nil {
+		if respuesta_peticion == nil {
 			outputError = map[string]interface{}{"funcion": "ObtenerSupervisorContrato", "status": "404", "mensaje": "No se ha registrado un supervisor para el contrato"}
 			return supervisor_contrato, outputError
 		}

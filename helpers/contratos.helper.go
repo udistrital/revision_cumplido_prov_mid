@@ -2,7 +2,6 @@ package helpers
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 
 	"github.com/astaxie/beego"
@@ -23,7 +22,7 @@ func ObtenerInformacionContratoProveedor(numero_contrato_suscrito string, vigenc
 	}()
 
 	var respuesta_peticion map[string]interface{}
-	fmt.Println(beego.AppConfig.String("UrlAdministrativaJBPM") + "/informacion_contrato_proveedor/" + numero_contrato_suscrito + "/" + vigencia)
+	//fmt.Println(beego.AppConfig.String("UrlAdministrativaJBPM") + "/informacion_contrato_proveedor/" + numero_contrato_suscrito + "/" + vigencia)
 	if response, err := GetJsonWSO2Test(beego.AppConfig.String("UrlAdministrativaJBPM")+"/informacion_contrato_proveedor/"+numero_contrato_suscrito+"/"+vigencia, &respuesta_peticion); err == nil && response == 200 {
 		if respuesta_peticion != nil {
 			if contratosMap, exito := respuesta_peticion["proveedor"].(map[string]interface{}); exito {

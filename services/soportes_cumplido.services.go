@@ -335,6 +335,11 @@ func SubirSoporteCumplido(solicitud_pago_id int, tipo_documento string, item_id 
 	var respuesta_peticion map[string]interface{}
 	var cumplido_proveedor []models.CumplidoProveedor
 	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cumplido_proveedor/?query=Id:"+strconv.Itoa(solicitud_pago_id), &respuesta_peticion); err == nil && response == 200 {
+		data := respuesta_peticion["Data"].([]interface{})
+		if len(data[0].(map[string]interface{})) == 0 {
+			outputError = map[string]interface{}{"funcion": "/SubirSoporteCumplido", "status": "404", "mensaje": "El cumplido proveedor no existe"}
+			return soporte_pago, outputError
+		}
 		helpers.LimpiezaRespuestaRefactor(respuesta_peticion, &cumplido_proveedor)
 	} else {
 		outputError = map[string]interface{}{"funcion": "/SubirSoporteCumplido", "status": "404", "mensaje": "Error al consultar el cumplido proveedor"}

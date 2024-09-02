@@ -6,6 +6,7 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
+	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/services"
 )
 
@@ -52,14 +53,7 @@ func (c *SoportesCumplidoController) SubirSoporteCumplido() {
 	}()
 
 	// Estructura para recibir el cuerpo de la solicitud
-	var soporteReq struct {
-		SolicitudPagoID int    `json:"SolicitudPagoID"`
-		TipoDocumento   string `json:"TipoDocumento"`
-		ItemID          int    `json:"ItemID"`
-		Observaciones   string `json:"Observaciones"`
-		NombreArchivo   string `json:"NombreArchivo"`
-		Archivo         string `json:"Archivo"`
-	}
+	var soporteReq models.BodySubirSoporteRequest
 
 	// Parsear el cuerpo de la solicitud
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &soporteReq); err != nil {
@@ -179,13 +173,7 @@ func (c *SoportesCumplidoController) AgregarComentarioSoporte() {
 		}
 	}()
 
-	type BodyParams struct {
-		SoporteId      string `json:"soporte_id"`
-		CambioEstadoId string `json:"cambio_estado_id"`
-		Comentario     string `json:"comentario"`
-	}
-
-	var v BodyParams
+	var v models.AgregarComentarioSoporteRequest
 
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 

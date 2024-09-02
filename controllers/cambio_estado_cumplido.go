@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/astaxie/beego"
+	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/services"
 )
 
@@ -44,12 +45,8 @@ func (c *CambioEstadoCumplidoController) CambioEstadoCumplido() {
 	}()
 
 	// Estructura para recibir el cuerpo de la solicitud
-	type BodyParams struct {
-		CodigoAbreviacionEstadoCumplido string `json:"CodigoAbreviacionEstadoCumplido"`
-		CumplidoProveedorID             int    `json:"CumplidoProveedorId"`
-	}
 
-	var v BodyParams
+	var v models.BodyCumplidoRequest
 
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 

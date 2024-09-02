@@ -46,3 +46,23 @@ type BodyCumplidoSatisfaccion struct {
 	BancoId                int    `json:"BancoId"`
 	CumplimientoContrato   string `json:"CumplimientoContrato"`
 }
+
+type BodyCumplidoRequest struct {
+	CodigoAbreviacionEstadoCumplido string `json:"CodigoAbreviacionEstadoCumplido"`
+	CumplidoProveedorID             int    `json:"CumplidoProveedorId"`
+}
+
+type BodySubirSoporteRequest struct {
+	SolicitudPagoID int    `json:"SolicitudPagoID"`
+	TipoDocumento   string `json:"TipoDocumento"`
+	ItemID          int    `json:"ItemID"`
+	Observaciones   string `json:"Observaciones"`
+	NombreArchivo   string `json:"NombreArchivo"`
+	Archivo         string `json:"Archivo"`
+}
+
+type AgregarComentarioSoporteRequest struct {
+	SoporteId      string `json:"soporte_id"`
+	CambioEstadoId string `json:"cambio_estado_id"`
+	Comentario     string `json:"comentario"`
+}
