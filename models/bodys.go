@@ -18,7 +18,7 @@ type BodyCambioEstadoCumplido struct {
 	EstadoCumplidoId     EstadoCumplido    `json:"EstadoCumplidoId"`
 	CumplidoProveedorId  CumplidoProveedor `json:"CumplidoProveedorId"`
 	DocumentoResponsable int               `json:"DocumentoResponsable"`
-	CargoResponsable     string            `json:"CargoReponsable"`
+	CargoResponsable     string            `json:"CargoResponsable"`
 	Activo               bool              `json:"Activo"`
 	FechaCreacion        time.Time         `json:"FechaCreacion"`
 	FechaModificacion    time.Time         `json:"FechaModificacion"`
@@ -32,16 +32,17 @@ type BodySoportePago struct {
 	Activo              bool
 }
 
-type BodyInformeSeguimiento struct {
+type BodyCumplidoSatisfaccion struct {
 	NumeroContratoSuscrito int    `json:"NumeroContratoSuscrito"`
 	VigenciaContrato       string `json:"VigenciaContrato"`
-	TipoPagoId             string `json:"TipoPago"`
+	TipoPagoId             string `json:"TipoPagoId"`
 	PeiodoInicio           string `json:"PeriodoInicio"`
 	PeriodoFin             string `json:"PeriodoFin"`
-	TipoDocumentoCobroId   string `json:"TipoFactura"`
+	TipoDocumentoCobroId   string `json:"TipoDocumentoCobroId"`
 	NumeroCuentaFactura    string `json:"NumeroCuentaFactura"`
 	ValorPagar             int    `json:"ValorPagar"`
-	TipoCuenta             string `json:"TipoDocumentoCobroId"`
+	TipoCuenta             string `json:"TipoCuenta"`
 	NumeroCuenta           string `json:"NumeroCuenta"`
 	BancoId                int    `json:"BancoId"`
+	CumplimientoContrato   string `json:"CumplimientoContrato"`
 }

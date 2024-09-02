@@ -8,7 +8,6 @@ type InformacionContratoProveedor struct {
 	VigenciaRp             string
 	NombreProveedor        string
 	NombreDependencia      string
-	NumDocumentoSupervisor string
 	NumeroCdp              string
 	VigenciaCdp            string
 	Rubro                  string

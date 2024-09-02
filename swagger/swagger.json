@@ -15,20 +15,6 @@
     },
     "basePath": "/v1",
     "paths": {
-        "/contratacion/certificado-aprobacion-pago/{id_solicitud_pago}": {
-            "get": {
-                "tags": [
-                    "contratacion"
-                ],
-                "description": "Metodo",
-                "operationId": "RevisionCumplidoContratacionController.GnerarAutorizaxionPago",
-                "responses": {
-                    "403": {
-                        "description": ""
-                    }
-                }
-            }
-        },
         "/contratacion/solicitudes-pago/": {
             "get": {
                 "tags": [
@@ -57,7 +43,7 @@
                 }
             }
         },
-        "/ordenador/revertir-solicitud-pago/{id_cumplido}": {
+        "/ordenador/revertir-solicitud-pago/{documento_ordenador}": {
             "get": {
                 "tags": [
                     "ordenador"
@@ -87,7 +73,7 @@
                     "ordenador"
                 ],
                 "description": "Metodo para que el ordenador  Obtenga los contratos para la aprobacion de pago",
-                "operationId": "RevisionCumplidoOrdenadorController.ObtenerPendientesRevisionOrdenador",
+                "operationId": "RevisionCumplidoOrdenadorController.ObtenerCumplidosPendientesRevisionOrdenador",
                 "parameters": [
                     {
                         "in": "path",
@@ -104,33 +90,13 @@
                 }
             }
         },
-        "/ping/ping": {
-            "get": {
-                "tags": [
-                    "ping"
-                ],
-                "description": "Realiza una prueba de ping y devuelve el estado.",
-                "operationId": "PingController.PingTest",
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/map[string]interface{}{\"Success\":true,\"Status\":\"200\",\"Message\":\"Successful\",\"Data\":{}}"
-                        }
-                    },
-                    "500": {
-                        "description": "{object} map[string]interface{}{\"Success\":false,\"Status\":\"500\",\"Message\":\"Internal Server Error\"}"
-                    }
-                }
-            }
-        },
         "/solicitud-pago/cambio-estado": {
             "post": {
                 "tags": [
                     "solicitud-pago"
                 ],
                 "description": "Cambia el estado de pago del proveedor",
-                "operationId": "EstadoSoporteController.CambioEstadoPago",
+                "operationId": "CambioEstadoCumplidoController.CambioEstadoCumplido",
                 "parameters": [
                     {
                         "in": "query",
@@ -168,7 +134,7 @@
                             "$ref": "#/definitions/models.CambioEstadoCumplidoResponse"
                         }
                     },
-                    "502": {
+                    "404": {
                         "description": "{object} map[string]interface{}"
                     }
                 }
@@ -215,9 +181,6 @@
                         }
                     },
                     "404": {
-                        "description": "\"No se encontró el soporte de pago o cambio de estado\""
-                    },
-                    "502": {
                         "description": "\"Error al intentar agregar el comentario\""
                     }
                 }
@@ -229,7 +192,7 @@
                     "solicitud-pago"
                 ],
                 "description": "Subir un soporte de pago",
-                "operationId": "SoportesCumplidoController.SubirSoporte",
+                "operationId": "SoportesCumplidoController.SubirSoporteCumplido",
                 "parameters": [
                     {
                         "in": "body",
@@ -310,7 +273,7 @@
                     "solicitud-pago"
                 ],
                 "description": "Obtener los documentos de soporte de pago mensual y comprimirlos en un archivo ZIP",
-                "operationId": "SoportesCumplidoController.GetSoportesComprimido",
+                "operationId": "SoportesCumplidoController.ObtenerComprimidoSoportes",
                 "parameters": [
                     {
                         "in": "path",
@@ -328,9 +291,6 @@
                         }
                     },
                     "404": {
-                        "description": "\"No se encontraron documentos de soporte\""
-                    },
-                    "502": {
                         "description": "\"Error al intentar obtener o comprimir los documentos\""
                     }
                 }
@@ -342,7 +302,7 @@
                     "solicitud-pago"
                 ],
                 "description": "Obtener los documentos de soporte de pago mensual",
-                "operationId": "SoportesCumplidoController.GetDocumentosPagoMensual",
+                "operationId": "SoportesCumplidoController.ObtenerDocumentosPagoMensual",
                 "parameters": [
                     {
                         "in": "path",
@@ -392,9 +352,6 @@
                         }
                     },
                     "404": {
-                        "description": "\"No se encontró el soporte de pago\""
-                    },
-                    "502": {
                         "description": "\"Error al intentar eliminar el soporte de pago\""
                     }
                 }
@@ -406,7 +363,7 @@
                     "supervisor"
                 ],
                 "description": "Obtener el balance financiero de un contrato",
-                "operationId": "InformeSeguimientoController.GetBalanceFinancieroContrato",
+                "operationId": "CumplidoSatisfaccionController.ObtenerBalanceFinancieroContrato",
                 "parameters": [
                     {
                         "in": "path",
@@ -430,7 +387,7 @@
                             "$ref": "#/definitions/models.BalanceContrato"
                         }
                     },
-                    "502": {
+                    "404": {
                         "description": "Error procesando la solicitud"
                     }
                 }
@@ -465,13 +422,13 @@
                 }
             }
         },
-        "/supervisor/informe-seguimiento": {
+        "/supervisor/cumplido-satisfaccion": {
             "post": {
                 "tags": [
                     "supervisor"
                 ],
                 "description": "Genera un informe de seguimiento para un contrato suscrito",
-                "operationId": "InformeSeguimientoController.GenerateInformeSeguimiento",
+                "operationId": "CumplidoSatisfaccionController.GenerarInformeSatisfaccion",
                 "parameters": [
                     {
                         "in": "body",
@@ -491,9 +448,6 @@
                         }
                     },
                     "404": {
-                        "description": "\"No se encontró el recurso solicitado\""
-                    },
-                    "502": {
                         "description": "\"Error al intentar generar el informe de seguimiento\""
                     }
                 }
@@ -505,7 +459,7 @@
                     "supervisor"
                 ],
                 "description": "get solicitudes de contrato",
-                "operationId": "SolicitudContratoController.GetSolicitudesContrato",
+                "operationId": "SolicitudesCumplidosContratoController.ObtenerSolicitudesContrato",
                 "parameters": [
                     {
                         "in": "path",
@@ -544,7 +498,7 @@
                     "supervisor"
                 ],
                 "description": "get tipos de documentos cumplido",
-                "operationId": "ListarTipoDocumentosCumplidoController.GetTiposDocumentosCumplido",
+                "operationId": "ListarTipoDocumentosCumplidoController.ObtenerTiposDocumentosCumplido",
                 "responses": {
                     "200": {
                         "description": "",
@@ -555,7 +509,7 @@
                             }
                         }
                     },
-                    "502": {
+                    "404": {
                         "description": "{object} map[string]interface{} \"Error interno del servidor\""
                     }
                 }
@@ -565,10 +519,6 @@
     "definitions": {
         "map[string]interface{}": {
             "title": "map[string]interface{}",
-            "type": "object"
-        },
-        "map[string]interface{}{\"Success\":true,\"Status\":\"200\",\"Message\":\"Successful\",\"Data\":{}}": {
-            "title": "map[string]interface{}{\"Success\":true,\"Status\":\"200\",\"Message\":\"Successful\",\"Data\":{}}",
             "type": "object"
         },
         "models.BalanceContrato": {
@@ -585,45 +535,7 @@
         },
         "models.BodyInformeSeguimiento": {
             "title": "BodyInformeSeguimiento",
-            "type": "object",
-            "properties": {
-                "BancoId": {
-                    "type": "integer",
-                    "format": "int64"
-                },
-                "NumeroContratoSuscrito": {
-                    "type": "integer",
-                    "format": "int64"
-                },
-                "NumeroCuenta": {
-                    "type": "string"
-                },
-                "NumeroCuentaFactura": {
-                    "type": "string"
-                },
-                "PeriodoFin": {
-                    "type": "string"
-                },
-                "PeriodoInicio": {
-                    "type": "string"
-                },
-                "TipoDocumentoCobroId": {
-                    "type": "string"
-                },
-                "TipoFactura": {
-                    "type": "string"
-                },
-                "TipoPago": {
-                    "type": "string"
-                },
-                "ValorPagar": {
-                    "type": "integer",
-                    "format": "int64"
-                },
-                "VigenciaContrato": {
-                    "type": "string"
-                }
-            }
+            "type": "object"
         },
         "models.CambioEstadoCumplido": {
             "title": "CambioEstadoCumplido",
@@ -663,6 +575,9 @@
             "title": "CambioEstadoCumplidoResponse",
             "type": "object",
             "properties": {
+                "CargoResponsable": {
+                    "type": "string"
+                },
                 "CumplidoProveedorId": {
                     "type": "integer",
                     "format": "int64"
@@ -691,9 +606,6 @@
                     "items": {
                         "$ref": "#/definitions/models.Dependencia"
                     }
-                },
-                "nombre_supervisor": {
-                    "type": "string"
                 }
             }
         },
@@ -850,7 +762,7 @@
                 "Activo": {
                     "type": "boolean"
                 },
-                "CodigoAbreviación": {
+                "CodigoAbreviacion": {
                     "type": "string"
                 },
                 "Descripcion": {
@@ -884,9 +796,6 @@
                 "NombreProveedor": {
                     "type": "string"
                 },
-                "NumDocumentoSupervisor": {
-                    "type": "string"
-                },
                 "NumeroCdp": {
                     "type": "string"
                 },
@@ -915,15 +824,7 @@
         },
         "models.InformeSeguimiento": {
             "title": "InformeSeguimiento",
-            "type": "object",
-            "properties": {
-                "archivo": {
-                    "type": "string"
-                },
-                "file": {
-                    "type": "string"
-                }
-            }
+            "type": "object"
         },
         "models.RespuestaComentarioSoporte": {
             "title": "RespuestaComentarioSoporte",
@@ -1002,7 +903,7 @@
     "tags": [
         {
             "name": "supervisor",
-            "description": "Informe_seguimientoController operations for Informe_seguimiento\n"
+            "description": "ListarTipoDocumentosCumplidoController operations for ListarTipoDocumentosCumplidoController\n"
         },
         {
             "name": "solicitud-pago",
