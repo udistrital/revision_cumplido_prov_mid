@@ -705,7 +705,16 @@
                 "Archivo": {
                     "type": "string"
                 },
-                "File": {
+                "CargoResponsable": {
+                    "type": "string"
+                },
+                "DescripcionDocumento": {
+                    "type": "string"
+                },
+                "NombreArchivo": {
+                    "type": "string"
+                },
+                "NombreResponsable": {
                     "type": "string"
                 }
             }
