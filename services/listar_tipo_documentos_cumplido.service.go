@@ -26,15 +26,6 @@ func ObtenerTiposDocumentosCumplido() (tipos_documento []models.DocumentoCumplid
 			var documento models.DocumentoCumplido
 			documento.IdTipoDocumento = tipo.Id
 			documento.Nombre = tipo.Nombre
-			if tipo.NumeroOrden == 0 {
-				documento.Tipo = "Obligatorio"
-			} else if tipo.NumeroOrden == 1 {
-				documento.Tipo = "Autogenerado-Obligatorio"
-			} else if tipo.NumeroOrden == 2 {
-				documento.Tipo = "Aprobacion Pago"
-			} else {
-				documento.Tipo = "Acta liquidacion y evaluacion"
-			}
 			tipos_documento = append(tipos_documento, documento)
 		}
 	} else {

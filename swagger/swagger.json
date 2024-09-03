@@ -15,7 +15,7 @@
     },
     "basePath": "/v1",
     "paths": {
-        "/contratacion/solicitudes-pago/": {
+        "/contratacion/solicitudes-pago": {
             "get": {
                 "tags": [
                     "contratacion"
@@ -29,15 +29,30 @@
                 }
             }
         },
-        "/ordenador/certificado-aprobacion-pago/{id_solicitud_pago}": {
+        "/ordenador/autorizacion-giro/{cumplido_proveedor_id}": {
             "get": {
                 "tags": [
                     "ordenador"
                 ],
-                "description": "Metodo",
-                "operationId": "RevisionCumplidoOrdenadorController.GnerarAutorizaxionPago",
+                "description": "Generar la autorización de giro para un cumplido proveedor específico",
+                "operationId": "RevisionCumplidoOrdenadorController.GenerarAutorizacionGiro",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "cumplido_proveedor_id",
+                        "description": "ID del cumplido del proveedor",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
                 "responses": {
-                    "403": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.DocumentoAutorizacionPago"
+                        }
+                    },
+                    "404": {
                         "description": ""
                     }
                 }
@@ -683,6 +698,18 @@
                 }
             }
         },
+        "models.DocumentoAutorizacionPago": {
+            "title": "DocumentoAutorizacionPago",
+            "type": "object",
+            "properties": {
+                "Archivo": {
+                    "type": "string"
+                },
+                "File": {
+                    "type": "string"
+                }
+            }
+        },
         "models.DocumentoCumplido": {
             "title": "DocumentoCumplido",
             "type": "object",
@@ -692,9 +719,6 @@
                     "format": "int64"
                 },
                 "Nombre": {
-                    "type": "string"
-                },
-                "Tipo": {
                     "type": "string"
                 }
             }
@@ -904,10 +928,6 @@
         {
             "name": "supervisor",
             "description": "ListarTipoDocumentosCumplidoController operations for ListarTipoDocumentosCumplidoController\n"
-        },
-        {
-            "name": "solicitud-pago",
-            "description": "SoportesCumplidoController operations for SoportesCumplido\n"
         },
         {
             "name": "solicitud-pago",

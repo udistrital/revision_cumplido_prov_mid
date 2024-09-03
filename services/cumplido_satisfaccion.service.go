@@ -3,7 +3,6 @@ package services
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strconv"
 
 	"github.com/astaxie/beego"
@@ -147,68 +146,21 @@ func ObtenerInformacionCumplidoSatisfaccion(numero_contrato_suscrito string, vig
 	return informacion_informe, nil
 }
 
-func ObtenerBanco(banco_id int) (banco models.Banco, outputError map[string]interface{}) {
-	defer func() {
-		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/GetBanco", "err": err, "status": "404"}
-			panic(outputError)
-		}
-	}()
-
-	var respuesta_peticion map[string]interface{}
-	var respuesta_banco models.Banco
-	fmt.Println("Url Banco ", (beego.AppConfig.String("UrlCoreApi") + "/banco/" + strconv.Itoa(banco_id)))
-	if response, error := helpers.GetJsonTest(beego.AppConfig.String("UrlCoreApi")+"/banco/"+strconv.Itoa(banco_id), &respuesta_peticion); error == nil && response == 200 {
-		json_banco, err := json.Marshal(respuesta_peticion)
-		if err == nil {
-			if err := json.Unmarshal(json_banco, &respuesta_banco); err != nil {
-				outputError = map[string]interface{}{"funcion": "/ObtenerBanco", "err": err, "status": "404"}
-				return respuesta_banco, outputError
-			}
-		} else {
-			outputError = map[string]interface{}{"funcion": "/ObtenerBanco", "err": err, "status": "404"}
-			return respuesta_banco, outputError
-		}
-	} else {
-		outputError = map[string]interface{}{"funcion": "/ObtenerBanco", "err": error, "status": "404"}
-		return respuesta_banco, outputError
-	}
-	return respuesta_banco, nil
-}
-
-func CrearCumplidoSatisfaccion(numero_contrato_suscrito int, vigencia_contrato string, cumplimiento_contrato string, tipo_pago string, periodo_inicio string, periodo_fin string, tipo_factura string, numero_cuenta_factura string, valor_pagar int, tipo_cuenta string, numero_cuenta string, banco_id int) (informe_satisfaccion models.CumplidoSatisfaccion, outputError map[string]interface{}) {
+func CrearCumplidoSatisfaccion(numero_contrato_suscrito int, vigencia_contrato string, tipo_pago string, periodo_inicio string, periodo_fin string, tipo_factura string, numero_cuenta_factura string, valor_pagar int, tipo_cuenta string, numero_cuenta string, banco string) (informe_satisfaccion models.CumplidoSatisfaccion, outputError map[string]interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
 			outputError = map[string]interface{}{"funcion": "/CrearInformeSatisfaccion", "err": err, "status": "404"}
 			panic(outputError)
 		}
 	}()
-
-	nombre_banco := ""
 
 	informacion_informe_satisfaccion, err := ObtenerInformacionCumplidoSatisfaccion(strconv.Itoa(numero_contrato_suscrito), vigencia_contrato)
 	if err == nil {
-		banco, err := ObtenerBanco(banco_id)
-		if err == nil {
-			nombre_banco = banco.NombreBanco
-		} else {
-			outputError = map[string]interface{}{"funcion": "/CrearInformeSatisfaccion", "err": err, "status": "404"}
-			return informe_satisfaccion, outputError
-		}
-
-		balance_contrato, err := ObtenerBalanceFinancieroContrato(strconv.Itoa(numero_contrato_suscrito), vigencia_contrato)
-		if err != nil {
-			outputError = map[string]interface{}{"funcion": "/CrearInformeSatisfaccion", "err": err, "status": "404"}
-			return informe_satisfaccion, outputError
-		}
-
-		total_contrato, _ := strconv.Atoi(balance_contrato.TotalContrato)
-		saldo_contrato, _ := strconv.Atoi(balance_contrato.Saldo)
 
 		informe_satisfaccion, _ = helpers.CrearPdfCumplidoSatisfaccion(informacion_informe_satisfaccion.Dependencia,
 			informacion_informe_satisfaccion.NombreProveedor,
 			informacion_informe_satisfaccion.DocumentoProveedor,
-			cumplimiento_contrato,
+			tipo_pago,
 			informacion_informe_satisfaccion.TipoContrato,
 			informacion_informe_satisfaccion.FechaInicio,
 			strconv.Itoa(numero_contrato_suscrito),
@@ -219,14 +171,14 @@ func CrearCumplidoSatisfaccion(numero_contrato_suscrito int, vigencia_contrato s
 			informacion_informe_satisfaccion.CargoSupervisor,
 			tipo_factura,
 			numero_cuenta_factura,
-			total_contrato,
+			informacion_informe_satisfaccion.ValorTotalContrato,
 			periodo_inicio,
 			periodo_fin,
-			saldo_contrato,
+			informacion_informe_satisfaccion.SaldoContrato,
 			informacion_informe_satisfaccion.FechaFin,
 			tipo_cuenta,
 			numero_cuenta,
-			nombre_banco,
+			banco,
 			informacion_informe_satisfaccion.Supervisor,
 			vigencia_contrato,
 			informacion_informe_satisfaccion.DocumentoSupervisor)

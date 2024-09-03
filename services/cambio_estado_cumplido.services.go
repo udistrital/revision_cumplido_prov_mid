@@ -2,9 +2,7 @@ package services
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/astaxie/beego"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/helpers"
@@ -61,10 +59,9 @@ func CambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_proveedor
 		return respuesta_cambio_estado, outputError
 	}
 
-	ultimo_cambio_estado_cumplido, err := DesactivarCambiosAnterioresCumplido(cumplido_proveedor_id)
-	fmt.Println("Error en desactivar cambios anteriores", err)
+	ultimo_cambio_estado_cumplido, err := DesactivarCambiosAnterioresCumplido(cumplido_proveedor_id, codigo_abreviacion_cumplido)
 	if err != nil {
-		outputError = map[string]interface{}{"funcion": "CambioEstadoCumplido", "status": "404", "mensaje": "Error al desactivar los cambios anteriores"}
+		outputError = err
 		return respuesta_cambio_estado, outputError
 	}
 
@@ -112,9 +109,6 @@ func CrearBodyCambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_
 			body_cambio_estado.CumplidoProveedorId = cumplido_proveedor
 			body_cambio_estado.DocumentoResponsable = documento_supervisor
 			body_cambio_estado.CargoResponsable = supervisor_contrato.Contratos.Supervisor[0].Cargo
-			body_cambio_estado.Activo = true
-			body_cambio_estado.FechaCreacion = time.Now()
-			body_cambio_estado.FechaModificacion = time.Now()
 		} else {
 			outputError = map[string]interface{}{"funcion": "CambioEstadoCumplido", "status": "404", "mensaje": "Error al obtener el supervisor del contrato"}
 			return body_cambio_estado, outputError
@@ -123,17 +117,17 @@ func CrearBodyCambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_
 		body_cambio_estado.EstadoCumplidoId = estado_cumplido
 		body_cambio_estado.CumplidoProveedorId = cumplido_proveedor
 		body_cambio_estado.DocumentoResponsable = 0
-		body_cambio_estado.CargoResponsable = "Contratación"
+		body_cambio_estado.CargoResponsable = "CONTRATACIÓN"
 	case "RC":
 		body_cambio_estado.EstadoCumplidoId = estado_cumplido
 		body_cambio_estado.CumplidoProveedorId = cumplido_proveedor
 		body_cambio_estado.DocumentoResponsable = 0
-		body_cambio_estado.CargoResponsable = "Contratación"
+		body_cambio_estado.CargoResponsable = "CONTRATACIÓN"
 	case "AC":
 		body_cambio_estado.EstadoCumplidoId = estado_cumplido
 		body_cambio_estado.CumplidoProveedorId = cumplido_proveedor
 		body_cambio_estado.DocumentoResponsable = 0
-		body_cambio_estado.CargoResponsable = "Contratación"
+		body_cambio_estado.CargoResponsable = "CONTRATACIÓN"
 	case "PRO":
 		ordenador_contrato, err := helpers.ObtenerOrdenadorContrato(cumplido_proveedor.NumeroContrato, strconv.Itoa(cumplido_proveedor.VigenciaContrato))
 		if err == nil {
@@ -211,13 +205,32 @@ func ObtenerSupervisorContrato(numero_contrato_suscrito string, vigencia string)
 	return supervisor_contrato, outputError
 }
 
-func DesactivarCambiosAnterioresCumplido(cumplido_proveedor_id int) (ultimo_cambio_cumplido models.CambioEstadoCumplido, outputError map[string]interface{}) {
+func DesactivarCambiosAnterioresCumplido(cumplido_proveedor_id int, codigo_abreviacion_cumplido string) (ultimo_cambio_cumplido models.CambioEstadoCumplido, outputError map[string]interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
 			outputError = map[string]interface{}{"funcion": "DesactivarCambiosAnterioresCumplido", "err": err, "status": "404"}
 			panic(outputError)
 		}
 	}()
+
+	posibles_estados_siguientes := map[string][]string{
+		"CD":  {"PRC"},
+		"PRC": {"RC", "AC"},
+		"RC":  {"CD"},
+		"AC":  {"PRO"},
+		"PRO": {"AO", "RO"},
+		"AO":  {"RO"},
+		"RO":  {"CD"},
+	}
+
+	contains := func(posibles_estados []string, estado string) bool {
+		for _, a := range posibles_estados {
+			if a == estado {
+				return true
+			}
+		}
+		return false
+	}
 
 	var respuesta_peticion map[string]interface{}
 	var cambios_anteriores []models.CambioEstadoCumplido
@@ -228,6 +241,12 @@ func DesactivarCambiosAnterioresCumplido(cumplido_proveedor_id int) (ultimo_camb
 			return
 		}
 		helpers.LimpiezaRespuestaRefactor(respuesta_peticion, &cambios_anteriores)
+
+		if !contains(posibles_estados_siguientes[cambios_anteriores[0].EstadoCumplidoId.CodigoAbreviacion], codigo_abreviacion_cumplido) {
+			outputError = map[string]interface{}{"funcion": "DesactivarCambiosAnterioresCumplido", "status": "404", "mensaje": "No es posible pasar del estado " + cambios_anteriores[0].EstadoCumplidoId.CodigoAbreviacion + " al estado " + codigo_abreviacion_cumplido}
+			return ultimo_cambio_cumplido, outputError
+		}
+
 		if (cambios_anteriores[0] != models.CambioEstadoCumplido{}) {
 			ultimo_cambio_cumplido = cambios_anteriores[0]
 			for _, cambio_anterior := range cambios_anteriores {
@@ -240,6 +259,7 @@ func DesactivarCambiosAnterioresCumplido(cumplido_proveedor_id int) (ultimo_camb
 				}
 			}
 		}
+
 	} else {
 		outputError = map[string]interface{}{"funcion": "DesactivarCambiosAnterioresCumplido", "status": "404", "mensaje": "Error al consultar el estado del cumplido"}
 		return ultimo_cambio_cumplido, outputError

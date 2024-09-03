@@ -131,7 +131,6 @@ type ItemInforme struct {
 type DocumentoCumplido struct {
 	IdTipoDocumento int
 	Nombre          string
-	Tipo            string
 }
 
 type DocumentosComprimido struct {

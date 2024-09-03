@@ -55,7 +55,7 @@ func init() {
     beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:RevisionCumplidoContratacionController"] = append(beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:RevisionCumplidoContratacionController"],
         beego.ControllerComments{
             Method: "ObtenerCumplidosPendientesContratacion",
-            Router: "/solicitudes-pago/",
+            Router: "/solicitudes-pago",
             AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,
@@ -63,8 +63,8 @@ func init() {
 
     beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:RevisionCumplidoOrdenadorController"] = append(beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:RevisionCumplidoOrdenadorController"],
         beego.ControllerComments{
-            Method: "GenerarPdfAutorizacionPago",
-            Router: "/certificado-aprobacion-pago/:id_solicitud_pago",
+            Method: "GenerarAutorizacionGiro",
+            Router: "/autorizacion-giro/:cumplido_proveedor_id",
             AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,

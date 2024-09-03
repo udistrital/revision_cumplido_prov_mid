@@ -10,11 +10,10 @@ type RevisionCumplidoOrdenadorController struct {
 	beego.Controller
 }
 
-// URLMapping asigna métodos a la estructura PingController
 func (c *RevisionCumplidoOrdenadorController) URLMapping() {
 	c.Mapping("ObtenerCumplidosPendientesRevisionOrdenador", c.ObtenerCumplidosPendientesRevisionOrdenador)
 	c.Mapping("ListaCumplidosReversibles", c.ListaCumplidosReversibles)
-	c.Mapping("GenerarPdfAutorizacionPago", c.GenerarPdfAutorizacionPago)
+	c.Mapping("GenerarAutorizacionGiro", c.GenerarAutorizacionGiro)
 }
 
 // ObtenerCumplidosPendientesRevisionOrdenador
@@ -77,6 +76,7 @@ func (c *RevisionCumplidoOrdenadorController) ListaCumplidosReversibles() {
 	}()
 
 	id_cumplido := c.GetString(":documento_ordenador")
+	print(id_cumplido)
 
 	cumplidos_reversibles, err := services.ListaCumplidosReversibles(id_cumplido)
 
@@ -89,16 +89,17 @@ func (c *RevisionCumplidoOrdenadorController) ListaCumplidosReversibles() {
 	c.ServeJSON()
 }
 
-// generarDocumentoAutorizacion
-// @Title GnerarAutorizaxionPago
-// @Description Metodo
-// Success 200 {object}
-// @Failure 403
-// @router /certificado-aprobacion-pago/:id_solicitud_pago [get]
-func (c *RevisionCumplidoOrdenadorController) GenerarPdfAutorizacionPago() {
+// GenerarAutorizacionGiro ...
+// @Title GenerarAutorizacionGiro
+// @Description Generar la autorización de giro para un cumplido proveedor específico
+// @Param	cumplido_proveedor_id	path	string	true	"ID del cumplido del proveedor"
+// @Success 200 {object} models.DocumentoAutorizacionPago
+// @Failure 404
+// @router /autorizacion-giro/:cumplido_proveedor_id [get]
+func (c *RevisionCumplidoOrdenadorController) GenerarAutorizacionGiro() {
 
-	id_solicitud_pago := c.GetString(":id_solicitud_pago")
-	autorizacion, err := services.GenerarAutorizacionPago(id_solicitud_pago)
+	cumplido_proveedor_id := c.GetString(":cumplido_proveedor_id")
+	autorizacion, err := services.GenerarAutorizacionGiro(cumplido_proveedor_id)
 	if err == nil {
 		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": autorizacion}
 	} else {

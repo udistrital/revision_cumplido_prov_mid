@@ -136,7 +136,7 @@ func ListaCumplidosReversibles(documento_ordenador string) (soliciudes_revertibl
 	return soliciudes_revertibles, nil
 }
 
-func GenerarAutorizacionPago(id_solicitud_pago string) (autorizacion_pago models.DocumentoAutorizacionPago, outputError interface{}) {
+func GenerarAutorizacionGiro(id_solicitud_pago string) (autorizacion_pago models.DocumentoAutorizacionPago, outputError interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
 			outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionPago", "err": err, "status": "404"}
@@ -200,7 +200,7 @@ func GenerarAutorizacionPago(id_solicitud_pago string) (autorizacion_pago models
 												ValorPago:          valor_pago,
 											}
 
-											autorizacion := helpers.GenerarPdfAutorizacionPago(datos_documento)
+											autorizacion := helpers.GenerarPdfAutorizacionGiro(datos_documento)
 											if autorizacion != "" {
 												nombre := "AutorizacionPago_" + strings.Join(strings.Fields(proveedor.NomProveedor), "")
 												autorizacion_pago = models.DocumentoAutorizacionPago{
@@ -209,47 +209,47 @@ func GenerarAutorizacionPago(id_solicitud_pago string) (autorizacion_pago models
 												}
 												return autorizacion_pago, nil
 											} else {
-												outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionPago", "message": "Error al generar el archivo de autorización de pago", "status": "404"}
+												outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionGiro", "message": "Error al generar el archivo de autorización de pago", "status": "404"}
 												return autorizacion_pago, outputError
 											}
 										} else {
-											outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionPago", "message": "Error al consultar los documentos cargados", "err": err, "status": "404"}
+											outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionGiro", "message": "Error al consultar los documentos cargados", "err": err, "status": "404"}
 											return autorizacion_pago, outputError
 										}
 									} else {
-										outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionPago", "message": "No se encontraron soportes del cumplido", "status": "404"}
+										outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionGiro", "message": "No se encontraron soportes del cumplido", "status": "404"}
 										return autorizacion_pago, outputError
 									}
 								} else {
-									outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionPago", "message": "No se encontro este soporte", "status": "404"}
+									outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionGiro", "message": "No se encontro este soporte", "status": "404"}
 									return autorizacion_pago, outputError
 								}
 
 							} else {
-								outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionPago", "message": "Error al obtener los soportes del cumplido", "err": err, "status": "404"}
+								outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionGiro", "message": "Error al obtener los soportes del cumplido", "err": err, "status": "404"}
 								return autorizacion_pago, outputError
 							}
 						} else {
-							outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionPago", "message": "Error al consultar el ordenador", "err": err, "status": "404"}
+							outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionGiro", "message": "Error al consultar el ordenador", "err": err, "status": "404"}
 							return autorizacion_pago, outputError
 						}
 					} else {
-						outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionPago", "message": "Error al consultar el proveedor", "err": err, "status": "404"}
+						outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionGiro", "message": "Error al consultar el proveedor", "err": err, "status": "404"}
 						return autorizacion_pago, outputError
 					}
 
 				} else {
-					outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionPago", "message": "Error al consultar el contrato", "err": err, "status": "404"}
+					outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionGiro", "message": "Error al consultar el contrato", "err": err, "status": "404"}
 					return autorizacion_pago, outputError
 				}
 			}
 
 		} else {
-			outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionPago", "message": "No se encontró información del cumplido o el cumplido no esta pendiente de aprobación por parte del ordenador", "status": "404"}
+			outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionGiro", "message": "No se encontró información del cumplido o el cumplido no esta pendiente de aprobación por parte del ordenador", "status": "404"}
 			return autorizacion_pago, outputError
 		}
 	} else {
-		outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionPago", "message": "Error al obtener el cambio cumplido", "err": err, "status": "404"}
+		outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionGiro", "message": "Error al obtener el cambio cumplido", "err": err, "status": "404"}
 		return autorizacion_pago, outputError
 	}
 

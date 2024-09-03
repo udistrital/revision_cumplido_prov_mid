@@ -19,7 +19,7 @@ func (c *RevisionCumplidoContratacionController) URLMapping() {
 // @Description Metodo para que el personal de c  Obtenga los contratos para la aprobacion de pago
 // Success 200 {object} models.Contrato
 // @Failure 403 :document is empty
-// @router /solicitudes-pago/ [get]
+// @router /solicitudes-pago [get]
 func (c *RevisionCumplidoContratacionController) ObtenerCumplidosPendientesContratacion() {
 
 	defer func() {

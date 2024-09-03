@@ -85,7 +85,7 @@ func Header(pdf *gofpdf.Fpdf, tipo_documento string, proceso string, codigo stri
 	return pdf
 }
 
-func GenerarPdfAutorizacionPago(autorizacion models.DatosAutorizacionPago) string {
+func GenerarPdfAutorizacionGiro(autorizacion models.DatosAutorizacionPago) string {
 
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	now := time.Now()

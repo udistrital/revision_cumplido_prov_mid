@@ -86,7 +86,7 @@ func (c *CumplidoSatisfaccionController) GenerarCumplidoSatisfaccion() {
 
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
-	if data, err := services.CrearCumplidoSatisfaccion(v.NumeroContratoSuscrito, v.VigenciaContrato, v.CumplimientoContrato, v.TipoPagoId, v.PeiodoInicio, v.PeriodoFin, v.TipoDocumentoCobroId, v.NumeroCuentaFactura, v.ValorPagar, v.TipoCuenta, v.NumeroCuenta, v.BancoId); err == nil {
+	if data, err := services.CrearCumplidoSatisfaccion(v.NumeroContratoSuscrito, v.VigenciaContrato, v.TipoPago, v.PeriodoInicio, v.PeriodoFin, v.TipoFactura, v.NumeroCuentaFactura, v.ValorPagar, v.TipoCuenta, v.NumeroCuenta, v.Banco); err == nil {
 		if (data == models.CumplidoSatisfaccion{}) {
 			c.Ctx.Output.SetStatus(404)
 			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "404", "Message": err, "Data": []map[string]interface{}{}}

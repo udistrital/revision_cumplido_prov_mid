@@ -326,9 +326,9 @@ func SubirSoporteCumplido(solicitud_pago_id int, tipo_documento string, item_id 
 		return soporte_pago, outputError
 	}
 
-	// Verificar tamaño del archivo (máximo 1MB)
-	if len(decodedFile) > 1000000 {
-		outputError = map[string]interface{}{"funcion": "/SubirSoporteCumplido", "err": err, "status": "404", "mensaje": "El archivo no debe superar 1MB"}
+	// Verificar tamaño del archivo (máximo 5MB)
+	if len(decodedFile) > 5000000 {
+		outputError = map[string]interface{}{"funcion": "/SubirSoporteCumplido", "err": err, "status": "404", "mensaje": "El archivo no debe superar 5MB"}
 		return soporte_pago, outputError
 	}
 
@@ -374,9 +374,6 @@ func SubirSoporteCumplido(solicitud_pago_id int, tipo_documento string, item_id 
 		soporte := models.BodySoportePago{
 			DocumentoId:         int(id),
 			CumplidoProveedorId: cumplido_proveedor[0],
-			FechaCreacion:       time.Now(),
-			FechaModificacion:   time.Now(),
-			Activo:              true,
 		}
 		var res map[string]interface{}
 		if err := helpers.SendJson(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido", "POST", &res, soporte); err == nil {
