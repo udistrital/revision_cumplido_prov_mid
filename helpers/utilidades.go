@@ -13,7 +13,6 @@ import (
 )
 
 func GetJsonWSO2Test(urlp string, target interface{}) (status int, err error) {
-	//fmt.Println("URL: ", urlp)
 	b := new(bytes.Buffer)
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", urlp, b)
@@ -32,11 +31,8 @@ func GetJsonWSO2Test(urlp string, target interface{}) (status int, err error) {
 }
 
 func GetJsonTest(url string, target interface{}) (status int, err error) {
-	//fmt.Println("URL: ", url)
 	r, err := http.Get(url)
-	fmt.Println(err)
 	if err != nil {
-		//fmt.Println("r", r)
 		return r.StatusCode, err
 	}
 	defer func() {
@@ -55,12 +51,9 @@ func SendJson(url string, trequest string, target interface{}, datajson interfac
 		}
 	}
 	client := &http.Client{}
-	//fmt.Print("Json que se le va a apasar a la funcion: ")
-	//fmt.Println(b)
 	req, err := http.NewRequest(trequest, url, b)
 	req.Header.Set("Content-Type", "application/json")
 	r, err := client.Do(req)
-	//fmt.Println("Respuesta de la peticion: ", r.StatusCode)
 	if err != nil {
 		beego.Error("error", err)
 		return err

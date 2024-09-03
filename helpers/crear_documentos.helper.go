@@ -161,7 +161,6 @@ func body(pdf *gofpdf.Fpdf, cellx float64, cellY float64, month int, day int, ye
 
 	pdf.SetXY(29, 55)
 	pdf.MultiCell(153, 5, tr(fmt.Sprintf("Yo %s  en calidad de Ordenador del Gasto del (los) Rubro(s) %s, anexo los documentos detallados en la presente, como soporte a la orden de pago correspondiente.", autorizacion.NombreOrdenador, autorizacion.Rubro)), "", "", false)
-	println(cellY, "y")
 	pdf = CrearTablaDocumentos(pdf, cellx, cellY-10, autorizacion)
 
 	return pdf
@@ -184,7 +183,6 @@ func CrearTablaDocumentos(pdf *gofpdf.Fpdf, cellx float64, cellY float64, autori
 	pdf.SetFont("Times", "", 10)
 	for key, value := range docuementos() {
 		cellY += 7
-		//fmt.Println("yyyy", cellY)
 		pdf.SetXY(startX, cellY)
 		pdf.CellFormat(col1Width, 7, tr(value), "1", 0, "L", false, 0, "")
 
@@ -193,7 +191,6 @@ func CrearTablaDocumentos(pdf *gofpdf.Fpdf, cellx float64, cellY float64, autori
 		} else {
 			pdf.CellFormat(col2Width, 7, "", "1", 0, "C", false, 0, "")
 		}
-		println(cellY)
 		if cellY > 250 {
 			pdf.AddPage()
 			cellY = 35
@@ -206,7 +203,6 @@ func CrearTablaDocumentos(pdf *gofpdf.Fpdf, cellx float64, cellY float64, autori
 	pdf.CellFormat(col1Width, 7, "OTROS DOCUMENTOS (DETALLAR)", "1", 0, "C", false, 0, "")
 	pdf.CellFormat(col2Width, 7, "X", "1", 0, "C", false, 0, "")
 
-	println("guia", cellY)
 	if cellY > 235 {
 		pdf.AddPage()
 		cellY = 35
@@ -223,7 +219,6 @@ func body2(pdf *gofpdf.Fpdf, cellx float64, cellY float64, month int, day int, y
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
 	cellY += 10
 	pdf.SetXY(29, cellY)
-	//fmt.Println(autorizacion.DocumentoProveedor)
 	pdf.MultiCell(153, 5, tr(fmt.Sprintf(`Autorizo a la Tesorería General a girar a favor de %s con C.C., NIT, TI, OTROS Nº %s para realizar el giro una vez sean deducidos los descuentos de Ley correspondientes. El valor bruto de la presente autorización es de %s pesos m/cte. (%s). `, tr(autorizacion.NombreProveedor), tr(autorizacion.DocumentoProveedor), strings.ToUpper(ValorLetras(autorizacion.ValorPago)), FormatNumber(autorizacion.ValorPago, 0, ".", ","))), "", "", false)
 	cellY += 35
 	pdf.SetXY(29, cellY)
@@ -407,7 +402,7 @@ func CrearPdfCumplidoSatisfaccion(dependencia string, nombre_proveedor string, n
 		documento_supervisor)
 
 	encodedFile := encodePDF(pdf)
-	nombre := "CumplidoSatisfaccion_" + strings.Join(strings.Fields(nombre_proveedor), "")
+	nombre := "CumplidoSatisfaccion_" + strings.Join(strings.Fields(nombre_proveedor), "") + "_" + numero_contrato + "_" + vigencia
 
 	cumplido_satisfaccion = models.CumplidoSatisfaccion{
 		NombreArchivo:        nombre,

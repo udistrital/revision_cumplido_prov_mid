@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -20,7 +19,7 @@ func ObtenerCumplidosPendientesOrdenador(documento_ordenador string) (cambios_es
 	}()
 
 	var respuesta_peticion map[string]interface{}
-	fmt.Println(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores") + "/cambio_estado_cumplido/?query=DocumentoResponsable:" + documento_ordenador + ",EstadoCumplidoId.CodigoAbreviacion:PRO,Activo:true")
+	//fmt.Println(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores") + "/cambio_estado_cumplido/?query=DocumentoResponsable:" + documento_ordenador + ",EstadoCumplidoId.CodigoAbreviacion:PRO,Activo:true")
 	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/?query=DocumentoResponsable:"+documento_ordenador+",EstadoCumplidoId.CodigoAbreviacion:PRO,Activo:true", &respuesta_peticion); (err == nil) && (response == 200) {
 		data := respuesta_peticion["Data"].([]interface{})
 		if len(data[0].(map[string]interface{})) == 0 {
@@ -146,7 +145,7 @@ func GenerarAutorizacionGiro(id_solicitud_pago string) (autorizacion_pago models
 
 	var respuesta_cambioEstado map[string]interface{}
 	var cambio_estado []models.CambioEstadoCumplido
-	fmt.Println(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores") + "/cambio_estado_cumplido/?query=CumplidoProveedorId.Id:" + id_solicitud_pago + ",EstadoCumplidoId.CodigoAbreviacion:PRO,Activo:true")
+	//fmt.Println(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores") + "/cambio_estado_cumplido/?query=CumplidoProveedorId.Id:" + id_solicitud_pago + ",EstadoCumplidoId.CodigoAbreviacion:PRO,Activo:true")
 	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/?query=CumplidoProveedorId.Id:"+id_solicitud_pago+",EstadoCumplidoId.CodigoAbreviacion:PRO,Activo:true", &respuesta_cambioEstado); err == nil && response == 200 {
 		data := respuesta_cambioEstado["Data"].([]interface{})
 		if len(data[0].(map[string]interface{})) > 0 {
@@ -202,7 +201,7 @@ func GenerarAutorizacionGiro(id_solicitud_pago string) (autorizacion_pago models
 
 											autorizacion := helpers.GenerarPdfAutorizacionGiro(datos_documento)
 											if autorizacion != "" {
-												nombre := "AutorizacionPago_" + strings.Join(strings.Fields(proveedor.NomProveedor), "")
+												nombre := "AutorizacionPago_" + strings.Join(strings.Fields(proveedor.NomProveedor), "") + "_" + cambio_estado[0].CumplidoProveedorId.NumeroContrato + "_" + strconv.Itoa(cambio_estado[0].CumplidoProveedorId.VigenciaContrato)
 												autorizacion_pago = models.DocumentoAutorizacionPago{
 													NombreArchivo:        nombre,
 													Archivo:              autorizacion,

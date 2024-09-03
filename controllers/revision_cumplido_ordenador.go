@@ -76,7 +76,6 @@ func (c *RevisionCumplidoOrdenadorController) ListaCumplidosReversibles() {
 	}()
 
 	id_cumplido := c.GetString(":documento_ordenador")
-	print(id_cumplido)
 
 	cumplidos_reversibles, err := services.ListaCumplidosReversibles(id_cumplido)
 
