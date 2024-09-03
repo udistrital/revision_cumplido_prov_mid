@@ -87,10 +87,17 @@ func Header(pdf *gofpdf.Fpdf, tipo_documento string, proceso string, codigo stri
 
 func GenerarPdfAutorizacionGiro(autorizacion models.DatosAutorizacionPago) string {
 
+	if len(autorizacion.DocumentosCargados) == 0 {
+		return ""
+	}
+
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	now := time.Now()
-	////// Header
 	cellX, cellY := 30.0, 10.0
+	cellX2, cellY2 := 55.0, 10.0
+	cellWidth, cellHeight := 25.0, 25.0
+	cellWidth2, cellHeight2 := 55.0, 7.5
+	formattedDate := now.Format("02/01/2006")
 	month := int(now.Month())
 	year := now.Year()
 	day := now.Day()
@@ -99,22 +106,20 @@ func GenerarPdfAutorizacionGiro(autorizacion models.DatosAutorizacionPago) strin
 	pdf.SetMargins(15, 10, 15)
 	pdf.SetFillColor(240, 240, 240)
 
-	pdf.SetFooterFunc(func() {
-		pdf = footer(pdf, cellX, cellY)
-	})
-	pdf = footer(pdf, cellX, cellY)
+	// Define el encabezado y pie de página
 	pdf.SetHeaderFunc(func() {
-		pdf = Header(pdf, "AUTORIZACIÓN DE GIRO", "Gestión de Recursos Financieros", "GRF-PR-007-FR-005", "04", "14/01/2022")
+		header(pdf, cellX, cellY, cellX2, cellY2, cellWidth, cellHeight, cellWidth2, cellHeight2, formattedDate)
 	})
+	pdf.SetFooterFunc(func() {
+		footer(pdf, cellX, cellY)
+	})
+
 	pdf.AddPage()
-
-	pdf = body(pdf, cellX, cellY, month, day, year, autorizacion)
-
-	// Codifica el PDF a base64 utilizando la función encodePDF
-	base64Data := encodePDF(pdf)
-
+	header(pdf, cellX, cellY, cellX2, cellY2, cellWidth, cellHeight, cellWidth2, cellHeight2, formattedDate)
+	body(pdf, cellX, cellY, month, day, year, autorizacion)
+	filedata := encodePDF(pdf)
 	// Retorna el PDF codificado en base64
-	return base64Data
+	return filedata
 }
 
 func header(pdf *gofpdf.Fpdf, cellX float64, cellY float64, cellX2 float64, cellY2 float64, cellWidth float64, cellHeight float64, cellWidth2 float64, cellHeight2 float64, formattedDate string) *gofpdf.Fpdf {
