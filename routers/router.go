@@ -9,43 +9,29 @@ package routers
 
 import (
 	"github.com/astaxie/beego"
-	"github.com/udistrital/revision_cumplidos_proveedores_mid/controllers/controladores_estado_pago"
-	"github.com/udistrital/revision_cumplidos_proveedores_mid/controllers/controladores_soporte"
-	"github.com/udistrital/revision_cumplidos_proveedores_mid/controllers/controladores_contratacion"
-	"github.com/udistrital/revision_cumplidos_proveedores_mid/controllers/controladores_ordenador"
-	"github.com/udistrital/revision_cumplidos_proveedores_mid/controllers/controladores_supervisor"
+	"github.com/udistrital/revision_cumplidos_proveedores_mid/controllers"
 )
 
 func init() {
 	ns := beego.NewNamespace("/v1",
 		beego.NSNamespace("/supervisor",
 			beego.NSInclude(
-				&controladores_supervisor.ContratosSupervisorController{}, &controladores_supervisor.SolicitudContratoController{}, &controladores_supervisor.InformeSeguimientoController{}, &controladores_supervisor.ListarTipoDocumentosCumplidoController{}, &controladores_supervisor.InformeSeguimientoController{},
+				&controllers.ContratosSupervisorController{}, &controllers.SolicitudesCumplidosContratoController{}, &controllers.CumplidoSatisfaccionController{}, &controllers.ListarTipoDocumentosCumplidoController{},
 			),
 		),
 		beego.NSNamespace("/solicitud-pago",
 			beego.NSInclude(
-				&controladores_soporte.SoportesCumplidoController{},
-			),
-		),
-		beego.NSNamespace("/solicitud-pago",
-			beego.NSInclude(
-				&controladores_estado_pago.EstadoSoporteController{},
-			),
-		),
-		beego.NSNamespace("/ping",
-			beego.NSInclude(
-				&controladores_ordenador.PingController{},
+				&controllers.SoportesCumplidoController{}, &controllers.CambioEstadoCumplidoController{},
 			),
 		),
 		beego.NSNamespace("/ordenador",
 			beego.NSInclude(
-				&controladores_ordenador.RevisionCumplidoOrdenadorController{},
+				&controllers.RevisionCumplidoOrdenadorController{},
 			),
 		),
 		beego.NSNamespace("/contratacion",
 			beego.NSInclude(
-				&controladores_contratacion.RevisionCumplidoContratacionController{},
+				&controllers.RevisionCumplidoContratacionController{},
 			),
 		))
 

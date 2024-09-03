@@ -5,5 +5,5 @@ type EstadoCumplido struct {
 	Nombre            string
 	Descripcion       string
 	Activo            bool
-	CodigoAbreviación string
+	CodigoAbreviacion string
 }

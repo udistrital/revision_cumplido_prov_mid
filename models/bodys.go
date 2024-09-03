@@ -18,7 +18,7 @@ type BodyCambioEstadoCumplido struct {
 	EstadoCumplidoId     EstadoCumplido    `json:"EstadoCumplidoId"`
 	CumplidoProveedorId  CumplidoProveedor `json:"CumplidoProveedorId"`
 	DocumentoResponsable int               `json:"DocumentoResponsable"`
-	CargoResponsable     string            `json:"CargoReponsable"`
+	CargoResponsable     string            `json:"CargoResponsable"`
 	Activo               bool              `json:"Activo"`
 	FechaCreacion        time.Time         `json:"FechaCreacion"`
 	FechaModificacion    time.Time         `json:"FechaModificacion"`
@@ -32,16 +32,36 @@ type BodySoportePago struct {
 	Activo              bool
 }
 
-type BodyInformeSeguimiento struct {
+type BodyCumplidoSatisfaccion struct {
 	NumeroContratoSuscrito int    `json:"NumeroContratoSuscrito"`
 	VigenciaContrato       string `json:"VigenciaContrato"`
-	TipoPagoId             string `json:"TipoPago"`
-	PeiodoInicio           string `json:"PeriodoInicio"`
+	TipoPago               string `json:"TipoPago"`
+	PeriodoInicio          string `json:"PeriodoInicio"`
 	PeriodoFin             string `json:"PeriodoFin"`
-	TipoDocumentoCobroId   string `json:"TipoFactura"`
+	TipoFactura            string `json:"TipoFactura"`
 	NumeroCuentaFactura    string `json:"NumeroCuentaFactura"`
 	ValorPagar             int    `json:"ValorPagar"`
-	TipoCuenta             string `json:"TipoDocumentoCobroId"`
+	TipoCuenta             string `json:"TipoCuenta"`
 	NumeroCuenta           string `json:"NumeroCuenta"`
-	BancoId                int    `json:"BancoId"`
+	Banco                  string `json:"Banco"`
+}
+
+type BodyCumplidoRequest struct {
+	CodigoAbreviacionEstadoCumplido string `json:"CodigoAbreviacionEstadoCumplido"`
+	CumplidoProveedorID             int    `json:"CumplidoProveedorId"`
+}
+
+type BodySubirSoporteRequest struct {
+	SolicitudPagoID int    `json:"SolicitudPagoID"`
+	TipoDocumento   string `json:"TipoDocumento"`
+	ItemID          int    `json:"ItemID"`
+	Observaciones   string `json:"Observaciones"`
+	NombreArchivo   string `json:"NombreArchivo"`
+	Archivo         string `json:"Archivo"`
+}
+
+type AgregarComentarioSoporteRequest struct {
+	SoporteId      string `json:"soporte_id"`
+	CambioEstadoId string `json:"cambio_estado_id"`
+	Comentario     string `json:"comentario"`
 }

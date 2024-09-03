@@ -1,6 +1,6 @@
 package models
 
-type InformacionContratoContratista struct {
+type DatosContratoProveedor struct {
 	InformacionContratista struct {
 		Tiempo struct {
 			Valor  string `json:"valor"`

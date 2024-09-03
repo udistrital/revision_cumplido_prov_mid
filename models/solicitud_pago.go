@@ -8,11 +8,12 @@ type AutorizacionPago struct {
 	Archivo         string
 }
 
-type DocuementoAutorizacionPago struct {
+type DatosAutorizacionPago struct {
 	NombreOrdenador    string
 	DocumentoOrdenador string
+	Rubro              string
 	NombreProveedor    string
 	DocumentoProveedor string
-	ValorPago          string
+	ValorPago          int
 	DocumentosCargados []string
 }
