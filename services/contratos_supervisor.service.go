@@ -2,6 +2,7 @@ package services
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
@@ -9,11 +10,11 @@ import (
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 )
 
-func ObtenerContratosSupervisor(documento_supervisor string) (contratos_supervisor models.ContratoSupervisor, outputError map[string]interface{}) {
+func ObtenerContratosSupervisor(documento_supervisor string) (contratos_supervisor models.ContratoSupervisor, outputError error) {
 
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/ContratosSupervisor", "err": err, "status": "404"}
+			outputError = fmt.Errorf("%v", err)
 			panic(outputError)
 		}
 	}()
@@ -35,27 +36,22 @@ func ObtenerContratosSupervisor(documento_supervisor string) (contratos_supervis
 				}
 			} else {
 				logs.Error(err)
-				outputError = map[string]interface{}{"funcion": "/ContratosSupervisor", "err": err, "status": "404"}
+				outputError = fmt.Errorf("Error al obtener los contratos de la dependencia: " + dependencia.Codigo)
 				return contratos_supervisor, outputError
 			}
 		}
 	} else {
 		logs.Error(err)
-		outputError = map[string]interface{}{"funcion": "/ContratosSupervisor", "err": err, "status": "404"}
+		outputError = fmt.Errorf("Error al obtener las dependencias del supervisor con documento: " + documento_supervisor)
 		return contratos_supervisor, outputError
 	}
 	return contratos_supervisor, nil
 }
 
-func ObtenerContratosDependencia(dependencia string) (contratos_dependencia models.ContratoDependencia, outputError map[string]interface{}) {
+func ObtenerContratosDependencia(dependencia string) (contratos_dependencia models.ContratoDependencia, outputError error) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{
-				"Success": false,
-				"Status":  404,
-				"Message": "Error al obtener los contratos de la dependencia: " + dependencia,
-				"Error":   err,
-			}
+			outputError = fmt.Errorf("%v", err)
 		}
 	}()
 
@@ -69,35 +65,30 @@ func ObtenerContratosDependencia(dependencia string) (contratos_dependencia mode
 					return contratos_dependencia, nil
 				} else {
 					logs.Error(err)
-					outputError = map[string]interface{}{"funcion": "/ObtenerContratosDependencia/", "err": err.Error(), "status": "404"}
+					outputError = fmt.Errorf("Error al convertir el json")
 					return contratos_dependencia, outputError
 				}
 			} else {
 				logs.Error(err_json)
-				outputError = map[string]interface{}{"funcion": "/ObtenerContratosDependencia/", "err": err_json.Error(), "status": "404"}
+				outputError = fmt.Errorf("Error al convertir el json")
 				return contratos_dependencia, outputError
 			}
 		} else {
-			outputError = map[string]interface{}{"funcion": "/ObtenerContratosDependencia/", "err": "No se encontraron contratos para la dependencia: " + dependencia, "status": "404"}
+			outputError = fmt.Errorf("No se encontraron contratos para la dependencia: " + dependencia)
 			return contratos_dependencia, outputError
 		}
 	} else {
 		logs.Error(err)
-		outputError = map[string]interface{}{"funcion": "/ObtenerContratosDependencia/", "err": err, "status": "404"}
+		outputError = fmt.Errorf("Error al obtener los contratos de la dependencia: " + dependencia)
 		return contratos_dependencia, outputError
 	}
 
 }
 
-func ObtenerDependenciasSupervisor(documento_supervisor string) (dependencias_supervisor []models.Dependencia, outputError map[string]interface{}) {
+func ObtenerDependenciasSupervisor(documento_supervisor string) (dependencias_supervisor []models.Dependencia, outputError error) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{
-				"Success": false,
-				"Status":  404,
-				"Message": "Error al consultar las dependencias del supervisor identificado con el documento: " + documento_supervisor,
-				"Error":   err,
-			}
+			outputError = fmt.Errorf("%v", err)
 		}
 	}()
 
@@ -123,13 +114,13 @@ func ObtenerDependenciasSupervisor(documento_supervisor string) (dependencias_su
 						}
 
 					} else {
-						outputError = map[string]interface{}{"funcion": "/ObtenerDependenciasSupervisor/", "err": "No se encontraron dependencias para el supervisor con documento: " + documento_supervisor, "status": "404"}
+						outputError = fmt.Errorf("No se encontraron dependencias para el supervisor con documento: " + documento_supervisor)
 						return dependencias_supervisor, outputError
 					}
 				}
 			}
 		} else {
-			outputError = map[string]interface{}{"funcion": "/ObtenerDependenciasSupervisor/", "err": "No se encontraron dependencias para el supervisor con documento: " + documento_supervisor, "status": "404"}
+			outputError = fmt.Errorf("No se encontraron dependencias para el supervisor con documento: " + documento_supervisor)
 			return dependencias_supervisor, outputError
 		}
 	}

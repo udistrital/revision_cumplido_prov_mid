@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/astaxie/beego"
@@ -9,10 +10,10 @@ import (
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 )
 
-func ObtenerCumplidosPendientesContratacion() (cumplidosInfo []models.SolicituRevisionCumplidoProveedor, outputError interface{}) {
+func ObtenerCumplidosPendientesContratacion() (cumplidosInfo []models.SolicituRevisionCumplidoProveedor, outputError error) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/ObtenerCumplidosPendientesContratacion", "err": err, "status": "404"}
+			outputError = fmt.Errorf("%v", err)
 			panic(outputError)
 		}
 	}()
@@ -44,29 +45,21 @@ func ObtenerCumplidosPendientesContratacion() (cumplidosInfo []models.SolicituRe
 						cumplidosInfo = append(cumplidosInfo, contrato)
 					} else {
 						logs.Error(err)
-						outputError = map[string]interface{}{"funcion": "/ObtenerCumplidosPendientesContratacion", "err": err, "status": "404"}
+						outputError = fmt.Errorf("Error al obtener la informacion del contrato")
 						return cumplidosInfo, outputError
 					}
 				}
 			} else {
-				outputError = map[string]interface{}{
-					"Success": false,
-					"Status":  404,
-					"Message": "No se encontraron cumplidos pendientes",
-				}
+				outputError = fmt.Errorf("No se encontraron cumplidos pendientes")
 			}
 		} else {
-			outputError = map[string]interface{}{
-				"Success": false,
-				"Status":  404,
-				"Message": "No se encontraron cumplidos pendientes por revision de contratación",
-			}
+			outputError = fmt.Errorf("No se encontraron cumplidos pendientes por revision de contratación")
 			return cumplidosInfo, outputError
 		}
 
 	} else {
 		logs.Error(err)
-		outputError = map[string]interface{}{"funcion": "/ObtenerCumplidosPendientesContratacion", "err": err, "status": "404"}
+		outputError = fmt.Errorf("Error al obtener los cumplidos pendientes")
 		return cumplidosInfo, outputError
 	}
 	return cumplidosInfo, outputError

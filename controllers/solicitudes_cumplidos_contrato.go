@@ -2,8 +2,9 @@ package controllers
 
 import (
 	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/logs"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/services"
+	"github.com/udistrital/utils_oas/errorhandler"
+	"github.com/udistrital/utils_oas/requestresponse"
 )
 
 // Solicitud_contratoController operations for Solicitud_contrato
@@ -25,29 +26,18 @@ func (c *SolicitudesCumplidosContratoController) URLMapping() {
 // @Failure 403 :numero_contrato or vigencia is empty
 // @router /solicitudes-contrato/:numero_contrato/:vigencia [get]
 func (c *SolicitudesCumplidosContratoController) ObtenerSolicitudesContrato() {
-	defer func() {
-		if err := recover(); err != nil {
-			logs.Error(err)
-			localError := err.(map[string]interface{})
-			c.Data["message"] = (beego.AppConfig.String("appname") + "/" + "ContratosSupervisorController" + "/" + (localError["funcion"]).(string))
-			c.Data["data"] = (localError["err"])
-			if status, ok := localError["status"]; ok {
-				c.Abort(status.(string))
-			} else {
-				c.Abort("404")
-			}
-		}
-	}()
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	numero_contrato := c.Ctx.Input.Param(":numero_contrato")
 	vigencia := c.Ctx.Input.Param(":vigencia")
 
 	data, err := services.ObtenerSolicitudesCumplidosContrato(numero_contrato, vigencia)
 	if err == nil {
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": data}
+		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, data)
 	} else {
 		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 404, "Message": err, "Data": []map[string]interface{}{}}
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 404, nil, err.Error())
 	}
 	c.ServeJSON()
 }

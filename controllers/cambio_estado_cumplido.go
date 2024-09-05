@@ -2,11 +2,12 @@ package controllers
 
 import (
 	"encoding/json"
-	"log"
 
 	"github.com/astaxie/beego"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/services"
+	"github.com/udistrital/utils_oas/errorhandler"
+	"github.com/udistrital/utils_oas/requestresponse"
 )
 
 // EstadoSoporteController operations for EstadoSoporte
@@ -30,19 +31,7 @@ func (c *CambioEstadoCumplidoController) URLMapping() {
 // @Failure 404 {object} map[string]interface{}
 // @router /cambio-estado [post]
 func (c *CambioEstadoCumplidoController) CambioEstadoCumplido() {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			localError := err.(map[string]interface{})
-			c.Data["message"] = (beego.AppConfig.String("appname") + "/" + "CambioEstadoCumplidoController" + "/" + (localError["funcion"]).(string))
-			c.Data["data"] = (localError["err"])
-			if status, ok := localError["status"]; ok {
-				c.Abort(status.(string))
-			} else {
-				c.Abort("404")
-			}
-		}
-	}()
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	// Estructura para recibir el cuerpo de la solicitud
 
@@ -51,20 +40,14 @@ func (c *CambioEstadoCumplidoController) CambioEstadoCumplido() {
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
 	// Llamada al helper para cambiar el estado de pago
-	response, outputError := services.CambioEstadoCumplido(v.CodigoAbreviacionEstadoCumplido, v.CumplidoProveedorID)
+	response, err := services.CambioEstadoCumplido(v.CodigoAbreviacionEstadoCumplido, v.CumplidoProveedorID)
 
-	if outputError != nil {
-		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "404", "Message": outputError, "Data": []map[string]interface{}{}}
-	} else {
-		c.Data["json"] = map[string]interface{}{
-			"Success": true,
-			"Status":  "200",
-			"Message": "Successful",
-			"Data":    response,
-		}
+	if err == nil {
 		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, response)
+	} else {
+		c.Ctx.Output.SetStatus(404)
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 404, nil, err.Error())
 	}
-
 	c.ServeJSON()
 }

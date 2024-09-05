@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -10,10 +11,10 @@ import (
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 )
 
-func ObtenerCumplidosPendientesOrdenador(documento_ordenador string) (cambios_estado []models.CambioEstadoCumplido, outputError map[string]interface{}) {
+func ObtenerCumplidosPendientesOrdenador(documento_ordenador string) (cambios_estado []models.CambioEstadoCumplido, outputError error) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/ObtenerCumplidosPendientesOrdenador", "err": err, "status": "404"}
+			outputError = fmt.Errorf("%v", err)
 			panic(outputError)
 		}
 	}()
@@ -23,22 +24,22 @@ func ObtenerCumplidosPendientesOrdenador(documento_ordenador string) (cambios_es
 	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/?query=DocumentoResponsable:"+documento_ordenador+",EstadoCumplidoId.CodigoAbreviacion:PRO,Activo:true", &respuesta_peticion); (err == nil) && (response == 200) {
 		data := respuesta_peticion["Data"].([]interface{})
 		if len(data[0].(map[string]interface{})) == 0 {
-			outputError = map[string]interface{}{"funcion": "/ObtenerCumplidosPendientesOrdenador", "message": "No hay cumplidos pendientes de revision por el ordenador", "status": "404"}
+			outputError = fmt.Errorf("No hay cumplidos pendientes de revision por el ordenador")
 			return nil, outputError
 		} else {
 			helpers.LimpiezaRespuestaRefactor(respuesta_peticion, &cambios_estado)
 			return cambios_estado, nil
 		}
 	} else {
-		outputError = map[string]interface{}{"funcion": "/ObtenerCumplidosPendientesOrdenador", "message": "Error al consultar los cumplidos pendeinetes de revision por el ordenador", "err": err, "status": "404"}
+		outputError = fmt.Errorf("Error al consultar los cumplidos pendientes de revision por el ordenador")
 		return nil, outputError
 	}
 }
 
-func ObtenerSolicitudesCumplidos(documento_ordenador string) (cumplidosInfo []models.SolicituRevisionCumplidoProveedor, outputError map[string]interface{}) {
+func ObtenerSolicitudesCumplidos(documento_ordenador string) (cumplidosInfo []models.SolicituRevisionCumplidoProveedor, outputError error) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/ObtenerSolicitudesCumplidos", "err": err, "status": "404"}
+			outputError = fmt.Errorf("%v", err)
 			panic(outputError)
 		}
 	}()
@@ -65,22 +66,22 @@ func ObtenerSolicitudesCumplidos(documento_ordenador string) (cumplidosInfo []mo
 				}
 				cumplidosInfo = append(cumplidosInfo, solicitudes_cumplido)
 			} else {
-				outputError = map[string]interface{}{"funcion": "/ObtenerCumplidosPendientesOrdenador", "message": "Error al consultar los cumplidos pendeinetes de revision por el ordenador", "err": err, "status": "404"}
+				outputError = fmt.Errorf("Error al consultar los cumplidos pendientes de revision por el ordenador")
 				return nil, outputError
 			}
 		}
 	} else {
-		outputError = map[string]interface{}{"funcion": "/ObtenerCumplidosPendientesOrdenador", "message": "No hay cumplidos pendientes de aprobacion para el ordenador " + documento_ordenador, "status": "404"}
+		outputError = fmt.Errorf("No hay cumplidos pendientes de aprobacion para el ordenador " + documento_ordenador)
 		return nil, outputError
 	}
 
 	return cumplidosInfo, nil
 }
 
-func ListaCumplidosReversibles(documento_ordenador string) (soliciudes_revertibles []models.SolicituRevisionCumplidoProveedor, outputError interface{}) {
+func ListaCumplidosReversibles(documento_ordenador string) (soliciudes_revertibles []models.SolicituRevisionCumplidoProveedor, outputError error) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/ListaCumplidosReversibles", "err": err, "status": "404"}
+			outputError = fmt.Errorf("%v", err)
 			panic(outputError)
 		}
 	}()
@@ -117,16 +118,16 @@ func ListaCumplidosReversibles(documento_ordenador string) (soliciudes_revertibl
 						}
 						soliciudes_revertibles = append(soliciudes_revertibles, solicitudes_cumplido)
 					} else {
-						outputError = map[string]interface{}{"funcion": "/ListaCumplidosReversibles", "message": "Error al consultar los cumplidos pendientes de revision por el ordenador", "err": err, "status": "404"}
+						outputError = fmt.Errorf("Error al consultar los cumplidos pendientes de revision por el ordenador")
 						return nil, outputError
 					}
 				}
 			} else {
-				outputError = map[string]interface{}{"funcion": "/ListaCumplidosReversibles", "message": "No hay cumplidos que se puedan revertir", "status": "404"}
+				outputError = fmt.Errorf("No hay cumplidos que se puedan revertir")
 				return nil, outputError
 			}
 		} else {
-			outputError = map[string]interface{}{"funcion": "/ListaCumplidosReversibles", "message": "El ordenador " + documento_ordenador + " no tiene cumplidos que se puedan revertir", "status": "404"}
+			outputError = fmt.Errorf("El ordenador " + documento_ordenador + " no tiene cumplidos que se puedan revertir")
 			return nil, outputError
 		}
 
@@ -135,10 +136,10 @@ func ListaCumplidosReversibles(documento_ordenador string) (soliciudes_revertibl
 	return soliciudes_revertibles, nil
 }
 
-func GenerarAutorizacionGiro(id_solicitud_pago string) (autorizacion_pago models.DocumentoAutorizacionPago, outputError interface{}) {
+func GenerarAutorizacionGiro(id_solicitud_pago string) (autorizacion_pago models.DocumentoAutorizacionPago, outputError error) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionPago", "err": err, "status": "404"}
+			outputError = fmt.Errorf("%v", err)
 			panic(outputError)
 		}
 	}()
@@ -173,7 +174,7 @@ func GenerarAutorizacionGiro(id_solicitud_pago string) (autorizacion_pago models
 										var documentos []models.Documento
 										if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlDocumentosCrud")+"/documento/?query=Id.in:"+documentos_busqueda+",Activo:true&limit=0", &documentos); err == nil && response == 200 {
 											if len(documentos) == 0 {
-												outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionPago", "message": "No se encontraron documentos cargados", "status": "404"}
+												outputError = fmt.Errorf("No se encontraron documentos cargados")
 												return autorizacion_pago, outputError
 											}
 											var lista_documentos_cargados []string
@@ -211,47 +212,47 @@ func GenerarAutorizacionGiro(id_solicitud_pago string) (autorizacion_pago models
 												}
 												return autorizacion_pago, nil
 											} else {
-												outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionGiro", "message": "Error al generar el archivo de autorización de pago", "status": "404"}
+												outputError = fmt.Errorf("Error al generar el archivo de autorización de pago")
 												return autorizacion_pago, outputError
 											}
 										} else {
-											outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionGiro", "message": "Error al consultar los documentos cargados", "err": err, "status": "404"}
+											outputError = fmt.Errorf("Error al consultar los documentos cargados")
 											return autorizacion_pago, outputError
 										}
 									} else {
-										outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionGiro", "message": "No se encontraron soportes del cumplido", "status": "404"}
+										outputError = fmt.Errorf("No se encontraron soportes del cumplido")
 										return autorizacion_pago, outputError
 									}
 								} else {
-									outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionGiro", "message": "No se encontro este soporte", "status": "404"}
+									outputError = fmt.Errorf("No se encontro este soporte")
 									return autorizacion_pago, outputError
 								}
 
 							} else {
-								outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionGiro", "message": "Error al obtener los soportes del cumplido", "err": err, "status": "404"}
+								outputError = fmt.Errorf("Error al obtener los soportes del cumplido")
 								return autorizacion_pago, outputError
 							}
 						} else {
-							outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionGiro", "message": "Error al consultar el ordenador", "err": err, "status": "404"}
+							outputError = fmt.Errorf("Error al consultar el ordenador")
 							return autorizacion_pago, outputError
 						}
 					} else {
-						outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionGiro", "message": "Error al consultar el proveedor", "err": err, "status": "404"}
+						outputError = fmt.Errorf("Error al consultar el proveedor")
 						return autorizacion_pago, outputError
 					}
 
 				} else {
-					outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionGiro", "message": "Error al consultar el contrato", "err": err, "status": "404"}
+					outputError = fmt.Errorf("Error al consultar el contrato")
 					return autorizacion_pago, outputError
 				}
 			}
 
 		} else {
-			outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionGiro", "message": "No se encontró información del cumplido o el cumplido no esta pendiente de aprobación por parte del ordenador", "status": "404"}
+			outputError = fmt.Errorf("No se encontró información del cumplido o el cumplido no esta pendiente de aprobación por parte del ordenador")
 			return autorizacion_pago, outputError
 		}
 	} else {
-		outputError = map[string]interface{}{"funcion": "/GenerarAutorizacionGiro", "message": "Error al obtener el cambio cumplido", "err": err, "status": "404"}
+		outputError = fmt.Errorf("Error al obtener el cambio cumplido")
 		return autorizacion_pago, outputError
 	}
 
@@ -261,12 +262,7 @@ func GenerarAutorizacionGiro(id_solicitud_pago string) (autorizacion_pago models
 func ObtenerInformacionProveedor(IdProveedor string) (provedor models.InformacionProveedor, outputError interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{
-				"Success": false,
-				"Status":  400,
-				"Message": "Error al consultar las dependencias: " + IdProveedor,
-				"Error":   err,
-			}
+			outputError = fmt.Errorf("%v", err)
 		}
 	}()
 
@@ -275,7 +271,7 @@ func ObtenerInformacionProveedor(IdProveedor string) (provedor models.Informacio
 		if len(informacion_proveedor) > 0 {
 			return informacion_proveedor[0], nil
 		} else {
-			outputError = map[string]interface{}{"funcion": "/ObtenerInformacionProveedor", "message": "No se encontró información del proveedor", "status": "404"}
+			outputError = fmt.Errorf("No se encontró información del proveedor")
 			return provedor, outputError
 		}
 	}

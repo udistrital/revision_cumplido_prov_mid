@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 
 	"github.com/astaxie/beego"
@@ -9,20 +10,15 @@ import (
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 )
 
-func ObtenerInformacionContratoProveedor(numero_contrato_suscrito string, vigencia string) (contratos_proveedor []models.InformacionContratoProveedor, outputError map[string]interface{}) {
+func ObtenerInformacionContratoProveedor(numero_contrato_suscrito string, vigencia string) (contratos_proveedor []models.InformacionContratoProveedor, outputError error) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{
-				"Success": false,
-				"Status":  404,
-				"Message": "Error al obtener la informacion del contrato del proveedor",
-				"Error":   err,
-			}
+			outputError = fmt.Errorf("%v", err)
 		}
 	}()
 
 	var respuesta_peticion map[string]interface{}
-	//fmt.Println(beego.AppConfig.String("UrlAdministrativaJBPM") + "/informacion_contrato_proveedor/" + numero_contrato_suscrito + "/" + vigencia)
+	fmt.Println(beego.AppConfig.String("UrlAdministrativaJBPM") + "/informacion_contrato_proveedor/" + numero_contrato_suscrito + "/" + vigencia)
 	if response, err := GetJsonWSO2Test(beego.AppConfig.String("UrlAdministrativaJBPM")+"/informacion_contrato_proveedor/"+numero_contrato_suscrito+"/"+vigencia, &respuesta_peticion); err == nil && response == 200 {
 		if respuesta_peticion != nil {
 			if contratosMap, exito := respuesta_peticion["proveedor"].(map[string]interface{}); exito {
@@ -47,39 +43,39 @@ func ObtenerInformacionContratoProveedor(numero_contrato_suscrito string, vigenc
 								contratos_proveedor = append(contratos_proveedor, contrato_proveedor)
 							} else {
 								logs.Error(err)
-								outputError = map[string]interface{}{"funcion": "/ObtenerInformacionContratoProveedor/", "err": err, "status": "404"}
+								outputError = fmt.Errorf("Error al obtener el RP del contrato")
 								return contratos_proveedor, outputError
 							}
 						}
 					} else {
 						logs.Error("Error al obtener la informacion del contrato del proveedor")
-						outputError = map[string]interface{}{"funcion": "/ObtenerInformacionContratoProveedor/", "err": "Error al obtener la informacion del contrato del proveedor", "status": "404"}
+						outputError = fmt.Errorf("Error al obtener la informacion del contrato del proveedor")
 						return contratos_proveedor, outputError
 					}
 				}
 			} else {
 				logs.Error("Error al obtener la informacion del contrato del proveedor")
-				outputError = map[string]interface{}{"funcion": "/ObtenerInformacionContratoProveedor/", "err": "Error al obtener la informacion del contrato del proveedor", "status": "404"}
+				outputError = fmt.Errorf("Error al obtener la informacion del contrato del proveedor")
 				return contratos_proveedor, outputError
 			}
 		} else {
 			logs.Error("Error al obtener la informacion del contrato del proveedor")
-			outputError = map[string]interface{}{"funcion": "/ObtenerInformacionContratoProveedor/", "err": "Error al obtener la informacion del contrato del proveedor", "status": "404"}
+			outputError = fmt.Errorf("Error al obtener la informacion del contrato del proveedor")
 			return contratos_proveedor, outputError
 		}
 	} else {
 		logs.Error(err)
-		outputError = map[string]interface{}{"funcion": "/ObtenerInformacionContratoProveedor/", "err": err, "status": "404"}
+		outputError = fmt.Errorf("Error al obtener los datos del contrato proveedor")
 		return contratos_proveedor, outputError
 	}
 
 	return contratos_proveedor, nil
 }
 
-func ObtenerOrdenadorContrato(numero_contrato_suscrito string, vigencia string) (ordenador_contrato models.OrdenadorContratoProveedor, outputError map[string]interface{}) {
+func ObtenerOrdenadorContrato(numero_contrato_suscrito string, vigencia string) (ordenador_contrato models.OrdenadorContratoProveedor, outputError error) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "ObtenerOrdenadorContrato", "err": err, "status": "404"}
+			outputError = fmt.Errorf("%v", err)
 			panic(outputError)
 		}
 	}()
@@ -88,32 +84,32 @@ func ObtenerOrdenadorContrato(numero_contrato_suscrito string, vigencia string) 
 
 	if response, err := GetJsonWSO2Test(beego.AppConfig.String("UrlAdministrativaJBPM")+"/informacion_ordenador_contrato/"+numero_contrato_suscrito+"/"+vigencia, &respuesta_peticion); err == nil && response == 200 {
 		if respuesta_peticion == nil {
-			outputError = map[string]interface{}{"funcion": "ObtenerOrdenadorContrato", "status": "404", "mensaje": "No se encontro el ordenador del contrato"}
+			outputError = fmt.Errorf("No se encontro el ordenador del contrato")
 			return ordenador_contrato, outputError
 		}
 		json_ordenador, err_json := json.Marshal(respuesta_peticion)
 		if err_json == nil {
 			err := json.Unmarshal(json_ordenador, &ordenador_contrato)
 			if err != nil {
-				outputError = map[string]interface{}{"funcion": "ObtenerOrdenadorContrato", "status": "404", "mensaje": "Error al convertir el json"}
+				outputError = fmt.Errorf("Error al convertir el json")
 				return ordenador_contrato, outputError
 			}
 		} else {
-			outputError = map[string]interface{}{"funcion": "ObtenerOrdenadorContrato", "status": "404", "mensaje": "Error al convertir el json"}
+			outputError = fmt.Errorf("Error al convertir el json")
 			return ordenador_contrato, outputError
 		}
 	} else {
-		outputError = map[string]interface{}{"funcion": "ObtenerOrdenadorContrato", "status": "404", "mensaje": "Error al consultar el ordenador del contrato"}
+		outputError = fmt.Errorf("Error al consultar el ordenador del contrato")
 		return ordenador_contrato, outputError
 	}
 	return ordenador_contrato, outputError
 }
 
-func ObtenerRP(numero_cdp string, vigencia_cdp string) (rp models.InformacionCdpRp, outputError map[string]interface{}) {
+func ObtenerRP(numero_cdp string, vigencia_cdp string) (rp models.InformacionCdpRp, outputError error) {
 
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/GetRP0", "err": err, "status": "404"}
+			outputError = fmt.Errorf("%v", err)
 			panic(outputError)
 		}
 	}()
@@ -123,7 +119,7 @@ func ObtenerRP(numero_cdp string, vigencia_cdp string) (rp models.InformacionCdp
 	//fmt.Println(beego.AppConfig.String("UrlFinancieraJBPM") + "/" + "cdprp/" + numero_cdp + "/" + vigencia_cdp + "/01")
 	if response, err := GetJsonWSO2Test(beego.AppConfig.String("UrlFinancieraJBPM")+"/cdprp/"+numero_cdp+"/"+vigencia_cdp+"/01", &temp); (err == nil) && (response == 200) {
 		if temp == nil {
-			outputError = map[string]interface{}{"funcion": "/GetRP", "err": "No se encontro el RP", "status": "404"}
+			outputError = fmt.Errorf("No se encontro el RP")
 			return rp, outputError
 		}
 		json_cdp_rp, error_json := json.Marshal(temp)
@@ -134,23 +130,23 @@ func ObtenerRP(numero_cdp string, vigencia_cdp string) (rp models.InformacionCdp
 				return rp, nil
 			} else {
 				logs.Error(err)
-				outputError = map[string]interface{}{"funcion": "/GetRP1", "err": err, "status": "404"}
+				outputError = fmt.Errorf("Error al convertir a Json")
 				return rp, outputError
 			}
 		} else {
 			logs.Error(error_json)
-			outputError = map[string]interface{}{"funcion": "/GetRP2", "err": error_json, "status": "404"}
+			outputError = fmt.Errorf("Error al convertir a Json")
 			return rp, outputError
 		}
 	} else {
 		logs.Error(err)
-		outputError = map[string]interface{}{"funcion": "/GetRP3", "err": err, "status": "404"}
+		outputError = fmt.Errorf("Error al consultar el RP del contrato")
 		return rp, outputError
 	}
 
 }
 
-func ObtenerActaInicio(numero_contrato_suscrito string, vigencia_contrato int) (acta_inicio models.ActaInicio, outputError map[string]interface{}) {
+func ObtenerActaInicio(numero_contrato_suscrito string, vigencia_contrato int) (acta_inicio models.ActaInicio, outputError error) {
 	var contratos_suscrito []models.ContratoSuscrito
 	if response, err := GetJsonTest(beego.AppConfig.String("UrlcrudAgora")+"/contrato_suscrito/?query=NumeroContratoSuscrito:"+numero_contrato_suscrito+",Vigencia:"+strconv.Itoa(vigencia_contrato), &contratos_suscrito); (err == nil) && (response == 200) {
 		if len(contratos_suscrito) > 0 {
@@ -176,52 +172,55 @@ func ObtenerActaInicio(numero_contrato_suscrito string, vigencia_contrato int) (
 							case 207:
 								acta_inicio.FechaFin = acta_inicio.FechaInicio.AddDate(contratos_generales[0].PlazoEjecucion, 0, 0)
 							default:
-								outputError = map[string]interface{}{"funcion": "/ObtenerActaInicio", "message": "La unidad de ejecucuion no es un valor de tiempo", "status": "404"}
+								outputError = fmt.Errorf("La unidad de ejecucion no es un valor de tiempo")
 								return acta_inicio, outputError
 							}
 							return acta_inicio, nil
 						} else {
-							outputError = map[string]interface{}{"funcion": "/ObtenerActaInicio", "message": "No existe el contrato general ingresado", "status": "404"}
+							outputError = fmt.Errorf("No existe el contrato general ingresado")
 							return acta_inicio, outputError
 						}
 					} else {
-						outputError = map[string]interface{}{"funcion": "/ObtenerActaInicio", "message": "Error al obtener el contrato general", "status": "404"}
+						outputError = fmt.Errorf("Error al obtener el contrato general")
 						return acta_inicio, outputError
 					}
 				} else {
 					acta_inicio = actasInicio[0]
 				}
 			} else {
-				outputError = map[string]interface{}{"funcion": "/ObtenerActaInicio", "err": err, "message": "Error al obtener la acta de inicio", "status": "404"}
+				outputError = fmt.Errorf("Error al obtener la acta de inicio")
 			}
 		} else {
-			outputError = map[string]interface{}{"funcion": "/ObtenerActaInicio", "err": err, "message": "No existe el contrato suscrito ingresado", "status": "404"}
+			outputError = fmt.Errorf("No existe el contrato suscrito ingresado")
 			return acta_inicio, outputError
 		}
 	} else {
-		outputError = map[string]interface{}{"funcion": "/ObtenerActaInicio", "err": err, "message": "Error al obtener el contrato suscrito", "status": "404"}
+		outputError = fmt.Errorf("Error al obtener el contrato suscrito")
 		return acta_inicio, outputError
 	}
 
 	return acta_inicio, outputError
 }
 
-func ObtenerContratoGeneralProveedor(numero_contrato_suscrito string, vigencia_contrato string) (contrato_general models.ContratoGeneral, outputError map[string]interface{}) {
+func ObtenerContratoGeneralProveedor(numero_contrato_suscrito string, vigencia_contrato string) (contrato_general models.ContratoGeneral, outputError error) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/ObtenerContratoGeneralProveedor", "err": err, "status": "404"}
+			outputError = fmt.Errorf("%v", err)
 			panic(outputError)
 		}
 	}()
 
 	var contrato []models.ContratoGeneral
+	//fmt.Println(beego.AppConfig.String("UrlcrudAgora") + "/contrato_general/?query=ContratoSuscrito.NumeroContratoSuscrito:" + numero_contrato_suscrito + ",VigenciaContrato:" + vigencia_contrato)
 	if response, err := GetJsonTest(beego.AppConfig.String("UrlcrudAgora")+"/contrato_general/?query=ContratoSuscrito.NumeroContratoSuscrito:"+numero_contrato_suscrito+",VigenciaContrato:"+vigencia_contrato, &contrato); (err == nil) && (response == 200) {
 		if len(contrato) > 0 {
 			return contrato[0], nil
 		} else {
-			outputError = map[string]interface{}{"funcion": "/ObtenerContratoGeneralProveedor", "err": "No se encontró contrato", "status": "404"}
+			outputError = fmt.Errorf("No se encontró contrato")
 			return contrato[0], outputError
 		}
+	} else {
+		outputError = fmt.Errorf("Error al obtener el contrato general")
+		return contrato_general, outputError
 	}
-	return contrato_general, outputError
 }

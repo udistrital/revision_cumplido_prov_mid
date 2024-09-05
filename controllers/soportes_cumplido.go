@@ -2,12 +2,12 @@ package controllers
 
 import (
 	"encoding/json"
-	"log"
 
 	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/logs"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/services"
+	"github.com/udistrital/utils_oas/errorhandler"
+	"github.com/udistrital/utils_oas/requestresponse"
 )
 
 // SoportesCumplidoController operations for SoportesCumplido
@@ -38,19 +38,7 @@ func (c *SoportesCumplidoController) URLMapping() {
 // @Failure 403 body is empty
 // @router /soportes [post]
 func (c *SoportesCumplidoController) SubirSoporteCumplido() {
-	defer func() {
-		if err := recover(); err != nil {
-			logs.Error(err)
-			localError := err.(map[string]interface{})
-			c.Data["message"] = (beego.AppConfig.String("appname") + "/" + "SoportesCumplidoController" + "/" + (localError["funcion"]).(string))
-			c.Data["data"] = (localError["err"])
-			if status, ok := localError["status"]; ok {
-				c.Abort(status.(string))
-			} else {
-				c.Abort("404")
-			}
-		}
-	}()
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	// Estructura para recibir el cuerpo de la solicitud
 	var soporteReq models.BodySubirSoporteRequest
@@ -68,12 +56,13 @@ func (c *SoportesCumplidoController) SubirSoporteCumplido() {
 	}
 
 	// Llamada al helper para subir el soporte
-	soporte, err := services.SubirSoporteCumplido(soporteReq.SolicitudPagoID, soporteReq.TipoDocumento, soporteReq.ItemID, soporteReq.Observaciones, soporteReq.NombreArchivo, soporteReq.Archivo)
+	data, err := services.SubirSoporteCumplido(soporteReq.SolicitudPagoID, soporteReq.TipoDocumento, soporteReq.ItemID, soporteReq.Observaciones, soporteReq.NombreArchivo, soporteReq.Archivo)
 	if err == nil {
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": soporte}
+		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, data)
 	} else {
 		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 404, "Message": err, "Data": []map[string]interface{}{}}
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 404, nil, err.Error())
 	}
 	c.ServeJSON()
 }
@@ -86,28 +75,17 @@ func (c *SoportesCumplidoController) SubirSoporteCumplido() {
 // @Failure 404 No se encontraron documentos de soporte
 // @router /soportes/:cumplido_proveedor_id [get]
 func (c *SoportesCumplidoController) ObtenerDocumentosPagoMensual() {
-	defer func() {
-		if err := recover(); err != nil {
-			logs.Error(err)
-			localError := err.(map[string]interface{})
-			c.Data["message"] = (beego.AppConfig.String("appname") + "/" + "ObtenerDocumentosPagoMensual" + "/" + (localError["funcion"]).(string))
-			c.Data["data"] = (localError["err"])
-			if status, ok := localError["status"]; ok {
-				c.Abort(status.(string))
-			} else {
-				c.Abort("404")
-			}
-		}
-	}()
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	cumplido_proveedor_id := c.Ctx.Input.Param(":cumplido_proveedor_id")
 
 	data, err := services.ObtenerDocumentosPagoMensual(cumplido_proveedor_id)
 	if err == nil {
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": data}
+		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, data)
 	} else {
 		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 404, "Message": err, "Data": []map[string]interface{}{}}
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 404, nil, err.Error())
 	}
 	c.ServeJSON()
 
@@ -122,28 +100,17 @@ func (c *SoportesCumplidoController) ObtenerDocumentosPagoMensual() {
 // @Failure 404 "Error al intentar eliminar el soporte de pago"
 // @router /soportes/:soporte_pago_id [delete]
 func (c *SoportesCumplidoController) EliminarSoporteCumplido() {
-	defer func() {
-		if err := recover(); err != nil {
-			logs.Error(err)
-			localError := err.(map[string]interface{})
-			c.Data["message"] = (beego.AppConfig.String("appname") + "/" + "EliminarSoporteCumplido" + "/" + (localError["funcion"]).(string))
-			c.Data["data"] = (localError["err"])
-			if status, ok := localError["status"]; ok {
-				c.Abort(status.(string))
-			} else {
-				c.Abort("404")
-			}
-		}
-	}()
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	soporte_pago_id := c.Ctx.Input.Param(":soporte_pago_id")
 
 	data, err := services.EliminarSoporteCumplido(soporte_pago_id)
 	if err == nil {
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": data}
+		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, data)
 	} else {
 		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 404, "Message": err, "Data": []map[string]interface{}{}}
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 404, nil, err.Error())
 	}
 	c.ServeJSON()
 }
@@ -159,19 +126,7 @@ func (c *SoportesCumplidoController) EliminarSoporteCumplido() {
 // @Failure 404 "Error al intentar agregar el comentario"
 // @router /comentario-soporte [post]
 func (c *SoportesCumplidoController) AgregarComentarioSoporte() {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			localError := err.(map[string]interface{})
-			c.Data["message"] = (beego.AppConfig.String("appname") + "/" + "SoportesCumplidoController" + "/" + (localError["funcion"]).(string))
-			c.Data["data"] = (localError["err"])
-			if status, ok := localError["status"]; ok {
-				c.Abort(status.(string))
-			} else {
-				c.Abort("404")
-			}
-		}
-	}()
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	var v models.AgregarComentarioSoporteRequest
 
@@ -185,10 +140,11 @@ func (c *SoportesCumplidoController) AgregarComentarioSoporte() {
 
 	data, err := services.AgregarComentarioSoporte(v.SoporteId, v.CambioEstadoId, v.Comentario)
 	if err == nil {
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": data}
+		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, data)
 	} else {
 		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 404, "Message": err, "Data": []map[string]interface{}{}}
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 404, nil, err.Error())
 	}
 	c.ServeJSON()
 }
@@ -202,27 +158,17 @@ func (c *SoportesCumplidoController) AgregarComentarioSoporte() {
 // @Failure 404 "Error al intentar obtener o comprimir los documentos"
 // @router /soportes-comprimido/:id_cumplido_proveedor [get]
 func (c *SoportesCumplidoController) ObtenerComprimidoSoportes() {
-	defer func() {
-		if err := recover(); err != nil {
-			logs.Error(err)
-			localError := err.(map[string]interface{})
-			c.Data["message"] = (beego.AppConfig.String("appname") + "/" + "ObtenerComprimidoSoportes" + "/" + (localError["funcion"]).(string))
-			c.Data["data"] = (localError["err"])
-			if status, ok := localError["status"]; ok {
-				c.Abort(status.(string))
-			} else {
-				c.Abort("404")
-			}
-		}
-	}()
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	id_cumplido_proveedor := c.Ctx.Input.Param(":id_cumplido_proveedor")
 
 	data, err := services.ObtenerComprimidoSoportes(id_cumplido_proveedor)
 	if err == nil {
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": data}
+		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, data)
 	} else {
 		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 404, "Message": err, "Data": []map[string]interface{}{}}
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 404, nil, err.Error())
 	}
+	c.ServeJSON()
 }
