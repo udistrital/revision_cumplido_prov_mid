@@ -2,8 +2,9 @@ package controllers
 
 import (
 	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/logs"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/services"
+	"github.com/udistrital/utils_oas/errorhandler"
+	"github.com/udistrital/utils_oas/requestresponse"
 )
 
 type RevisionCumplidoContratacionController struct {
@@ -22,27 +23,15 @@ func (c *RevisionCumplidoContratacionController) URLMapping() {
 // @router /solicitudes-pago [get]
 func (c *RevisionCumplidoContratacionController) ObtenerCumplidosPendientesContratacion() {
 
-	defer func() {
-		if err := recover(); err != nil {
-			logs.Error(err)
-			localError := err.(map[string]interface{})
-			c.Data["message"] = beego.AppConfig.String("appname") + "/" + "RevisionCumplidoOrdenadorController" + "/" + (localError["funcion"]).(string)
-			c.Data["data"] = localError["err"]
-			if status, ok := localError["status"]; ok {
-				c.Abort(status.(string))
-			} else {
-				c.Abort("500")
-			}
-		}
-	}()
+	defer errorhandler.HandlePanic(&c.Controller)
 
-	dependencias, err := services.ObtenerCumplidosPendientesContratacion()
-
+	data, err := services.ObtenerCumplidosPendientesContratacion()
 	if err == nil {
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 204, "Message": "Cumplidos pendientes obtenidos satisfactoriamente", "Data": dependencias}
+		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, data)
 	} else {
 		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 404, "Message": err, "Data": []map[string]interface{}{}}
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 404, nil, err.Error())
 	}
 	c.ServeJSON()
 }

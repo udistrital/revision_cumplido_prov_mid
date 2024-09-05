@@ -2,6 +2,7 @@ package services
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 
 	"github.com/astaxie/beego"
@@ -9,17 +10,17 @@ import (
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 )
 
-func CambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_proveedor_id int) (respuesta_cambio_estado models.CambioEstadoCumplidoResponse, outputError map[string]interface{}) {
+func CambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_proveedor_id int) (respuesta_cambio_estado models.CambioEstadoCumplidoResponse, outputError error) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "CambioEstadoCumplido", "err": err, "status": "404"}
-			panic(outputError)
+			outputError = fmt.Errorf("%v", err)
+			panic(outputError.Error())
 		}
 	}()
 
 	// Verificar que se envien todos los datos
 	if codigo_abreviacion_cumplido == "" || cumplido_proveedor_id == 0 {
-		outputError = map[string]interface{}{"funcion": "CambioEstadoCumplido", "status": "404", "mensaje": "Faltan datos por enviar"}
+		outputError = fmt.Errorf("Error en los datos de entrada")
 		return respuesta_cambio_estado, outputError
 	}
 
@@ -36,21 +37,21 @@ func CambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_proveedor
 			if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/estado_cumplido/?query=CodigoAbreviacion:"+codigo_abreviacion_cumplido, &respuesta_estado_cumplido); (err == nil) && (response == 200) {
 				data := respuesta_estado_cumplido["Data"].([]interface{})
 				if len(data[0].(map[string]interface{})) == 0 {
-					outputError = map[string]interface{}{"funcion": "CambioEstadoCumplido", "status": "404", "mensaje": "El estado del cumplido proveedor ingresado no existe"}
+					outputError = fmt.Errorf("El estado del cumplido proveedor ingresado no existe")
 					return respuesta_cambio_estado, outputError
 				}
 				helpers.LimpiezaRespuestaRefactor(respuesta_estado_cumplido, &estado_cumplido)
 			} else {
-				outputError = map[string]interface{}{"funcion": "CambioEstadoCumplido", "status": "404", "mensaje": "Error al consultar el estado del cumplido"}
+				outputError = fmt.Errorf("Error al consultar el estado del cumplido proveedor")
 				return respuesta_cambio_estado, outputError
 			}
 
 		} else {
-			outputError = map[string]interface{}{"funcion": "CambioEstadoCumplido", "status": "404", "mensaje": "El cumplido proveedor ingresado no existe"}
+			outputError = fmt.Errorf("El cumplido proveedor ingresado no existe")
 			return respuesta_cambio_estado, outputError
 		}
 	} else {
-		outputError = map[string]interface{}{"funcion": "CambioEstadoCumplido", "status": "404", "mensaje": "Error al consultar el cumplido proveedor"}
+		outputError = fmt.Errorf("Error al consultar el cumplido proveedor")
 		return respuesta_cambio_estado, outputError
 	}
 
@@ -66,7 +67,7 @@ func CambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_proveedor
 	}
 
 	if (ultimo_cambio_estado_cumplido != models.CambioEstadoCumplido{}) && body_cambio_estado.DocumentoResponsable == ultimo_cambio_estado_cumplido.DocumentoResponsable && body_cambio_estado.EstadoCumplidoId.Id == ultimo_cambio_estado_cumplido.EstadoCumplidoId.Id {
-		outputError = map[string]interface{}{"funcion": "CambioEstadoCumplido", "status": "404", "mensaje": "El cumplido ya se encuentra en este estado"}
+		outputError = fmt.Errorf("El cumplido ya se encuentra en este estado")
 		return respuesta_cambio_estado, outputError
 	} else {
 		var respuesta_peticion map[string]interface{}
@@ -86,17 +87,17 @@ func CambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_proveedor
 			}
 			return respuesta_cambio_estado, outputError
 		} else {
-			outputError = map[string]interface{}{"funcion": "CambioEstadoCumplido", "status": "404", "mensaje": "Error al actualizar el cumplido proveedor"}
+			outputError = fmt.Errorf("Error al actualizar el cumplido proveedor")
 			return respuesta_cambio_estado, outputError
 		}
 	}
 }
 
-func CrearBodyCambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_proveedor models.CumplidoProveedor, estado_cumplido models.EstadoCumplido) (body_cambio_estado models.BodyCambioEstadoCumplido, outputError map[string]interface{}) {
+func CrearBodyCambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_proveedor models.CumplidoProveedor, estado_cumplido models.EstadoCumplido) (body_cambio_estado models.BodyCambioEstadoCumplido, outputError error) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "CrearBodyCambioEstadoCumplido", "err": err, "status": "404"}
-			panic(outputError)
+			outputError = fmt.Errorf("%v", err)
+			panic(outputError.Error())
 		}
 	}()
 
@@ -110,7 +111,7 @@ func CrearBodyCambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_
 			body_cambio_estado.DocumentoResponsable = documento_supervisor
 			body_cambio_estado.CargoResponsable = supervisor_contrato.Contratos.Supervisor[0].Cargo
 		} else {
-			outputError = map[string]interface{}{"funcion": "CambioEstadoCumplido", "status": "404", "mensaje": "Error al obtener el supervisor del contrato"}
+			outputError = fmt.Errorf("Error al obtener el supervisor del contrato")
 			return body_cambio_estado, outputError
 		}
 	case "PRC":
@@ -137,7 +138,7 @@ func CrearBodyCambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_
 			body_cambio_estado.DocumentoResponsable = documento_ordenador
 			body_cambio_estado.CargoResponsable = ordenador_contrato.Contratos.Ordenador[0].RolOrdenador
 		} else {
-			outputError = map[string]interface{}{"funcion": "CambioEstadoCumplido", "status": "404", "mensaje": "Error al obtener el ordenador del contrato"}
+			outputError = fmt.Errorf("Error al obtener el ordenador del contrato")
 			return body_cambio_estado, outputError
 		}
 	case "AO":
@@ -149,7 +150,7 @@ func CrearBodyCambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_
 			body_cambio_estado.DocumentoResponsable = documento_ordenador
 			body_cambio_estado.CargoResponsable = ordenador_contrato.Contratos.Ordenador[0].RolOrdenador
 		} else {
-			outputError = map[string]interface{}{"funcion": "CambioEstadoCumplido", "status": "404", "mensaje": "Error al obtener el ordenador del contrato"}
+			outputError = fmt.Errorf("Error al obtener el ordenador del contrato")
 			return body_cambio_estado, outputError
 		}
 	case "RO":
@@ -161,21 +162,21 @@ func CrearBodyCambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_
 			body_cambio_estado.DocumentoResponsable = documento_ordenador
 			body_cambio_estado.CargoResponsable = ordenador_contrato.Contratos.Ordenador[0].RolOrdenador
 		} else {
-			outputError = map[string]interface{}{"funcion": "CambioEstadoCumplido", "status": "404", "mensaje": "Error al obtener el ordenador del contrato"}
+			outputError = fmt.Errorf("Error al obtener el ordenador del contrato")
 			return body_cambio_estado, outputError
 		}
 	default:
-		outputError = map[string]interface{}{"funcion": "CambioEstadoCumplido", "status": "404", "mensaje": "El código de abreviación no es válido"}
+		outputError = fmt.Errorf("El código de abreviación no es válido")
 		return body_cambio_estado, outputError
 	}
 	return body_cambio_estado, outputError
 
 }
 
-func ObtenerSupervisorContrato(numero_contrato_suscrito string, vigencia string) (supervisor_contrato models.SupervisorContratoProveedor, outputError map[string]interface{}) {
+func ObtenerSupervisorContrato(numero_contrato_suscrito string, vigencia string) (supervisor_contrato models.SupervisorContratoProveedor, outputError error) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "ObtenerSupervisorContrato", "err": err, "status": "404"}
+			outputError = fmt.Errorf("%v", err)
 			panic(outputError)
 		}
 	}()
@@ -184,31 +185,31 @@ func ObtenerSupervisorContrato(numero_contrato_suscrito string, vigencia string)
 
 	if response, err := helpers.GetJsonWSO2Test(beego.AppConfig.String("UrlAdministrativaJBPM")+"/informacion_supervisor_contrato/"+numero_contrato_suscrito+"/"+vigencia, &respuesta_peticion); err == nil && response == 200 {
 		if respuesta_peticion == nil {
-			outputError = map[string]interface{}{"funcion": "ObtenerSupervisorContrato", "status": "404", "mensaje": "No se ha registrado un supervisor para el contrato"}
+			outputError = fmt.Errorf("No se ha registrado un supervisor para el contrato")
 			return supervisor_contrato, outputError
 		}
 		json_supervisor, err_json := json.Marshal(respuesta_peticion)
 		if err_json == nil {
 			err := json.Unmarshal(json_supervisor, &supervisor_contrato)
 			if err != nil {
-				outputError = map[string]interface{}{"funcion": "ObtenerSupervisorContrato", "status": "404", "mensaje": "Error al convertir el json"}
+				outputError = fmt.Errorf("Error al convertir el json")
 				return supervisor_contrato, outputError
 			}
 		} else {
-			outputError = map[string]interface{}{"funcion": "ObtenerSupervisorContrato", "status": "404", "mensaje": "Error al convertir el json"}
+			outputError = fmt.Errorf("Error al convertir el json")
 			return supervisor_contrato, outputError
 		}
 	} else {
-		outputError = map[string]interface{}{"funcion": "ObtenerSupervisorContrato", "status": "404", "mensaje": "Error al consultar el supervisor del contrato"}
+		outputError = fmt.Errorf("Error al consultar el supervisor del contrato")
 		return supervisor_contrato, outputError
 	}
 	return supervisor_contrato, outputError
 }
 
-func DesactivarCambiosAnterioresCumplido(cumplido_proveedor_id int, codigo_abreviacion_cumplido string) (ultimo_cambio_cumplido models.CambioEstadoCumplido, outputError map[string]interface{}) {
+func DesactivarCambiosAnterioresCumplido(cumplido_proveedor_id int, codigo_abreviacion_cumplido string) (ultimo_cambio_cumplido models.CambioEstadoCumplido, outputError error) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "DesactivarCambiosAnterioresCumplido", "err": err, "status": "404"}
+			outputError = fmt.Errorf("%v", err)
 			panic(outputError)
 		}
 	}()
@@ -243,7 +244,7 @@ func DesactivarCambiosAnterioresCumplido(cumplido_proveedor_id int, codigo_abrev
 		helpers.LimpiezaRespuestaRefactor(respuesta_peticion, &cambios_anteriores)
 
 		if !contains(posibles_estados_siguientes[cambios_anteriores[0].EstadoCumplidoId.CodigoAbreviacion], codigo_abreviacion_cumplido) {
-			outputError = map[string]interface{}{"funcion": "DesactivarCambiosAnterioresCumplido", "status": "404", "mensaje": "No es posible pasar del estado " + cambios_anteriores[0].EstadoCumplidoId.CodigoAbreviacion + " al estado " + codigo_abreviacion_cumplido}
+			outputError = fmt.Errorf("No es posible pasar del estado " + cambios_anteriores[0].EstadoCumplidoId.CodigoAbreviacion + " al estado " + codigo_abreviacion_cumplido)
 			return ultimo_cambio_cumplido, outputError
 		}
 
@@ -254,14 +255,14 @@ func DesactivarCambiosAnterioresCumplido(cumplido_proveedor_id int, codigo_abrev
 				cambio_anterior.Activo = false
 				err := helpers.SendJson(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/"+strconv.Itoa(cambio_anterior.Id), "PUT", &respuesta_estado_anterior, cambio_anterior)
 				if err != nil {
-					outputError = map[string]interface{}{"funcion": "DesactivarCambiosAnterioresCumplido", "status": "404", "mensaje": "Error al actualizar el estado de los cambios de estados anteriores"}
+					outputError = fmt.Errorf("Error al actualizar el estado de los cambios de estados anteriores")
 					return ultimo_cambio_cumplido, outputError
 				}
 			}
 		}
 
 	} else {
-		outputError = map[string]interface{}{"funcion": "DesactivarCambiosAnterioresCumplido", "status": "404", "mensaje": "Error al consultar el estado del cumplido"}
+		outputError = fmt.Errorf("Error al consultar el estado del cumplido")
 		return ultimo_cambio_cumplido, outputError
 	}
 	return ultimo_cambio_cumplido, outputError

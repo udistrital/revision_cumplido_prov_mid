@@ -3,7 +3,9 @@ package services
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/astaxie/beego"
 
@@ -11,10 +13,10 @@ import (
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 )
 
-func ObtenerBalanceFinancieroContrato(numero_contrato_suscrito string, vigencia_contrato string) (balance_contrato models.BalanceContrato, outputError map[string]interface{}) {
+func ObtenerBalanceFinancieroContrato(numero_contrato_suscrito string, vigencia_contrato string) (balance_contrato models.BalanceContrato, outputError error) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/ObtenerBalanceFinancieroContrato", "err": err, "status": "404"}
+			outputError = fmt.Errorf("%v", err)
 			panic(outputError)
 		}
 	}()
@@ -32,19 +34,24 @@ func ObtenerBalanceFinancieroContrato(numero_contrato_suscrito string, vigencia_
 				return balance_contrato, nil
 
 			} else {
-				outputError = map[string]interface{}{"funcion": "/ObtenerBalanceFinancieroContrato", "err": err, "status": "404"}
+				outputError = fmt.Errorf("Error al obtener el valor girado por el CDP")
 				return balance_contrato, outputError
 			}
+		} else {
+			outputError = fmt.Errorf("Error al obtener el contrato general")
+			return balance_contrato, outputError
 		}
+	} else {
+		outputError = fmt.Errorf("Error al obtener la información del contrato proveedor")
+		return balance_contrato, outputError
 	}
-
-	return balance_contrato, nil
 }
 
 func ObtenerValorGiradoPorCdp(cdp string, vigencia_cdp string, unidad_ejecucion string) (valor_girado int, err error) {
 	var temp_giros_tercero map[string]interface{}
 	var giros_tercero models.GirosTercero
 	valor_girado = 0
+	fmt.Println(beego.AppConfig.String("UrlFinancieraJBPM") + "/giros_tercero/" + cdp + "/" + vigencia_cdp + "/" + unidad_ejecucion)
 	if response, err := helpers.GetJsonWSO2Test(beego.AppConfig.String("UrlFinancieraJBPM")+"/giros_tercero/"+cdp+"/"+vigencia_cdp+"/"+unidad_ejecucion, &temp_giros_tercero); (err == nil) && (response == 200) {
 		if temp_giros_tercero == nil {
 			err = errors.New("error en la consulta de giros_tercero")
@@ -76,11 +83,11 @@ func ObtenerValorGiradoPorCdp(cdp string, vigencia_cdp string, unidad_ejecucion 
 	}
 }
 
-func ObtenerInformacionCumplidoSatisfaccion(numero_contrato_suscrito string, vigencia string) (informacion_informe models.InformacionInformeSatisfaccion, outputError map[string]interface{}) {
+func ObtenerInformacionCumplidoSatisfaccion(numero_contrato_suscrito string, vigencia string) (informacion_informe models.InformacionInformeSatisfaccion, outputError error) {
 
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "err": err, "status": "404"}
+			outputError = fmt.Errorf("%v", err)
 			panic(outputError)
 		}
 	}()
@@ -117,39 +124,39 @@ func ObtenerInformacionCumplidoSatisfaccion(numero_contrato_suscrito string, vig
 							informacion_informe.Supervisor = contrato_general.Supervisor.Nombre
 							informacion_informe.DocumentoSupervisor = strconv.Itoa(contrato_general.Supervisor.Documento)
 						} else {
-							outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "message": "No fue posible obtener el balance financiero del contrato", "err": err, "status": "404"}
+							outputError = fmt.Errorf("No fue posible obtener el balance financiero del contrato")
 							return informacion_informe, outputError
 						}
 
 					} else {
-						outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "message": "No fue posible obtener el acta de inicio", "err": err, "status": "404"}
+						outputError = fmt.Errorf("No fue posible obtener el acta de inicio")
 						return informacion_informe, outputError
 					}
 				} else {
-					outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "message": "No fue posible obtener la informacion del proveedor", "status": "404"}
+					outputError = fmt.Errorf("No fue posible obtener la informacion del proveedor")
 					return informacion_informe, outputError
 				}
 			} else {
-				outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "message": "No fue posible obtener la informacion del proveedor", "err": err, "status": "404"}
+				outputError = fmt.Errorf("No fue posible obtener la informacion del proveedor")
 				return informacion_informe, outputError
 			}
 		} else {
-			outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "message": "No fue posible obtener el contrato general", "err": err, "status": "404"}
+			outputError = fmt.Errorf("No fue posible obtener el contrato general")
 			return informacion_informe, outputError
 		}
 
 	} else {
-		outputError = map[string]interface{}{"funcion": "/ObtenerInformacionInformeSatisfaccion", "message": "No fue posible obtener la informacion del contrato", "err": err, "status": "404"}
+		outputError = fmt.Errorf("No fue posible obtener la informacion del contrato")
 		return informacion_informe, outputError
 	}
 
 	return informacion_informe, nil
 }
 
-func CrearCumplidoSatisfaccion(numero_contrato_suscrito int, vigencia_contrato string, tipo_pago string, periodo_inicio string, periodo_fin string, tipo_factura string, numero_cuenta_factura string, valor_pagar int, tipo_cuenta string, numero_cuenta string, banco string) (informe_satisfaccion models.CumplidoSatisfaccion, outputError map[string]interface{}) {
+func CrearCumplidoSatisfaccion(numero_contrato_suscrito int, vigencia_contrato string, tipo_pago string, periodo_inicio string, periodo_fin string, tipo_factura string, numero_cuenta_factura string, valor_pagar int, tipo_cuenta string, numero_cuenta string, banco string) (cumplido_satisfaccion models.CumplidoSatisfaccion, outputError error) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/CrearInformeSatisfaccion", "err": err, "status": "404"}
+			outputError = fmt.Errorf("%v", err)
 			panic(outputError)
 		}
 	}()
@@ -157,7 +164,7 @@ func CrearCumplidoSatisfaccion(numero_contrato_suscrito int, vigencia_contrato s
 	informacion_informe_satisfaccion, err := ObtenerInformacionCumplidoSatisfaccion(strconv.Itoa(numero_contrato_suscrito), vigencia_contrato)
 	if err == nil {
 
-		informe_satisfaccion, _ = helpers.CrearPdfCumplidoSatisfaccion(informacion_informe_satisfaccion.Dependencia,
+		archivo_cumplido_satisfaccion := helpers.CrearPdfCumplidoSatisfaccion(informacion_informe_satisfaccion.Dependencia,
 			informacion_informe_satisfaccion.NombreProveedor,
 			informacion_informe_satisfaccion.DocumentoProveedor,
 			tipo_pago,
@@ -182,7 +189,19 @@ func CrearCumplidoSatisfaccion(numero_contrato_suscrito int, vigencia_contrato s
 			informacion_informe_satisfaccion.Supervisor,
 			vigencia_contrato,
 			informacion_informe_satisfaccion.DocumentoSupervisor)
+
+		nombre := "CumplidoSatisfaccion_" + strings.Join(strings.Fields(informacion_informe_satisfaccion.NombreProveedor), "") + "_" + strconv.Itoa(numero_contrato_suscrito) + "_" + vigencia_contrato
+
+		cumplido_satisfaccion.NombreArchivo = nombre
+		cumplido_satisfaccion.Archivo = archivo_cumplido_satisfaccion
+		cumplido_satisfaccion.NombreResponsable = informacion_informe_satisfaccion.Supervisor
+		cumplido_satisfaccion.CargoResponsable = informacion_informe_satisfaccion.CargoSupervisor
+		cumplido_satisfaccion.DescripcionDocumento = "Autorización de pago para el cumplido " + strconv.Itoa(numero_contrato_suscrito) + " de " + vigencia_contrato + " con actividades compredidas entre " + periodo_inicio + " al " + periodo_fin
+
+		return cumplido_satisfaccion, nil
+	} else {
+		outputError = fmt.Errorf("No fue posible obtener la informacion del contrato")
+		return cumplido_satisfaccion, outputError
 	}
 
-	return informe_satisfaccion, nil
 }

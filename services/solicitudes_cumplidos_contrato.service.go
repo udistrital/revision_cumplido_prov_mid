@@ -2,6 +2,7 @@ package services
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 
 	"github.com/astaxie/beego"
@@ -9,10 +10,10 @@ import (
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 )
 
-func ObtenerSolicitudesCumplidosContrato(numero_contrato string, vigencia string) (solicitudes_cumplido []models.CumplidosContrato, outputError map[string]interface{}) {
+func ObtenerSolicitudesCumplidosContrato(numero_contrato string, vigencia string) (solicitudes_cumplido []models.CumplidosContrato, outputError error) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/ObtenerSolicitudesCumplidosContrato", "err": err, "status": "404"}
+			outputError = fmt.Errorf("%v", err)
 			panic(outputError)
 		}
 	}()
@@ -23,7 +24,7 @@ func ObtenerSolicitudesCumplidosContrato(numero_contrato string, vigencia string
 	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cumplido_proveedor/?query=NumeroContrato:"+numero_contrato+",VigenciaContrato:"+vigencia+"&sortby=FechaCreacion&order=desc", &respuesta_peticion); err == nil && response == 200 {
 		data := respuesta_peticion["Data"].([]interface{})
 		if len(data[0].(map[string]interface{})) == 0 {
-			outputError = map[string]interface{}{"funcion": "ObtenerSolicitudesCumplidosContrato", "err": "No se encontraron cumplidos para el contrato", "status": "404"}
+			outputError = fmt.Errorf("No se encontraron cumplidos para el contrato")
 			return nil, outputError
 		}
 		helpers.LimpiezaRespuestaRefactor(respuesta_peticion, &cumplidos_proveedor)
@@ -41,7 +42,7 @@ func ObtenerSolicitudesCumplidosContrato(numero_contrato string, vigencia string
 				solicitudes_cumplido = append(solicitudes_cumplido, solicitud_cumplido)
 
 			} else {
-				outputError = map[string]interface{}{"funcion": "ObtenerSolicitudesCumplidosContrato", "err": err, "status": "404"}
+				outputError = fmt.Errorf("Error al obtener el ultimo estado del cumplido")
 				return nil, outputError
 			}
 		}
@@ -72,10 +73,10 @@ func ObtenerPeriodoInformacionPago(cumplido_proveedor_id int) (periodo_pago stri
 	}
 }
 
-func ObtenerUltimoEstadoCumplidoProveedor(cumplido_proveedor_id string) (estado_cumplido models.CambioEstadoCumplido, outputError map[string]interface{}) {
+func ObtenerUltimoEstadoCumplidoProveedor(cumplido_proveedor_id string) (estado_cumplido models.CambioEstadoCumplido, outputError error) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/GetUltimoEstadoCumplidoProveedor", "err": err, "status": "404"}
+			outputError = fmt.Errorf("%v", err)
 			panic(outputError)
 		}
 	}()
@@ -84,20 +85,20 @@ func ObtenerUltimoEstadoCumplidoProveedor(cumplido_proveedor_id string) (estado_
 	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/?query=Activo:true,CumplidoProveedorId.Id:"+cumplido_proveedor_id+"&sortby=FechaCreacion&order=desc&limit=1", &respuesta_peticion); err == nil && response == 200 {
 		data := respuesta_peticion["Data"].([]interface{})
 		if len(data[0].(map[string]interface{})) > 0 {
-			estado_josn, err := json.Marshal(respuesta_peticion["Data"].([]interface{})[0])
+			estado_json, err := json.Marshal(respuesta_peticion["Data"].([]interface{})[0])
 			if err == nil {
-				json.Unmarshal(estado_josn, &estado_cumplido)
+				json.Unmarshal(estado_json, &estado_cumplido)
 				return estado_cumplido, nil
 			} else {
-				outputError = map[string]interface{}{"funcion": "GetUltimoEstadoCumplidoProveedor", "err": err, "status": "404"}
+				outputError = fmt.Errorf("Error al convertir el Json")
 				return estado_cumplido, outputError
 			}
 		} else {
-			outputError = map[string]interface{}{"funcion": "GetUltimoEstadoCumplidoProveedor", "err": "No se encontraron estados para el cumplido", "status": "404"}
+			outputError = fmt.Errorf("No se encontraron estados para el cumplido")
 			return estado_cumplido, outputError
 		}
 	} else {
-		outputError = map[string]interface{}{"funcion": "GetUltimoEstadoCumplidoProveedor", "err": err, "status": "404"}
+		outputError = fmt.Errorf("Error al obtener el ultimo estado del cumplido")
 		return estado_cumplido, outputError
 	}
 }

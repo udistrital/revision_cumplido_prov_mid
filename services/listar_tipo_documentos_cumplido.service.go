@@ -1,16 +1,18 @@
 package services
 
 import (
+	"fmt"
+
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/helpers"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 )
 
-func ObtenerTiposDocumentosCumplido() (tipos_documento []models.DocumentoCumplido, outputError map[string]interface{}) {
+func ObtenerTiposDocumentosCumplido() (tipos_documento []models.DocumentoCumplido, outputError error) {
 	defer func() {
 		if err := recover(); err != nil {
-			outputError = map[string]interface{}{"funcion": "/GetTiposDocumentosCumplido", "err": err, "status": "404"}
+			outputError = fmt.Errorf("%v", err)
 			panic(outputError)
 		}
 	}()
@@ -19,7 +21,7 @@ func ObtenerTiposDocumentosCumplido() (tipos_documento []models.DocumentoCumplid
 	//fmt.Println("UrlcrudAgora: ", beego.AppConfig.String("UrlDocumentosCrud")+"/tipo_documento/?query=DominioTipoDocumento.Id:12")
 	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlDocumentosCrud")+"/tipo_documento/?query=DominioTipoDocumento.Id:12&limit=0", &tipo_documento); err == nil && response == 200 {
 		if len(tipo_documento) == 0 {
-			outputError = map[string]interface{}{"funcion": "/GetTiposDocumentosCumplido", "err": "No se encontraron tipos de documentos", "status": "404"}
+			outputError = fmt.Errorf("No se encontraron tipos de documentos")
 			return nil, outputError
 		}
 		for _, tipo := range tipo_documento {
@@ -30,7 +32,7 @@ func ObtenerTiposDocumentosCumplido() (tipos_documento []models.DocumentoCumplid
 		}
 	} else {
 		logs.Error(err)
-		outputError = map[string]interface{}{"funcion": "/GetTiposDocumentosCumplido", "err": "No se pudo obtener los tipos de documentos", "status": "404"}
+		outputError = fmt.Errorf("No se pudo obtener los tipos de documentos")
 		return nil, outputError
 	}
 	return tipos_documento, nil

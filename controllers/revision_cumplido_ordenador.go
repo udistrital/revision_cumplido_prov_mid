@@ -2,8 +2,9 @@ package controllers
 
 import (
 	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/logs"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/services"
+	"github.com/udistrital/utils_oas/errorhandler"
+	"github.com/udistrital/utils_oas/requestresponse"
 )
 
 type RevisionCumplidoOrdenadorController struct {
@@ -25,29 +26,17 @@ func (c *RevisionCumplidoOrdenadorController) URLMapping() {
 // @router /solicitudes-pago/:documento_ordenador [get]
 func (c *RevisionCumplidoOrdenadorController) ObtenerCumplidosPendientesRevisionOrdenador() {
 
-	defer func() {
-		if err := recover(); err != nil {
-			logs.Error(err)
-			localError := err.(map[string]interface{})
-			c.Data["message"] = beego.AppConfig.String("appname") + "/" + "RevisionCumplidoOrdenadorController" + "/" + (localError["funcion"]).(string)
-			c.Data["data"] = localError["err"]
-			if status, ok := localError["status"]; ok {
-				c.Abort(status.(string))
-			} else {
-				c.Abort("500")
-			}
-		}
-	}()
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	documento_ordenador := c.GetString(":documento_ordenador")
 
-	solicitudes, err := services.ObtenerSolicitudesCumplidos(documento_ordenador)
-
+	data, err := services.ObtenerSolicitudesCumplidos(documento_ordenador)
 	if err == nil {
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": solicitudes}
+		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, data)
 	} else {
 		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 404, "Message": err, "Data": []map[string]interface{}{}}
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 404, nil, err.Error())
 	}
 	c.ServeJSON()
 }
@@ -61,29 +50,17 @@ func (c *RevisionCumplidoOrdenadorController) ObtenerCumplidosPendientesRevision
 // @router /revertir-solicitud-pago/:documento_ordenador [get]
 func (c *RevisionCumplidoOrdenadorController) ListaCumplidosReversibles() {
 
-	defer func() {
-		if err := recover(); err != nil {
-			logs.Error(err)
-			localError := err.(map[string]interface{})
-			c.Data["message"] = beego.AppConfig.String("appname") + "/" + "RevertirSolicitud" + "/" + (localError["funcion"]).(string)
-			c.Data["data"] = localError["err"]
-			if status, ok := localError["status"]; ok {
-				c.Abort(status.(string))
-			} else {
-				c.Abort("500")
-			}
-		}
-	}()
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	id_cumplido := c.GetString(":documento_ordenador")
 
-	cumplidos_reversibles, err := services.ListaCumplidosReversibles(id_cumplido)
-
+	data, err := services.ListaCumplidosReversibles(id_cumplido)
 	if err == nil {
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": cumplidos_reversibles}
+		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, data)
 	} else {
 		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 404, "Message": err, "Data": []map[string]interface{}{}}
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 404, nil, err.Error())
 	}
 	c.ServeJSON()
 }
@@ -97,13 +74,16 @@ func (c *RevisionCumplidoOrdenadorController) ListaCumplidosReversibles() {
 // @router /autorizacion-giro/:cumplido_proveedor_id [get]
 func (c *RevisionCumplidoOrdenadorController) GenerarAutorizacionGiro() {
 
+	defer errorhandler.HandlePanic(&c.Controller)
+
 	cumplido_proveedor_id := c.GetString(":cumplido_proveedor_id")
-	autorizacion, err := services.GenerarAutorizacionGiro(cumplido_proveedor_id)
+	data, err := services.GenerarAutorizacionGiro(cumplido_proveedor_id)
 	if err == nil {
-		c.Data["json"] = map[string]interface{}{"Succes": true, "Status:": 200, "Message": "Consulta completa", "Data": autorizacion}
+		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, data)
 	} else {
 		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 404, "Message": err, "Data": []map[string]interface{}{}}
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 404, nil, err.Error())
 	}
 	c.ServeJSON()
 }

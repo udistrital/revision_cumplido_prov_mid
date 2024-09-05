@@ -353,7 +353,7 @@ func DocumentoEnLista(documentos []string, documento string) bool {
 
 }
 
-func CrearPdfCumplidoSatisfaccion(dependencia string, nombre_proveedor string, numero_nit string, cumplimiento_contrato string, tipo_contrato string, fecha_inicio time.Time, numero_contrato string, cdp string, vigencia_cdp string, rp string, vigencia_rp string, cargo string, tipo_factura string, numero_cuenta_factura string, valor_total_contrato int, periodo_inicio string, periodo_fin string, saldo_contrato int, fecha_fin time.Time, tipo_cuenta string, numero_cuenta string, nombre_banco string, supervisor string, vigencia string, documento_supervisor string) (cumplido_satisfaccion models.CumplidoSatisfaccion, outputError interface{}) {
+func CrearPdfCumplidoSatisfaccion(dependencia string, nombre_proveedor string, numero_nit string, cumplimiento_contrato string, tipo_contrato string, fecha_inicio time.Time, numero_contrato string, cdp string, vigencia_cdp string, rp string, vigencia_rp string, cargo string, tipo_factura string, numero_cuenta_factura string, valor_total_contrato int, periodo_inicio string, periodo_fin string, saldo_contrato int, fecha_fin time.Time, tipo_cuenta string, numero_cuenta string, nombre_banco string, supervisor string, vigencia string, documento_supervisor string) (archivo_cumplido_satisfaccion string) {
 
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetMargins(30, 30, 30)
@@ -406,17 +406,9 @@ func CrearPdfCumplidoSatisfaccion(dependencia string, nombre_proveedor string, n
 		dependencia,
 		documento_supervisor)
 
-	encodedFile := encodePDF(pdf)
-	nombre := "CumplidoSatisfaccion_" + strings.Join(strings.Fields(nombre_proveedor), "") + "_" + numero_contrato + "_" + vigencia
+	archivo_cumplido_satisfaccion = encodePDF(pdf)
 
-	cumplido_satisfaccion = models.CumplidoSatisfaccion{
-		NombreArchivo:        nombre,
-		Archivo:              encodedFile,
-		NombreResponsable:    supervisor,
-		CargoResponsable:     cargo,
-		DescripcionDocumento: "Autorización de pago para el cumplido " + numero_contrato + " de " + vigencia + " con actividades compredidas entre " + periodo_inicio + " al " + periodo_fin,
-	}
-	return cumplido_satisfaccion, nil
+	return archivo_cumplido_satisfaccion
 }
 
 func body_primera_parte(pdf *gofpdf.Fpdf, dependencia string, nombre_proveedor string, numero_nit string, cumplimiento_contrato string, tipo_contrato string, fecha_inicio time.Time, numero_contrato string, cdp string, vigencia_cdp string, crp string, vigencia_crp string, cargo string) *gofpdf.Fpdf {
@@ -520,7 +512,7 @@ func formatear_fecha(fecha time.Time) (fecha_formateada string) {
 func encodePDF(pdf *gofpdf.Fpdf) string {
 	var buffer bytes.Buffer
 	writer := bufio.NewWriter(&buffer)
-	//pdf.OutputFileAndClose("/home/faidercamilo/go/src/github.com/udistrital/prueba.pdf") // para guardar el archivo localmente
+	pdf.OutputFileAndClose("/home/faidercamilo/go/src/github.com/udistrital/prueba.pdf") // para guardar el archivo localmente
 	pdf.Output(writer)
 	writer.Flush()
 	encodedFile := base64.StdEncoding.EncodeToString(buffer.Bytes())
