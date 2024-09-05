@@ -10,9 +10,13 @@ package routers
 import (
 	"github.com/astaxie/beego"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/controllers"
+	"github.com/udistrital/utils_oas/errorhandler"
 )
 
 func init() {
+
+	beego.ErrorController(&errorhandler.ErrorHandlerController{})
+
 	ns := beego.NewNamespace("/v1",
 		beego.NSNamespace("/supervisor",
 			beego.NSInclude(
@@ -32,6 +36,11 @@ func init() {
 		beego.NSNamespace("/contratacion",
 			beego.NSInclude(
 				&controllers.RevisionCumplidoContratacionController{},
+			),
+		),
+		beego.NSNamespace("/historico-cumplidos",
+			beego.NSInclude(
+				&controllers.HistoricoCumplidosController{},
 			),
 		))
 

@@ -65,3 +65,13 @@ type AgregarComentarioSoporteRequest struct {
 	CambioEstadoId string `json:"cambio_estado_id"`
 	Comentario     string `json:"comentario"`
 }
+
+type BodyHistoricoRequest struct {
+	Anios        []int    `json:"Anios"`
+	Meses        []int    `json:"Meses"`
+	Vigencias    []string `json:"Vigencias"`
+	Proveedores  []string `json:"Proveedores"`
+	Estados      []string `json:"Estados"`
+	Dependencias []string `json:"Dependencias"`
+	Contratos    []string `json:"Contratos"`
+}
