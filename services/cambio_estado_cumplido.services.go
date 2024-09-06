@@ -282,24 +282,38 @@ func EnviarNotificacionCambioEstado(nombre_estado string, documento_responsable 
 		}
 	}()
 
-	var autenticacion_persona models.AutenticacionPersona
-	body_autenticacion := map[string]interface{}{
-		"numero": documento_responsable,
-	}
-	var respuesta_peticion map[string]interface{}
-	// Se busca con el numero de documento del responsable los datos para recuperar el correo electronico
-	if err := helpers.SendJson(beego.AppConfig.String("UrlAutenticacionMid")+"/token/documentoToken", "POST", &respuesta_peticion, body_autenticacion); err == nil {
-		json_autenticacion, err := json.Marshal(respuesta_peticion)
-		if err != nil {
-			outputError = map[string]interface{}{"funcion": "EnviarNotificacionCambioEstado", "status": "404", "mensaje": "Error al convertir el json"}
-			return outputError
-		}
-		err = json.Unmarshal(json_autenticacion, &autenticacion_persona)
-		if err != nil {
-			outputError = map[string]interface{}{"funcion": "EnviarNotificacionCambioEstado", "status": "404", "mensaje": "Error al convertir el json"}
-			return outputError
-		}
+	var responsable_anterior string
+	var email string
 
+	if documento_responsable == "0" {
+		email = "tramitescontratacion@udistrital.edu.co"
+	} else {
+		var autenticacion_persona models.AutenticacionPersona
+		body_autenticacion := map[string]interface{}{
+			"numero": documento_responsable,
+		}
+		var respuesta_peticion map[string]interface{}
+		// Se busca con el numero de documento del responsable los datos para recuperar el correo electronico
+		if err := helpers.SendJson(beego.AppConfig.String("UrlAutenticacionMid")+"/token/documentoToken", "POST", &respuesta_peticion, body_autenticacion); err == nil {
+			json_autenticacion, err := json.Marshal(respuesta_peticion)
+			if err != nil {
+				outputError = map[string]interface{}{"funcion": "EnviarNotificacionCambioEstado", "status": "404", "mensaje": "Error al convertir el json"}
+				return outputError
+			}
+			err = json.Unmarshal(json_autenticacion, &autenticacion_persona)
+			if err != nil {
+				outputError = map[string]interface{}{"funcion": "EnviarNotificacionCambioEstado", "status": "404", "mensaje": "Error al convertir el json"}
+				return outputError
+			}
+
+			email = autenticacion_persona.Email
+		} else {
+			outputError = map[string]interface{}{"funcion": "EnviarNotificacionCambioEstado", "status": "404", "mensaje": "Error al consultar el responsable"}
+			return outputError
+		}
+	}
+
+	if documento_responsable_anterior != "0" {
 		// Se busca con el numero de documento del responsable anterior los datos para recuperar el nombre
 		var informacion_personal []models.InformacionProveedor
 		//fmt.Println(beego.AppConfig.String("UrlcrudAgora") + "/informacion_proveedor/?query=NumDocumento:" + documento_responsable_anterior)
@@ -308,47 +322,50 @@ func EnviarNotificacionCambioEstado(nombre_estado string, documento_responsable 
 				outputError = map[string]interface{}{"funcion": "EnviarNotificacionCambioEstado", "status": "404", "mensaje": "No se encontraron datos del responsable anterior"}
 				return outputError
 			}
+			responsable_anterior = informacion_personal[0].NomProveedor
 		} else {
 			outputError = map[string]interface{}{"funcion": "EnviarNotificacionCambioEstado", "status": "404", "mensaje": "Error al consultar el responsable anterior"}
 			return outputError
 		}
-
-		// Se busca con el numero de contrato suscrito y la vigencia los datos para recuperar el nombre del proveedor
-		informacion_contrato, outputError := helpers.ObtenerInformacionContratoProveedor(num_contrato_suscrito, strconv.Itoa(vigencia))
-		if outputError != nil {
-			outputError = map[string]interface{}{"funcion": "EnviarNotificacionCambioEstado", "status": "404", "mensaje": "Error al consultar el proveedor"}
-			return outputError
-		}
-
-		// Se crea el body y se hace el Post para enviar un correo electronico
-		var body_enviar_notificacion models.NotificacionEmail
-		body_enviar_notificacion.Source = "fctrujilloo@udistrital.edu.co"
-		body_enviar_notificacion.Template = "REVISION_CUMPLIDOS_PROVEEDORES_PLANTILLA"
-		body_enviar_notificacion.Destinations = make([]models.DestinationItem, 1)
-		body_enviar_notificacion.Destinations[0].Destination.ToAddresses = append(body_enviar_notificacion.Destinations[0].Destination.ToAddresses, autenticacion_persona.Email)
-		body_enviar_notificacion.Destinations[0].ReplacementTemplateData.EstadoCumplido = nombre_estado
-		body_enviar_notificacion.Destinations[0].ReplacementTemplateData.NombreEmisorCumplido = informacion_personal[0].NomProveedor
-		body_enviar_notificacion.Destinations[0].ReplacementTemplateData.NombreProveedor = informacion_contrato[0].NombreProveedor
-		body_enviar_notificacion.Destinations[0].ReplacementTemplateData.RevisionCumplidosProveedoresUrl = beego.AppConfig.String("UrlRevisionCumplidosProveedoresCliente")
-		body_enviar_notificacion.Destinations[0].Attachments = []string{}
-		body_enviar_notificacion.Destinations[0].Destination.BccAddresses = []string{}
-		body_enviar_notificacion.Destinations[0].Destination.CcAddresses = []string{}
-		body_enviar_notificacion.DefaultTemplateData.EstadoCumplido = nombre_estado
-		body_enviar_notificacion.DefaultTemplateData.NombreEmisorCumplido = informacion_personal[0].NomProveedor
-		body_enviar_notificacion.DefaultTemplateData.NombreProveedor = informacion_contrato[0].NombreProveedor
-		body_enviar_notificacion.DefaultTemplateData.RevisionCumplidosProveedoresUrl = beego.AppConfig.String("UrlRevisionCumplidosProveedoresCliente")
-
-		var respuesta map[string]interface{}
-		if err := helpers.SendJson2(beego.AppConfig.String("UrlNotificacionesMid")+"/email/enviar_templated_email", "POST", &respuesta, body_enviar_notificacion); err != nil {
-			jsonData, err := json.MarshalIndent(body_enviar_notificacion, "", "    ")
-			if err != nil {
-				log.Fatalf("Error al convertir a JSON: %s", err)
-			}
-			fmt.Println(string(jsonData))
-			outputError = map[string]interface{}{"funcion": "EnviarNotificacionCambioEstado", "status": "404", "mensaje": "Error al enviar la notificacion al correo"}
-			return outputError
-		}
-
+	} else {
+		responsable_anterior = "Contratación"
 	}
+
+	// Se busca con el numero de contrato suscrito y la vigencia los datos para recuperar el nombre del proveedor
+	informacion_contrato, outputError := helpers.ObtenerInformacionContratoProveedor(num_contrato_suscrito, strconv.Itoa(vigencia))
+	if outputError != nil {
+		outputError = map[string]interface{}{"funcion": "EnviarNotificacionCambioEstado", "status": "404", "mensaje": "Error al consultar el proveedor"}
+		return outputError
+	}
+
+	// Se crea el body y se hace el Post para enviar un correo electronico
+	var body_enviar_notificacion models.NotificacionEmail
+	body_enviar_notificacion.Source = "notificacionescumplidosproveedores@udistrital.edu.co"
+	body_enviar_notificacion.Template = "REVISION_CUMPLIDOS_PROVEEDORES_PLANTILLA"
+	body_enviar_notificacion.Destinations = make([]models.DestinationItem, 1)
+	body_enviar_notificacion.Destinations[0].Destination.ToAddresses = append(body_enviar_notificacion.Destinations[0].Destination.ToAddresses, email)
+	body_enviar_notificacion.Destinations[0].ReplacementTemplateData.EstadoCumplido = nombre_estado
+	body_enviar_notificacion.Destinations[0].ReplacementTemplateData.NombreEmisorCumplido = responsable_anterior
+	body_enviar_notificacion.Destinations[0].ReplacementTemplateData.NombreProveedor = informacion_contrato[0].NombreProveedor
+	body_enviar_notificacion.Destinations[0].ReplacementTemplateData.RevisionCumplidosProveedoresUrl = beego.AppConfig.String("UrlRevisionCumplidosProveedoresCliente")
+	body_enviar_notificacion.Destinations[0].Attachments = []string{}
+	body_enviar_notificacion.Destinations[0].Destination.BccAddresses = []string{}
+	body_enviar_notificacion.Destinations[0].Destination.CcAddresses = []string{}
+	body_enviar_notificacion.DefaultTemplateData.EstadoCumplido = nombre_estado
+	body_enviar_notificacion.DefaultTemplateData.NombreEmisorCumplido = responsable_anterior
+	body_enviar_notificacion.DefaultTemplateData.NombreProveedor = informacion_contrato[0].NombreProveedor
+	body_enviar_notificacion.DefaultTemplateData.RevisionCumplidosProveedoresUrl = beego.AppConfig.String("UrlRevisionCumplidosProveedoresCliente")
+
+	var respuesta map[string]interface{}
+	if err := helpers.SendJsonTls(beego.AppConfig.String("UrlNotificacionesMid")+"/email/enviar_templated_email", "POST", &respuesta, body_enviar_notificacion); err != nil {
+		jsonData, err := json.MarshalIndent(body_enviar_notificacion, "", "    ")
+		if err != nil {
+			log.Fatalf("Error al convertir a JSON: %s", err)
+		}
+		fmt.Println(string(jsonData))
+		outputError = map[string]interface{}{"funcion": "EnviarNotificacionCambioEstado", "status": "404", "mensaje": "Error al enviar la notificacion al correo"}
+		return outputError
+	}
+
 	return
 }
