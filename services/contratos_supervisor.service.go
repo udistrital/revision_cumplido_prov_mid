@@ -1,8 +1,6 @@
 package services
 
 import (
-	"fmt"
-
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/helpers"
@@ -19,8 +17,6 @@ func ObtenerContratosSupervisor(documento_supervisor string) (contratos_supervis
 	}()
 
 	dependencias_supervisor, err := ObtenerDependenciasSupervisor(documento_supervisor)
-	fmt.Println("Dependencias supervisor: ", dependencias_supervisor)
-	fmt.Println("Error en dependencias supervisor: ", err)
 	if err == nil {
 		for _, dependencia := range dependencias_supervisor {
 			contratos_supervisor.Dependencias_supervisor = append(contratos_supervisor.Dependencias_supervisor, dependencia)

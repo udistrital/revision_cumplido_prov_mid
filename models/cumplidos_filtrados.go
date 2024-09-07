@@ -8,4 +8,5 @@ type CumplidosFiltrados struct {
 	FechaAprobacion string `json:"FechaAprobacion"`
 	NombreProveedor string `json:"NombreProveedor"`
 	Dependencia     string `json:"Dependencia"`
+	Estado          string `json:"Estado"`
 }

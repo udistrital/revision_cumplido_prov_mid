@@ -612,10 +612,6 @@
             "title": "map[string]interface{}",
             "type": "object"
         },
-        "map[string]string": {
-            "title": "map[string]string",
-            "type": "object"
-        },
         "models.BalanceContrato": {
             "title": "BalanceContrato",
             "type": "object",
@@ -737,6 +733,9 @@
             "type": "object",
             "properties": {
                 "Dependencia": {
+                    "type": "string"
+                },
+                "Estado": {
                     "type": "string"
                 },
                 "FechaAprobacion": {

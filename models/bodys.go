@@ -69,7 +69,7 @@ type AgregarComentarioSoporteRequest struct {
 type BodyHistoricoRequest struct {
 	Anios        []int    `json:"Anios"`
 	Meses        []int    `json:"Meses"`
-	Vigencias    []string `json:"Vigencias"`
+	Vigencias    []int    `json:"Vigencias"`
 	Proveedores  []string `json:"Proveedores"`
 	Estados      []string `json:"Estados"`
 	Dependencias []string `json:"Dependencias"`
