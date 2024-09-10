@@ -11,7 +11,7 @@ import (
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 )
 
-func ObtenerHistoricoCumplidosFiltro(anios []int, meses []int, vigencias []int, nombres_proveedores []string, estados []string, dependencias []string, contratos []string) (cumplidos_filtrados []models.CumplidosFiltrados, outputError error) {
+func ObtenerHistoricoCumplidosFiltro(anios []int, meses []int, vigencias []int, proveedores []int, estados []string, dependencias []string, contratos []string, tipos_contratos []int) (cumplidos_filtrados []models.CumplidosFiltrados, outputError error) {
 	defer func() {
 		if err := recover(); err != nil {
 			outputError = fmt.Errorf("%v", err)
@@ -61,8 +61,8 @@ func ObtenerHistoricoCumplidosFiltro(anios []int, meses []int, vigencias []int, 
 		return cumplidos_filtrados, outputError
 	}
 
-	// En caso de que no se aplique filtro ni de meses, años o proveedores se retornan las coincidencias ya obtenidas
-	if len(meses) == 0 && len(anios) == 0 && len(nombres_proveedores) == 0 {
+	// En caso de que no se aplique filtro ni de meses, años, tipos de contrato o proveedores se retornan las coincidencias ya obtenidas
+	if len(meses) == 0 && len(anios) == 0 && len(proveedores) == 0 && len(tipos_contratos) == 0 {
 		for _, cumplido := range primer_filtro {
 			informacion_contrato, err := helpers.ObtenerInformacionContratoProveedor(cumplido.CumplidoProveedorId.NumeroContrato, strconv.Itoa(cumplido.CumplidoProveedorId.VigenciaContrato))
 			if err != nil {
@@ -70,14 +70,15 @@ func ObtenerHistoricoCumplidosFiltro(anios []int, meses []int, vigencias []int, 
 				continue
 			}
 			cumplido_filtrado := models.CumplidosFiltrados{
-				NumeroContrato:  cumplido.CumplidoProveedorId.NumeroContrato,
-				Vigencia:        strconv.Itoa(cumplido.CumplidoProveedorId.VigenciaContrato),
-				Rp:              informacion_contrato[0].NumeroRp,
-				Mes:             int(cumplido.FechaCreacion.Month()),
-				FechaAprobacion: cumplido.FechaCreacion.Format("2006/01/02"),
-				NombreProveedor: informacion_contrato[0].NombreProveedor,
-				Dependencia:     informacion_contrato[0].NombreDependencia,
-				Estado:          cumplido.EstadoCumplidoId.Nombre,
+				NumeroContrato:    cumplido.CumplidoProveedorId.NumeroContrato,
+				Vigencia:          strconv.Itoa(cumplido.CumplidoProveedorId.VigenciaContrato),
+				Rp:                informacion_contrato[0].NumeroRp,
+				Mes:               int(cumplido.FechaCreacion.Month()),
+				FechaCambioEstado: cumplido.FechaCreacion.Format("2006/01/02"),
+				NombreProveedor:   informacion_contrato[0].NombreProveedor,
+				Dependencia:       informacion_contrato[0].NombreDependencia,
+				Estado:            cumplido.EstadoCumplidoId.Nombre,
+				TipoContrato:      informacion_contrato[0].TipoContrato,
 			}
 			cumplidos_filtrados = append(cumplidos_filtrados, cumplido_filtrado)
 		}
@@ -90,21 +91,28 @@ func ObtenerHistoricoCumplidosFiltro(anios []int, meses []int, vigencias []int, 
 			logs.Error(err)
 			continue
 		}
+		contrato_general, err := helpers.ObtenerContratoGeneralProveedor(cumplido.CumplidoProveedorId.NumeroContrato, strconv.Itoa(cumplido.CumplidoProveedorId.VigenciaContrato))
+		if err != nil {
+			logs.Error(err)
+			continue
+		}
 		// Verificar que se cumplan los filtros si no estan vacios
 		cumplimiento_mes := len(meses) == 0 || contieneInt(meses, int(cumplido.FechaCreacion.Month()))
 		cumplimiento_anio := len(anios) == 0 || contieneInt(anios, cumplido.FechaCreacion.Year())
-		cumplimiento_proveedor := len(nombres_proveedores) == 0 || contiene(nombres_proveedores, informacion_contrato[0].NombreProveedor)
+		cumplimiento_proveedor := len(proveedores) == 0 || contieneInt(proveedores, contrato_general.Contratista)
+		cumplimiento_tipo_contrato := len(tipos_contratos) == 0 || contieneInt(tipos_contratos, contrato_general.TipoContrato.Id)
 
-		if cumplimiento_mes && cumplimiento_anio && cumplimiento_proveedor {
+		if cumplimiento_mes && cumplimiento_anio && cumplimiento_proveedor && cumplimiento_tipo_contrato {
 			cumplido_filtrado := models.CumplidosFiltrados{
-				NumeroContrato:  cumplido.CumplidoProveedorId.NumeroContrato,
-				Vigencia:        strconv.Itoa(cumplido.CumplidoProveedorId.VigenciaContrato),
-				Rp:              informacion_contrato[0].NumeroRp,
-				Mes:             int(cumplido.FechaCreacion.Month()),
-				FechaAprobacion: cumplido.FechaCreacion.Format("2006/01/02"),
-				NombreProveedor: informacion_contrato[0].NombreProveedor,
-				Dependencia:     informacion_contrato[0].NombreDependencia,
-				Estado:          cumplido.EstadoCumplidoId.Nombre,
+				NumeroContrato:    cumplido.CumplidoProveedorId.NumeroContrato,
+				Vigencia:          strconv.Itoa(cumplido.CumplidoProveedorId.VigenciaContrato),
+				Rp:                informacion_contrato[0].NumeroRp,
+				Mes:               int(cumplido.FechaCreacion.Month()),
+				FechaCambioEstado: cumplido.FechaCreacion.Format("2006/01/02"),
+				NombreProveedor:   informacion_contrato[0].NombreProveedor,
+				Dependencia:       informacion_contrato[0].NombreDependencia,
+				Estado:            cumplido.EstadoCumplidoId.Nombre,
+				TipoContrato:      informacion_contrato[0].TipoContrato,
 			}
 			cumplidos_filtrados = append(cumplidos_filtrados, cumplido_filtrado)
 		}
@@ -113,6 +121,7 @@ func ObtenerHistoricoCumplidosFiltro(anios []int, meses []int, vigencias []int, 
 	return cumplidos_filtrados, nil
 }
 
+/**
 func contiene(lista []string, elemento string) bool {
 	for _, v := range lista {
 		if strings.ToLower(v) == strings.ToLower(elemento) {
@@ -121,6 +130,7 @@ func contiene(lista []string, elemento string) bool {
 	}
 	return false
 }
+**/
 
 func contieneInt(lista []int, elemento int) bool {
 	for _, v := range lista {
@@ -145,7 +155,7 @@ func ObtenerCambiosCumplidosFiltro(contratos []string, vigencias []string, estad
 
 	query := strings.TrimSuffix(("?query=" + buildQuery(contratos, "CumplidoProveedorId.NumeroContrato") + buildQuery(vigencias, "CumplidoProveedorId.VigenciaContrato") + buildQuery(estados, "EstadoCumplidoId.CodigoAbreviacion")), ",")
 	order := "&order=desc"
-	sortby := "&sortby=FechaCreacion"
+	sortby := "&sortby=FechaCreacion,CumplidoProveedorId__Id"
 	limit := "&limit=0"
 
 	//.Println("URL Filtros", beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/"+query+sortby+order+limit)

@@ -67,11 +67,12 @@ type AgregarComentarioSoporteRequest struct {
 }
 
 type BodyHistoricoRequest struct {
-	Anios        []int    `json:"Anios"`
-	Meses        []int    `json:"Meses"`
-	Vigencias    []int    `json:"Vigencias"`
-	Proveedores  []string `json:"Proveedores"`
-	Estados      []string `json:"Estados"`
-	Dependencias []string `json:"Dependencias"`
-	Contratos    []string `json:"Contratos"`
+	Anios          []int    `json:"Anios"`
+	Meses          []int    `json:"Meses"`
+	Vigencias      []int    `json:"Vigencias"`
+	Proveedores    []int    `json:"Proveedores"`
+	Estados        []string `json:"Estados"`
+	Dependencias   []string `json:"Dependencias"`
+	Contratos      []string `json:"Contratos"`
+	TiposContratos []int    `json:"TiposContratos"`
 }

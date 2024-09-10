@@ -38,7 +38,7 @@ func (c *HistoricoCumplidosController) ObtenerHistoricoCumplidos() {
 
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 
-	data, err := services.ObtenerHistoricoCumplidosFiltro(v.Anios, v.Meses, v.Vigencias, v.Proveedores, v.Estados, v.Dependencias, v.Contratos)
+	data, err := services.ObtenerHistoricoCumplidosFiltro(v.Anios, v.Meses, v.Vigencias, v.Proveedores, v.Estados, v.Dependencias, v.Contratos, v.TiposContratos)
 	if err == nil {
 		c.Ctx.Output.SetStatus(200)
 		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, data)

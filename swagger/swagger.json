@@ -738,7 +738,7 @@
                 "Estado": {
                     "type": "string"
                 },
-                "FechaAprobacion": {
+                "FechaCambioEstado": {
                     "type": "string"
                 },
                 "Mes": {
@@ -752,6 +752,9 @@
                     "type": "string"
                 },
                 "Rp": {
+                    "type": "string"
+                },
+                "TipoContrato": {
                     "type": "string"
                 },
                 "Vigencia": {
