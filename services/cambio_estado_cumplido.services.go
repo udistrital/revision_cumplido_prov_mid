@@ -77,13 +77,8 @@ func CambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_proveedor
 			respuesta_cambio_estado.CargoResponsable = body_cambio_estado.CargoResponsable
 			respuesta_cambio_estado.EstadoCumplido = &estado_cumplido[0]
 
-			switch codigo_abreviacion_cumplido {
-			case "RC":
-				respuesta_cambio_estado, outputError = CambioEstadoCumplido("CD", cumplido_proveedor_id)
-			case "AC":
+			if codigo_abreviacion_cumplido == "AC" {
 				respuesta_cambio_estado, outputError = CambioEstadoCumplido("PRO", cumplido_proveedor_id)
-			case "RO":
-				respuesta_cambio_estado, outputError = CambioEstadoCumplido("CD", cumplido_proveedor_id)
 			}
 			return respuesta_cambio_estado, outputError
 		} else {
@@ -217,11 +212,11 @@ func DesactivarCambiosAnterioresCumplido(cumplido_proveedor_id int, codigo_abrev
 	posibles_estados_siguientes := map[string][]string{
 		"CD":  {"PRC"},
 		"PRC": {"RC", "AC"},
-		"RC":  {"CD"},
+		"RC":  {"PRC"},
 		"AC":  {"PRO"},
 		"PRO": {"AO", "RO"},
 		"AO":  {"RO"},
-		"RO":  {"CD"},
+		"RO":  {"PRC"},
 	}
 
 	contains := func(posibles_estados []string, estado string) bool {

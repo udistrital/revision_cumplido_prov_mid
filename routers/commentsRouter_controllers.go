@@ -99,15 +99,6 @@ func init() {
 
     beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:SoportesCumplidoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:SoportesCumplidoController"],
         beego.ControllerComments{
-            Method: "AgregarComentarioSoporte",
-            Router: "/comentario-soporte",
-            AllowHTTPMethods: []string{"post"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
-    beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:SoportesCumplidoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:SoportesCumplidoController"],
-        beego.ControllerComments{
             Method: "SubirSoporteCumplido",
             Router: "/soportes",
             AllowHTTPMethods: []string{"post"},

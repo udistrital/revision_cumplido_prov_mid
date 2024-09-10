@@ -155,52 +155,6 @@
                 }
             }
         },
-        "/solicitud-pago/comentario-soporte": {
-            "post": {
-                "tags": [
-                    "solicitud-pago"
-                ],
-                "description": "Agregar un comentario a un soporte de pago",
-                "operationId": "SoportesCumplidoController.AgregarComentarioSoporte",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "soporte_id",
-                        "description": "ID del soporte de pago",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "path",
-                        "name": "cambio_estado_id",
-                        "description": "ID del cambio de estado",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "body",
-                        "name": "comentario",
-                        "description": "Comentario a agregar",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        },
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "\"Comentario agregado exitosamente\"",
-                        "schema": {
-                            "$ref": "#/definitions/models.RespuestaComentarioSoporte"
-                        }
-                    },
-                    "404": {
-                        "description": "\"Error al intentar agregar el comentario\""
-                    }
-                }
-            }
-        },
         "/solicitud-pago/soportes": {
             "post": {
                 "tags": [
@@ -858,23 +812,6 @@
         "models.InformeSeguimiento": {
             "title": "InformeSeguimiento",
             "type": "object"
-        },
-        "models.RespuestaComentarioSoporte": {
-            "title": "RespuestaComentarioSoporte",
-            "type": "object",
-            "properties": {
-                "cambio_estado_cumplido_id": {
-                    "type": "integer",
-                    "format": "int64"
-                },
-                "comentario": {
-                    "type": "string"
-                },
-                "soporte_pago_id": {
-                    "type": "integer",
-                    "format": "int64"
-                }
-            }
         },
         "models.SoportePago": {
             "title": "SoportePago",
