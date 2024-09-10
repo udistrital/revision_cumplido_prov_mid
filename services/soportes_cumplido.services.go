@@ -9,69 +9,12 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/helpers"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 )
-
-func AgregarComentarioSoporte(soporte_id string, cambio_estado_id string, comentario string) (respuesta models.RespuestaComentarioSoporte, outputError error) {
-	defer func() {
-		if err := recover(); err != nil {
-			outputError = fmt.Errorf("%v", err)
-			panic(outputError)
-		}
-	}()
-
-	var respuesta_peticion map[string]interface{}
-	var comentario_soporte models.ComentarioSoporte
-	var soporte_pago []models.SoporteCumplido
-	var cambio_estado_cumplido []models.CambioEstadoCumplido
-
-	if soporte_id == "" || cambio_estado_id == "" || comentario == "" {
-		outputError = fmt.Errorf("Faltan datos en la solicitud")
-		return respuesta, outputError
-	}
-	//fmt.Println("URL soporte cumplido: ", beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido/?query=Activo:true,DocumentoId:"+soporte_id)
-	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido/?query=Activo:true,DocumentoId:"+soporte_id, &respuesta_peticion); (err == nil) && (response == 200) {
-		data := respuesta_peticion["Data"].([]interface{})
-		if len(data[0].(map[string]interface{})) > 0 {
-			helpers.LimpiezaRespuestaRefactor(respuesta_peticion, &soporte_pago)
-			if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/?query=Id:"+cambio_estado_id+",CumplidoProveedorId:"+strconv.Itoa(soporte_pago[0].CumplidoProveedorId.Id), &respuesta_peticion); (err == nil) && (response == 200) {
-				data := respuesta_peticion["Data"].([]interface{})
-				if len(data[0].(map[string]interface{})) == 0 {
-					outputError = fmt.Errorf("El cambio de estado no existe")
-					return respuesta, outputError
-				}
-				helpers.LimpiezaRespuestaRefactor(respuesta_peticion, &cambio_estado_cumplido)
-				comentario_soporte.Comentario = comentario
-				comentario_soporte.SoporteCumplidoId = &soporte_pago[0]
-				comentario_soporte.CambioEstadoCumplidoId = &cambio_estado_cumplido[0]
-				comentario_soporte.FechaCreacion = time.Now()
-				comentario_soporte.FechaModificacion = time.Now()
-				if err := helpers.SendJson(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/comentario_soporte", "POST", &respuesta, comentario_soporte); err == nil {
-					respuesta.SoportePagoId = soporte_pago[0].Id
-					respuesta.CambioEstadoCumplidoId = cambio_estado_cumplido[0].Id
-					respuesta.Comentario = comentario
-					return respuesta, nil
-				} else {
-					outputError = fmt.Errorf("Error al registrar el comentario del soporte")
-					return respuesta, outputError
-				}
-			} else {
-				outputError = fmt.Errorf("Error al obtener el cambio de estado de cumplido")
-				return respuesta, outputError
-			}
-		} else {
-			outputError = fmt.Errorf("El soporte cumplido no existe")
-			return respuesta, outputError
-		}
-
-	}
-	return respuesta, outputError
-}
 
 func EliminarSoporteCumplido(documento_id string) (response string, outputError error) {
 	defer func() {
@@ -112,8 +55,7 @@ func EliminarSoporteCumplido(documento_id string) (response string, outputError 
 
 }
 
-func ObtenerDocumentosPagoMensual(cumplido_proveedor_id string) (documentos []models.DocumentosSoporteCorto, outputError error) {
-
+func ObtenerSoportesCumplido(cumplido_proveedor_id string) (documentos []models.DocumentosSoporteSimplificado, outputError error) {
 	defer func() {
 		if err := recover(); err != nil {
 			outputError = fmt.Errorf("%v", err)
@@ -124,8 +66,9 @@ func ObtenerDocumentosPagoMensual(cumplido_proveedor_id string) (documentos []mo
 	var soportes_pagos_mensuales []models.SoporteCumplido
 	var documentos_crud []models.Documento
 	var fileGestor models.FileGestorDocumental
-	var soporte models.DocumentosSoporteCorto
-	var documento_individual models.DocumentoCorto
+	var soporte models.DocumentosSoporteSimplificado
+	var documento_individual models.DocumentoSimplificado
+	var a = map[int]int{}
 
 	var respuesta_peticion map[string]interface{}
 
@@ -140,6 +83,7 @@ func ObtenerDocumentosPagoMensual(cumplido_proveedor_id string) (documentos []mo
 			var ids_documentos []string
 			for _, soporte_pago_mensual := range soportes_pagos_mensuales {
 				ids_documentos = append(ids_documentos, strconv.Itoa(soporte_pago_mensual.DocumentoId))
+				a[soporte_pago_mensual.DocumentoId] = soporte_pago_mensual.Id
 			}
 
 			var ids_documentos_juntos = strings.Join(ids_documentos, "|")
@@ -147,6 +91,8 @@ func ObtenerDocumentosPagoMensual(cumplido_proveedor_id string) (documentos []mo
 			if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlDocumentosCrud")+"/documento/?limit=-1&query=Activo:True,Id.in:"+ids_documentos_juntos, &documentos_crud); (err == nil) && (response == 200) {
 				if len(documentos_crud) > 0 {
 					for _, documento_crud := range documentos_crud {
+						soporte.Comentarios = ObtenerComentariosSoporte(a[documento_crud.Id])
+						soporte.SoporteCumplidoId = a[documento_crud.Id]
 						var observaciones map[string]interface{}
 						documento_individual.Id = documento_crud.Id
 						documento_individual.Nombre = documento_crud.Nombre
@@ -189,6 +135,21 @@ func ObtenerDocumentosPagoMensual(cumplido_proveedor_id string) (documentos []mo
 	return
 }
 
+func ObtenerComentariosSoporte(soporte_id int) (comentarios []models.ComentarioSoporte) {
+	var respuesta_peticion map[string]interface{}
+	var comentarios_soporte []models.ComentarioSoporte
+	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/comentario_soporte/?limit=-1&query=SoporteCumplidoId.Id:"+strconv.Itoa(soporte_id)+",Activo:true&sortby=FechaCreacion&order=desc", &respuesta_peticion); (err == nil) && (response == 200) {
+		data := respuesta_peticion["Data"].([]interface{})
+		if len(data[0].(map[string]interface{})) == 0 {
+			return comentarios
+		}
+		helpers.LimpiezaRespuestaRefactor(respuesta_peticion, &comentarios_soporte)
+		return comentarios_soporte
+	} else {
+		return comentarios
+	}
+}
+
 func ObtenerComprimidoSoportes(id_cumplido_proveedor string) (documentos_comprimido models.DocumentosComprimido, outputError error) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -201,7 +162,7 @@ func ObtenerComprimidoSoportes(id_cumplido_proveedor string) (documentos_comprim
 
 	var respuesta_peticion map[string]interface{}
 	var cumplidos_proveedor []models.CumplidoProveedor
-	documentos, error := ObtenerDocumentosPagoMensual(id_cumplido_proveedor)
+	documentos, error := ObtenerSoportesCumplido(id_cumplido_proveedor)
 
 	if error != nil {
 		outputError = fmt.Errorf("Error al obtener los documentos del pago")

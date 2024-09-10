@@ -7,12 +7,14 @@ type DocumentosSoporte struct {
 	Archivo   FileGestorDocumental
 }
 
-type DocumentosSoporteCorto struct {
-	Documento DocumentoCorto
-	Archivo   FileGestorDocumental
+type DocumentosSoporteSimplificado struct {
+	SoporteCumplidoId int
+	Documento         DocumentoSimplificado
+	Archivo           FileGestorDocumental
+	Comentarios       []ComentarioSoporte
 }
 
-type DocumentoCorto struct {
+type DocumentoSimplificado struct {
 	Id            int
 	Nombre        string
 	TipoDocumento string

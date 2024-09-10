@@ -20,7 +20,6 @@ func (c *SoportesCumplidoController) URLMapping() {
 	c.Mapping("SubirSoporteCumplido", c.SubirSoporteCumplido)
 	c.Mapping("ObtenerDocumentosPagoMensual", c.ObtenerDocumentosPagoMensual)
 	c.Mapping("EliminarSoporteCumplido", c.EliminarSoporteCumplido)
-	c.Mapping("AgregarComentarioSoporte", c.AgregarComentarioSoporte)
 	c.Mapping("ObtenerComprimidoSoportes", c.ObtenerComprimidoSoportes)
 
 }
@@ -79,7 +78,7 @@ func (c *SoportesCumplidoController) ObtenerDocumentosPagoMensual() {
 
 	cumplido_proveedor_id := c.Ctx.Input.Param(":cumplido_proveedor_id")
 
-	data, err := services.ObtenerDocumentosPagoMensual(cumplido_proveedor_id)
+	data, err := services.ObtenerSoportesCumplido(cumplido_proveedor_id)
 	if err == nil {
 		c.Ctx.Output.SetStatus(200)
 		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, data)
@@ -105,40 +104,6 @@ func (c *SoportesCumplidoController) EliminarSoporteCumplido() {
 	soporte_pago_id := c.Ctx.Input.Param(":soporte_pago_id")
 
 	data, err := services.EliminarSoporteCumplido(soporte_pago_id)
-	if err == nil {
-		c.Ctx.Output.SetStatus(200)
-		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, data)
-	} else {
-		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = requestresponse.APIResponseDTO(true, 404, nil, err.Error())
-	}
-	c.ServeJSON()
-}
-
-// AgregarComentarioSoporte ...
-// @Title AgregarComentarioSoporte
-// @Description Agregar un comentario a un soporte de pago
-// @Param	soporte_id			path 	string	true		"ID del soporte de pago"
-// @Param	cambio_estado_id	path 	string	true		"ID del cambio de estado"
-// @Param	comentario			body 	string	true		"Comentario a agregar"
-// @Success 200 {object} models.RespuestaComentarioSoporte "Comentario agregado exitosamente"
-// @Failure 404 "No se encontró el soporte de pago o cambio de estado"
-// @Failure 404 "Error al intentar agregar el comentario"
-// @router /comentario-soporte [post]
-func (c *SoportesCumplidoController) AgregarComentarioSoporte() {
-	defer errorhandler.HandlePanic(&c.Controller)
-
-	var v models.AgregarComentarioSoporteRequest
-
-	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
-
-	if v.SoporteId == "" || v.CambioEstadoId == "" || v.Comentario == "" {
-		c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": "Parámetros incompletos"}
-		c.ServeJSON()
-		return
-	}
-
-	data, err := services.AgregarComentarioSoporte(v.SoporteId, v.CambioEstadoId, v.Comentario)
 	if err == nil {
 		c.Ctx.Output.SetStatus(200)
 		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, data)
