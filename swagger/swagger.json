@@ -29,7 +29,7 @@
                 }
             }
         },
-        "/historico-cumplidos/": {
+        "/historico-cumplidos/filtro-cumplidos": {
             "post": {
                 "tags": [
                     "historico-cumplidos"

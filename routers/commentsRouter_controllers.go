@@ -46,7 +46,7 @@ func init() {
     beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:HistoricoCumplidosController"] = append(beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:HistoricoCumplidosController"],
         beego.ControllerComments{
             Method: "ObtenerHistoricoCumplidos",
-            Router: "/",
+            Router: "/filtro-cumplidos",
             AllowHTTPMethods: []string{"post"},
             MethodParams: param.Make(),
             Filters: nil,

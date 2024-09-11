@@ -30,7 +30,7 @@ func (c *HistoricoCumplidosController) URLMapping() {
 // @Param Contratos query string true "contratos de los cumplidos a consultar"
 // @Success 200 {object} []models.CumplidosFiltrados
 // @Failure 404 {object} map[string]interface{}
-// @router / [post]
+// @router /filtro-cumplidos [post]
 func (c *HistoricoCumplidosController) ObtenerHistoricoCumplidos() {
 	defer errorhandler.HandlePanic(&c.Controller)
 
