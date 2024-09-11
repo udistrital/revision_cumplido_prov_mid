@@ -7,7 +7,7 @@ type CambioEstadoCumplido struct {
 	EstadoCumplidoId     *EstadoCumplido
 	CumplidoProveedorId  *CumplidoProveedor
 	DocumentoResponsable int
-	CargoReponsable      string
+	CargoResponsable     string
 	FechaCreacion        time.Time
 	FechaModificacion    time.Time
 	Activo               bool

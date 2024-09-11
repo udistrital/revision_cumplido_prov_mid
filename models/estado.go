@@ -22,7 +22,7 @@ type ContratoEstado struct {
 	EstadoCumplidoId     EstadoCumplidoId    `json:"EstadoCumplidoId"`
 	CumplidoProveedorId  CumplidoProveedorId `json:"CumplidoProveedorId"`
 	DocumentoResponsable int                 `json:"DocumentoResponsable"`
-	CargoReponsable      string              `json:"CargoReponsable"`
+	CargoResponsable     string              `json:"CargoResponsable"`
 	FechaCreacion        string              `json:"FechaCreacion"`
 	FechaModificacion    string              `json:"FechaModificacion"`
 	Activo               bool                `json:"Activo"`
