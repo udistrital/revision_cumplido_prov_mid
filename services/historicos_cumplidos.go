@@ -37,9 +37,9 @@ func ObtberHistoricoEstado(cumplido_proveedor_id string) (historicos []models.Hi
 	urlRequet := "/informacion_persona_natural?fields=PrimerNombre,SegundoNombre,PrimerApellido,SegundoApellido&limit=0&query=Id:" + strconv.Itoa(respuesta_histroricos[0].DocumentoResponsable)
 
 	for _, historico_estado := range respuesta_histroricos {
-		fmt.Println(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores") + "/cambio_estado_cumplido/?query=CumplidoProveedorId.Id:" + cumplido_proveedor_id + "&sortby=FechaCreacion&order=desc")
-		if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlcrudAgora")+urlRequet, &peticion_info_persona); response == 200 && err == nil {
-			println(peticion_info_persona[0].PrimerApellido)
+
+		if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlcrudAgora")+urlRequet, &peticion_info_persona); response == 200 && err == nil && peticion_info_persona != nil {
+
 			historico := models.HistoricoCumplido{
 				NombreResponsable: peticion_info_persona[0].PrimerNombre + " " + peticion_info_persona[0].SegundoNombre + " " + peticion_info_persona[0].PrimerApellido + " " + peticion_info_persona[0].SegundoApellido,
 				Estado:            historico_estado.EstadoCumplidoId.Nombre,
@@ -53,5 +53,6 @@ func ObtberHistoricoEstado(cumplido_proveedor_id string) (historicos []models.Hi
 		}
 
 	}
+
 	return historicos, nil
 }
