@@ -37,6 +37,11 @@ func init() {
 			beego.NSInclude(
 				&controllers.RevisionCumplidoContratacionController{},
 			),
+		),
+		beego.NSNamespace("/historico",
+			beego.NSInclude(
+				&controllers.HistoricoCumplidoController{},
+			),
 		))
 
 	beego.AddNamespace(ns)
