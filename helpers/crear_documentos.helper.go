@@ -512,7 +512,7 @@ func formatear_fecha(fecha time.Time) (fecha_formateada string) {
 func encodePDF(pdf *gofpdf.Fpdf) string {
 	var buffer bytes.Buffer
 	writer := bufio.NewWriter(&buffer)
-	pdf.OutputFileAndClose("/home/faidercamilo/go/src/github.com/udistrital/prueba.pdf") // para guardar el archivo localmente
+	//pdf.OutputFileAndClose("/home/faidercamilo/go/src/github.com/udistrital/prueba.pdf") // para guardar el archivo localmente
 	pdf.Output(writer)
 	writer.Flush()
 	encodedFile := base64.StdEncoding.EncodeToString(buffer.Bytes())
