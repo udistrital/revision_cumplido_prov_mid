@@ -32,12 +32,13 @@ func ObtenerSolicitudesCumplidosContrato(numero_contrato string, vigencia string
 			estado, err := ObtenerUltimoEstadoCumplidoProveedor(strconv.Itoa(cumplido_proveedor.Id))
 			if err == nil {
 				solicitud_cumplido := models.CumplidosContrato{
-					ConsecutivoCumplido: i + 1,
-					NumeroContrato:      estado.CumplidoProveedorId.NumeroContrato,
-					FechaCreacion:       estado.FechaCreacion,
-					Periodo:             ObtenerPeriodoInformacionPago(cumplido_proveedor.Id),
-					EstadoCumplido:      estado.EstadoCumplidoId.Nombre,
-					CumplidoProveedorId: estado.CumplidoProveedorId,
+					ConsecutivoCumplido:             i + 1,
+					NumeroContrato:                  estado.CumplidoProveedorId.NumeroContrato,
+					FechaCreacion:                   estado.FechaCreacion,
+					Periodo:                         ObtenerPeriodoInformacionPago(cumplido_proveedor.Id),
+					EstadoCumplido:                  estado.EstadoCumplidoId.Nombre,
+					CodigoAbreviacionEstadoCumplido: estado.EstadoCumplidoId.CodigoAbreviacion,
+					CumplidoProveedorId:             estado.CumplidoProveedorId,
 				}
 				solicitudes_cumplido = append(solicitudes_cumplido, solicitud_cumplido)
 
