@@ -677,6 +677,9 @@
             "title": "DocumentoCumplido",
             "type": "object",
             "properties": {
+                "CodigoAbreviacionTipoDocumento": {
+                    "type": "string"
+                },
                 "IdTipoDocumento": {
                     "type": "integer",
                     "format": "int64"

@@ -27,6 +27,7 @@ func ObtenerTiposDocumentosCumplido() (tipos_documento []models.DocumentoCumplid
 		for _, tipo := range tipo_documento {
 			var documento models.DocumentoCumplido
 			documento.IdTipoDocumento = tipo.Id
+			documento.CodigoAbreviacionTipoDocumento = tipo.CodigoAbreviacion
 			documento.Nombre = tipo.Nombre
 			tipos_documento = append(tipos_documento, documento)
 		}
