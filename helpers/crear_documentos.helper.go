@@ -516,6 +516,7 @@ func encodePDF(pdf *gofpdf.Fpdf) string {
 	pdf.Output(writer)
 	writer.Flush()
 	encodedFile := base64.StdEncoding.EncodeToString(buffer.Bytes())
+	fmt.Println(encodedFile)
 	return encodedFile
 }
 

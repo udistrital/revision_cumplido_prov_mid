@@ -17,6 +17,7 @@ swagger/lang/
 swagger/lib/
 cumplidos_mid
 lastupdate.tmp
+main
 .vscode/
 .scannerwork/
 revision_cumplidos_proveedores_mid.exe
@@ -27,4 +28,5 @@ revision_cumplidos_proveedores_mid
 *.ipr
 *.module
 *.workspace
+
 
