@@ -131,8 +131,9 @@ type ItemInforme struct {
 }
 
 type DocumentoCumplido struct {
-	IdTipoDocumento int
-	Nombre          string
+	IdTipoDocumento                int
+	CodigoAbreviacionTipoDocumento string
+	Nombre                         string
 }
 
 type DocumentosComprimido struct {

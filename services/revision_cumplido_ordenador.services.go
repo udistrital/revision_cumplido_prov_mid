@@ -162,6 +162,7 @@ func GenerarAutorizacionGiro(id_solicitud_pago string) (autorizacion_pago models
 							var respuesta_soportes_cumplido map[string]interface{}
 							var soportes_cumplido []models.SoporteCumplido
 							var id_documentos []string
+							//fmt.Println("URL soportes: ", beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido/?query=CumplidoProveedorId.id:"+id_solicitud_pago+",Activo:true")
 							if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido/?query=CumplidoProveedorId.id:"+id_solicitud_pago+",Activo:true", &respuesta_soportes_cumplido); err == nil && response == 200 {
 								data := respuesta_soportes_cumplido["Data"].([]interface{})
 								if len(data[0].(map[string]interface{})) > 0 {
@@ -172,6 +173,7 @@ func GenerarAutorizacionGiro(id_solicitud_pago string) (autorizacion_pago models
 										}
 										documentos_busqueda := strings.Join(id_documentos, "|")
 										var documentos []models.Documento
+										//fmt.Println("URL documentos: ", beego.AppConfig.String("UrlDocumentosCrud")+"/documento/?query=Id.in:"+documentos_busqueda+",Activo:true&limit=0")
 										if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlDocumentosCrud")+"/documento/?query=Id.in:"+documentos_busqueda+",Activo:true&limit=0", &documentos); err == nil && response == 200 {
 											if len(documentos) == 0 {
 												outputError = fmt.Errorf("No se encontraron documentos cargados")
@@ -188,6 +190,10 @@ func GenerarAutorizacionGiro(id_solicitud_pago string) (autorizacion_pago models
 												if len(data[0].(map[string]interface{})) > 0 {
 													helpers.LimpiezaRespuestaRefactor(respuesta_soporte, &informacion_pago)
 												}
+											}
+											if len(informacion_pago) == 0 {
+												outputError = fmt.Errorf("No se encontró información de pago")
+												return autorizacion_pago, outputError
 											}
 											valor_pago := int(informacion_pago[0].ValorCumplido)
 											datos_documento := models.DatosAutorizacionPago{
@@ -267,6 +273,7 @@ func ObtenerInformacionProveedor(IdProveedor string) (provedor models.Informacio
 	}()
 
 	var informacion_proveedor []models.InformacionProveedor
+	fmt.Println("URL proveedor: ", beego.AppConfig.String("UrlcrudAgora")+"/informacion_proveedor/?query=id:"+IdProveedor)
 	if response, err := helpers.GetJsonWSO2Test(beego.AppConfig.String("UrlcrudAgora")+"/informacion_proveedor/?query=id:"+IdProveedor, &informacion_proveedor); err == nil && response == 200 {
 		if len(informacion_proveedor) > 0 {
 			return informacion_proveedor[0], nil

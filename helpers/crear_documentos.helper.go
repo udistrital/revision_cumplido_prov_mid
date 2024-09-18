@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jung-kurt/gofpdf"
+	"github.com/phpdave11/gofpdf"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 )
 
