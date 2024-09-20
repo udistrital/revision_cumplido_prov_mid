@@ -117,7 +117,7 @@ func GenerarPdfAutorizacionGiro(autorizacion models.DatosAutorizacionPago) strin
 	pdf.AddPage()
 	header(pdf, cellX, cellY, cellX2, cellY2, cellWidth, cellHeight, cellWidth2, cellHeight2, formattedDate)
 	body(pdf, cellX, cellY, month, day, year, autorizacion)
-	filedata := encodePDF(pdf)
+	filedata, _ := encodePDF(pdf)
 	// Retorna el PDF codificado en base64
 	return filedata
 }
@@ -406,7 +406,7 @@ func CrearPdfCumplidoSatisfaccion(dependencia string, nombre_proveedor string, n
 		dependencia,
 		documento_supervisor)
 
-	archivo_cumplido_satisfaccion = encodePDF(pdf)
+	archivo_cumplido_satisfaccion, _ = encodePDF(pdf)
 
 	return archivo_cumplido_satisfaccion
 }
@@ -509,15 +509,41 @@ func formatear_fecha(fecha time.Time) (fecha_formateada string) {
 	return fecha.Format(layout)
 }
 
-func encodePDF(pdf *gofpdf.Fpdf) string {
+func encodePDF(pdf *gofpdf.Fpdf) (encodedFile string, outputError error) {
+	defer func() {
+		if err := recover(); err != nil {
+			outputError = fmt.Errorf("%v", err)
+			panic(outputError)
+		}
+	}()
 	var buffer bytes.Buffer
+	fmt.Println("Buffer creado:", buffer)
+
 	writer := bufio.NewWriter(&buffer)
+	fmt.Println("Writer creado:", writer)
+
 	//pdf.OutputFileAndClose("/home/faidercamilo/go/src/github.com/udistrital/prueba.pdf") // para guardar el archivo localmente
-	pdf.Output(writer)
-	writer.Flush()
-	encodedFile := base64.StdEncoding.EncodeToString(buffer.Bytes())
-	fmt.Println(encodedFile)
-	return encodedFile
+	err := pdf.Output(writer)
+	if err != nil {
+		outputError = fmt.Errorf("Error al generar el PDF:", err)
+		fmt.Println("Error al generar el PDF:", err)
+		return encodedFile, outputError
+	} else {
+		fmt.Println("PDF generado correctamente:", err)
+	}
+
+	err = writer.Flush()
+	if err != nil {
+		outputError = fmt.Errorf("Error al hacer flush del writer:", err)
+		fmt.Println("Error al hacer flush del writer:", err)
+	} else {
+		fmt.Println("Writer flush exitoso:", err)
+	}
+
+	encodedFile = base64.StdEncoding.EncodeToString(buffer.Bytes())
+	fmt.Println("PDF codificado en base64")
+	//fmt.Println(encodedFile)
+	return encodedFile, nil
 }
 
 func image(pdf *gofpdf.Fpdf, image string, x, y, w, h float64) *gofpdf.Fpdf {
