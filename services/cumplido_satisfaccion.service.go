@@ -164,6 +164,31 @@ func CrearCumplidoSatisfaccion(numero_contrato_suscrito int, vigencia_contrato s
 	informacion_informe_satisfaccion, err := ObtenerInformacionCumplidoSatisfaccion(strconv.Itoa(numero_contrato_suscrito), vigencia_contrato)
 	if err == nil {
 
+		fmt.Println("Dependencia:", informacion_informe_satisfaccion.Dependencia)
+		fmt.Println("Nombre proveedor:", informacion_informe_satisfaccion.NombreProveedor)
+		fmt.Println("Documento proveedor:", informacion_informe_satisfaccion.DocumentoProveedor)
+		fmt.Println("Tipo pago:", tipo_pago)
+		fmt.Println("Tipo contrato:", informacion_informe_satisfaccion.TipoContrato)
+		fmt.Println("Fecha inicio:", informacion_informe_satisfaccion.FechaInicio)
+		fmt.Println("Numero contrato:", numero_contrato_suscrito)
+		fmt.Println("Vigencia contrato:", vigencia_contrato)
+		fmt.Println("Cdp:", informacion_informe_satisfaccion.Cdp)
+		fmt.Println("Vigencia cdp:", informacion_informe_satisfaccion.VigenciaCdp)
+		fmt.Println("Rp:", informacion_informe_satisfaccion.Rp)
+		fmt.Println("Vigencia rp", informacion_informe_satisfaccion.VigenciaRp)
+		fmt.Println("Cargo supervisor:", informacion_informe_satisfaccion.CargoSupervisor)
+		fmt.Println("Tipo factura:", tipo_factura)
+		fmt.Println("Numero cuenta factura:", numero_cuenta_factura)
+		fmt.Println("Valor total contrato:", informacion_informe_satisfaccion.ValorTotalContrato)
+		fmt.Println("Periodo inicio:", periodo_inicio)
+		fmt.Println("Periodo fin:", periodo_fin)
+		fmt.Println("Saldo contrato:", informacion_informe_satisfaccion.SaldoContrato)
+		fmt.Println("Fecha fin:", informacion_informe_satisfaccion.FechaFin)
+		fmt.Println("Tipo cuenta:", tipo_cuenta)
+		fmt.Println("Numero cuenta:", numero_cuenta)
+		fmt.Println("Banco:", banco)
+		fmt.Println("Supervisor:", informacion_informe_satisfaccion.Supervisor)
+		fmt.Println("Documento supervisor:", informacion_informe_satisfaccion.DocumentoSupervisor)
 		archivo_cumplido_satisfaccion := helpers.CrearPdfCumplidoSatisfaccion(informacion_informe_satisfaccion.Dependencia,
 			informacion_informe_satisfaccion.NombreProveedor,
 			informacion_informe_satisfaccion.DocumentoProveedor,
