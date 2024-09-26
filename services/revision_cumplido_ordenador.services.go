@@ -92,7 +92,7 @@ func ListaCumplidosReversibles(documento_ordenador string) (soliciudes_revertibl
 	var listaDocumentos []string
 	var ordenadores []models.ArgoOrdenadorContrato
 
-	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlcrudAgora")+"/ordenadores/?query=Documento:"+documento_ordenador, &ordenadores); err == nil && response == 200 {
+	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlcrudAgora")+"/ordenadores/?query=Documento:"+documento_ordenador+"&limit=-1", &ordenadores); err == nil && response == 200 {
 		if len(ordenadores) == 0 {
 			outputError = fmt.Errorf("No se encontro el ordenador con el documento " + documento_ordenador)
 			return nil, outputError
@@ -124,7 +124,7 @@ func ListaCumplidosReversibles(documento_ordenador string) (soliciudes_revertibl
 	var respuesta_peticion map[string]interface{}
 	var cumplidos []models.CambioEstadoCumplido
 	//fmt.Println(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores") + "/cambio_estado_cumplido/?query=DocumentoResponsable:" + documento_ordenador + ",EstadoCumplidoId.CodigoAbreviacion:AO,Activo:true,FechaModificacion__gte:" + fechaFormateada)
-	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/?query=DocumentoResponsable:"+documentos+",EstadoCumplidoId.CodigoAbreviacion:AO,Activo:true,FechaModificacion__gte:"+fechaFormateada, &respuesta_peticion); err == nil && response == 200 {
+	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/?query=DocumentoResponsable:"+documentos+",EstadoCumplidoId.CodigoAbreviacion:AO,Activo:true,FechaModificacion__gte:"+fechaFormateada+"&limit=-1", &respuesta_peticion); err == nil && response == 200 {
 		data := respuesta_peticion["Data"].([]interface{})
 		if len(data[0].(map[string]interface{})) > 0 {
 			helpers.LimpiezaRespuestaRefactor(respuesta_peticion, &cumplidos)
