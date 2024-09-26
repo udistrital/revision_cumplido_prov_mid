@@ -91,7 +91,6 @@ func ObtenerSoportesCumplido(cumplido_proveedor_id string) (documentos []models.
 			if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlDocumentosCrud")+"/documento/?limit=-1&query=Activo:True,Id.in:"+ids_documentos_juntos, &documentos_crud); (err == nil) && (response == 200) {
 				if len(documentos_crud) > 0 {
 					for _, documento_crud := range documentos_crud {
-						soporte.Comentarios = ObtenerComentariosSoporte(a[documento_crud.Id])
 						soporte.SoporteCumplidoId = a[documento_crud.Id]
 						var observaciones map[string]interface{}
 						documento_individual.Id = documento_crud.Id
