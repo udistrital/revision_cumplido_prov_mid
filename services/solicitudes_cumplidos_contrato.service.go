@@ -21,7 +21,7 @@ func ObtenerSolicitudesCumplidosContrato(numero_contrato string, vigencia string
 	var respuesta_peticion map[string]interface{}
 	var cumplidos_proveedor []models.CumplidoProveedor
 	//fmt.Println(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores") + "/cumplido_proveedor/?query=NumeroContrato:" + numero_contrato + ",VigenciaContrato:" + vigencia + "&sortby=FechaCreacion&order=desc")
-	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cumplido_proveedor/?query=NumeroContrato:"+numero_contrato+",VigenciaContrato:"+vigencia+"&sortby=FechaCreacion&order=desc", &respuesta_peticion); err == nil && response == 200 {
+	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cumplido_proveedor/?query=NumeroContrato:"+numero_contrato+",VigenciaContrato:"+vigencia+"&limit=-1&sortby=FechaCreacion&order=desc", &respuesta_peticion); err == nil && response == 200 {
 		data := respuesta_peticion["Data"].([]interface{})
 		if len(data[0].(map[string]interface{})) == 0 {
 			outputError = fmt.Errorf("No se encontraron cumplidos para el contrato")

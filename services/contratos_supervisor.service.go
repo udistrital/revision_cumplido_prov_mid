@@ -92,7 +92,7 @@ func ObtenerDependenciasSupervisor(documento_supervisor string) (dependencias_su
 	}()
 
 	var respuesta_peticion map[string]interface{}
-	fmt.Println(beego.AppConfig.String("UrlAdministrativaJBPM") + "/dependencias_supervisor/" + documento_supervisor)
+	fmt.Println("Url dependencias: ", beego.AppConfig.String("UrlAdministrativaJBPM")+"/dependencias_supervisor/"+documento_supervisor)
 	if response, err := helpers.GetJsonWSO2Test(beego.AppConfig.String("UrlAdministrativaJBPM")+"/dependencias_supervisor/"+documento_supervisor, &respuesta_peticion); err == nil && response == 200 {
 		if respuesta_peticion != nil {
 			if dependenciasMap, ok := respuesta_peticion["dependencias"].(map[string]interface{}); ok {
