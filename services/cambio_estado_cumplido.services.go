@@ -29,12 +29,12 @@ func CambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_proveedor
 	var respuesta_cumplido_proveedor map[string]interface{}
 	var respuesta_estado_cumplido map[string]interface{}
 
-	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cumplido_proveedor/?query=Id:"+strconv.Itoa(cumplido_proveedor_id), &respuesta_cumplido_proveedor); (err == nil) && (response == 200) {
+	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cumplido_proveedor/?query=Id:"+strconv.Itoa(cumplido_proveedor_id)+"&limit=-1", &respuesta_cumplido_proveedor); (err == nil) && (response == 200) {
 		data := respuesta_cumplido_proveedor["Data"].([]interface{})
 		if len(data[0].(map[string]interface{})) > 0 {
 			helpers.LimpiezaRespuestaRefactor(respuesta_cumplido_proveedor, &cumplido_proveedor)
 
-			if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/estado_cumplido/?query=CodigoAbreviacion:"+codigo_abreviacion_cumplido, &respuesta_estado_cumplido); (err == nil) && (response == 200) {
+			if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/estado_cumplido/?query=CodigoAbreviacion:"+codigo_abreviacion_cumplido+"&limit=-1", &respuesta_estado_cumplido); (err == nil) && (response == 200) {
 				data := respuesta_estado_cumplido["Data"].([]interface{})
 				if len(data[0].(map[string]interface{})) == 0 {
 					outputError = fmt.Errorf("El estado del cumplido proveedor ingresado no existe")
@@ -230,7 +230,7 @@ func DesactivarCambiosAnterioresCumplido(cumplido_proveedor_id int, codigo_abrev
 
 	var respuesta_peticion map[string]interface{}
 	var cambios_anteriores []models.CambioEstadoCumplido
-	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/?query=CumplidoProveedorId.Id:"+strconv.Itoa(cumplido_proveedor_id)+",Activo:true&sortby=FechaCreacion&order=desc", &respuesta_peticion); err == nil && response == 200 {
+	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/?query=CumplidoProveedorId.Id:"+strconv.Itoa(cumplido_proveedor_id)+",Activo:true&sortby=FechaCreacion&order=desc&limit=-1", &respuesta_peticion); err == nil && response == 200 {
 		data := respuesta_peticion["Data"].([]interface{})
 		if len(data[0].(map[string]interface{})) == 0 {
 			outputError = nil

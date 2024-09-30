@@ -22,7 +22,7 @@ func ObtenerCumplidosPendientesContratacion() (cumplidosInfo []models.SolicituRe
 	var respuesta_peticion map[string]interface{}
 
 	//fmt.Println("UrlCrudRevisionCumplidosProveedores", beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/?query=EstadoCumplidoId.CodigoAbreviación:PRC,Activo:true")
-	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/?query=EstadoCumplidoId.CodigoAbreviacion:PRC,Activo:true", &respuesta_peticion); err == nil && response == 200 {
+	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/?query=EstadoCumplidoId.CodigoAbreviacion:PRC,Activo:true&limit=-1", &respuesta_peticion); err == nil && response == 200 {
 		data := respuesta_peticion["Data"].([]interface{})
 		if len(data[0].(map[string]interface{})) > 0 {
 			helpers.LimpiezaRespuestaRefactor(respuesta_peticion, &cumplidos)

@@ -209,7 +209,7 @@ func ObtenerComprimidoSoportes(id_cumplido_proveedor string) (documentos_comprim
 
 	documentos_comprimido.File = base64.StdEncoding.EncodeToString(buf.Bytes())
 
-	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cumplido_proveedor/?query=Id:"+id_cumplido_proveedor, &respuesta_peticion); (err == nil) && (response == 200) {
+	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cumplido_proveedor/?query=Id:"+id_cumplido_proveedor+"&limit=-1", &respuesta_peticion); (err == nil) && (response == 200) {
 		data := respuesta_peticion["Data"].([]interface{})
 		if len(data[0].(map[string]interface{})) > 0 {
 			helpers.LimpiezaRespuestaRefactor(respuesta_peticion, &cumplidos_proveedor)
@@ -260,7 +260,7 @@ func SubirSoporteCumplido(solicitud_pago_id int, tipo_documento string, item_id 
 
 	var respuesta_peticion map[string]interface{}
 	var cumplido_proveedor []models.CumplidoProveedor
-	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cumplido_proveedor/?query=Id:"+strconv.Itoa(solicitud_pago_id), &respuesta_peticion); err == nil && response == 200 {
+	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cumplido_proveedor/?query=Id:"+strconv.Itoa(solicitud_pago_id)+"&limit=-1", &respuesta_peticion); err == nil && response == 200 {
 		data := respuesta_peticion["Data"].([]interface{})
 		if len(data[0].(map[string]interface{})) == 0 {
 			outputError = fmt.Errorf("El cumplido proveedor no existe")

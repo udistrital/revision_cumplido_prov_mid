@@ -21,7 +21,7 @@ func ObtenerCumplidosPendientesOrdenador(documento_ordenador string) (cambios_es
 
 	var respuesta_peticion map[string]interface{}
 	//fmt.Println(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores") + "/cambio_estado_cumplido/?query=DocumentoResponsable:" + documento_ordenador + ",EstadoCumplidoId.CodigoAbreviacion:PRO,Activo:true")
-	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/?query=DocumentoResponsable:"+documento_ordenador+",EstadoCumplidoId.CodigoAbreviacion:PRO,Activo:true", &respuesta_peticion); (err == nil) && (response == 200) {
+	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/?query=DocumentoResponsable:"+documento_ordenador+",EstadoCumplidoId.CodigoAbreviacion:PRO,Activo:true&limit=-1", &respuesta_peticion); (err == nil) && (response == 200) {
 		data := respuesta_peticion["Data"].([]interface{})
 		if len(data[0].(map[string]interface{})) == 0 {
 			outputError = fmt.Errorf("No hay cumplidos pendientes de revision por el ordenador")
@@ -147,7 +147,7 @@ func GenerarAutorizacionGiro(id_solicitud_pago string) (autorizacion_pago models
 	var respuesta_cambioEstado map[string]interface{}
 	var cambio_estado []models.CambioEstadoCumplido
 	//fmt.Println(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores") + "/cambio_estado_cumplido/?query=CumplidoProveedorId.Id:" + id_solicitud_pago + ",EstadoCumplidoId.CodigoAbreviacion:PRO,Activo:true")
-	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/?query=CumplidoProveedorId.Id:"+id_solicitud_pago+",EstadoCumplidoId.CodigoAbreviacion:PRO,Activo:true", &respuesta_cambioEstado); err == nil && response == 200 {
+	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/?query=CumplidoProveedorId.Id:"+id_solicitud_pago+",EstadoCumplidoId.CodigoAbreviacion:PRO,Activo:true&limit=-1", &respuesta_cambioEstado); err == nil && response == 200 {
 		data := respuesta_cambioEstado["Data"].([]interface{})
 		if len(data[0].(map[string]interface{})) > 0 {
 			helpers.LimpiezaRespuestaRefactor(respuesta_cambioEstado, &cambio_estado)
@@ -163,7 +163,7 @@ func GenerarAutorizacionGiro(id_solicitud_pago string) (autorizacion_pago models
 							var soportes_cumplido []models.SoporteCumplido
 							var id_documentos []string
 							//fmt.Println("URL soportes: ", beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido/?query=CumplidoProveedorId.id:"+id_solicitud_pago+",Activo:true")
-							if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido/?query=CumplidoProveedorId.id:"+id_solicitud_pago+",Activo:true", &respuesta_soportes_cumplido); err == nil && response == 200 {
+							if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido/?query=CumplidoProveedorId.id:"+id_solicitud_pago+",Activo:true&limit=-1", &respuesta_soportes_cumplido); err == nil && response == 200 {
 								data := respuesta_soportes_cumplido["Data"].([]interface{})
 								if len(data[0].(map[string]interface{})) > 0 {
 									helpers.LimpiezaRespuestaRefactor(respuesta_soportes_cumplido, &soportes_cumplido)
@@ -185,7 +185,7 @@ func GenerarAutorizacionGiro(id_solicitud_pago string) (autorizacion_pago models
 											}
 											var respuesta_soporte map[string]interface{}
 											var informacion_pago []models.InformacionPago
-											if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/informacion_pago/?query=CumplidoProveedorId.Id:"+id_solicitud_pago, &respuesta_soporte); err == nil && response == 200 {
+											if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/informacion_pago/?query=CumplidoProveedorId.Id:"+id_solicitud_pago+"&limit=-1", &respuesta_soporte); err == nil && response == 200 {
 												data := respuesta_soporte["Data"].([]interface{})
 												if len(data[0].(map[string]interface{})) > 0 {
 													helpers.LimpiezaRespuestaRefactor(respuesta_soporte, &informacion_pago)
