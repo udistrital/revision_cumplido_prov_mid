@@ -124,13 +124,4 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:SoportesCumplidoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:SoportesCumplidoController"],
-        beego.ControllerComments{
-            Method: "EliminarSoporteCumplido",
-            Router: "/soportes/:soporte_pago_id",
-            AllowHTTPMethods: []string{"delete"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
 }
