@@ -297,35 +297,6 @@
                 }
             }
         },
-        "/solicitud-pago/soportes/{soporte_pago_id}": {
-            "delete": {
-                "tags": [
-                    "solicitud-pago"
-                ],
-                "description": "Eliminar un soporte de pago cumplido",
-                "operationId": "SoportesCumplidoController.EliminarSoporteCumplido",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "soporte_pago_id",
-                        "description": "ID del soporte de pago a eliminar",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "\"Soporte de pago eliminado exitosamente\"",
-                        "schema": {
-                            "$ref": "#/definitions/map[string]interface{}"
-                        }
-                    },
-                    "404": {
-                        "description": "\"Error al intentar eliminar el soporte de pago\""
-                    }
-                }
-            }
-        },
         "/supervisor/balance-financiero-contrato/{numero_contrato_suscrito}/{vigencia_contrato}": {
             "get": {
                 "tags": [
@@ -486,10 +457,6 @@
         }
     },
     "definitions": {
-        "map[string]interface{}": {
-            "title": "map[string]interface{}",
-            "type": "object"
-        },
         "models.BalanceContrato": {
             "title": "BalanceContrato",
             "type": "object",

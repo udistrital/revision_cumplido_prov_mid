@@ -19,7 +19,6 @@ type SoportesCumplidoController struct {
 func (c *SoportesCumplidoController) URLMapping() {
 	c.Mapping("SubirSoporteCumplido", c.SubirSoporteCumplido)
 	c.Mapping("ObtenerDocumentosPagoMensual", c.ObtenerDocumentosPagoMensual)
-	c.Mapping("EliminarSoporteCumplido", c.EliminarSoporteCumplido)
 	c.Mapping("ObtenerComprimidoSoportes", c.ObtenerComprimidoSoportes)
 
 }
@@ -88,30 +87,6 @@ func (c *SoportesCumplidoController) ObtenerDocumentosPagoMensual() {
 	}
 	c.ServeJSON()
 
-}
-
-// EliminarSoporteCumplido ...
-// @Title EliminarSoporteCumplido
-// @Description Eliminar un soporte de pago cumplido
-// @Param	soporte_pago_id		path 	string	true		"ID del soporte de pago a eliminar"
-// @Success 200 {object} map[string]interface{} "Soporte de pago eliminado exitosamente"
-// @Failure 404 "No se encontró el soporte de pago"
-// @Failure 404 "Error al intentar eliminar el soporte de pago"
-// @router /soportes/:soporte_pago_id [delete]
-func (c *SoportesCumplidoController) EliminarSoporteCumplido() {
-	defer errorhandler.HandlePanic(&c.Controller)
-
-	soporte_pago_id := c.Ctx.Input.Param(":soporte_pago_id")
-
-	data, err := services.EliminarSoporteCumplido(soporte_pago_id)
-	if err == nil {
-		c.Ctx.Output.SetStatus(200)
-		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, data)
-	} else {
-		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = requestresponse.APIResponseDTO(true, 404, nil, err.Error())
-	}
-	c.ServeJSON()
 }
 
 // ObtenerComprimidoSoportes ...

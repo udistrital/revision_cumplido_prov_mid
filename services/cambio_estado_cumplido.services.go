@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"strconv"
 
 	"github.com/astaxie/beego"
@@ -29,12 +30,12 @@ func CambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_proveedor
 	var respuesta_cumplido_proveedor map[string]interface{}
 	var respuesta_estado_cumplido map[string]interface{}
 
-	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cumplido_proveedor/?query=Id:"+strconv.Itoa(cumplido_proveedor_id), &respuesta_cumplido_proveedor); (err == nil) && (response == 200) {
+	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cumplido_proveedor/?query=Id:"+strconv.Itoa(cumplido_proveedor_id)+"&limit=-1", &respuesta_cumplido_proveedor); (err == nil) && (response == 200) {
 		data := respuesta_cumplido_proveedor["Data"].([]interface{})
 		if len(data[0].(map[string]interface{})) > 0 {
 			helpers.LimpiezaRespuestaRefactor(respuesta_cumplido_proveedor, &cumplido_proveedor)
 
-			if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/estado_cumplido/?query=CodigoAbreviacion:"+codigo_abreviacion_cumplido, &respuesta_estado_cumplido); (err == nil) && (response == 200) {
+			if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/estado_cumplido/?query=CodigoAbreviacion:"+codigo_abreviacion_cumplido+"&limit=-1", &respuesta_estado_cumplido); (err == nil) && (response == 200) {
 				data := respuesta_estado_cumplido["Data"].([]interface{})
 				if len(data[0].(map[string]interface{})) == 0 {
 					outputError = fmt.Errorf("El estado del cumplido proveedor ingresado no existe")
@@ -77,6 +78,10 @@ func CambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_proveedor
 			respuesta_cambio_estado.CargoResponsable = body_cambio_estado.CargoResponsable
 			respuesta_cambio_estado.EstadoCumplido = &estado_cumplido[0]
 
+			if codigo_abreviacion_cumplido != "CD" {
+				EnviarNotificacionCambioEstado(estado_cumplido[0].Nombre, strconv.Itoa(body_cambio_estado.DocumentoResponsable), strconv.Itoa(ultimo_cambio_estado_cumplido.DocumentoResponsable), cumplido_proveedor[0].NumeroContrato, cumplido_proveedor[0].VigenciaContrato)
+
+			}
 			if codigo_abreviacion_cumplido == "AC" {
 				respuesta_cambio_estado, outputError = CambioEstadoCumplido("PRO", cumplido_proveedor_id)
 			}
@@ -115,10 +120,17 @@ func CrearBodyCambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_
 		body_cambio_estado.DocumentoResponsable = 0
 		body_cambio_estado.CargoResponsable = "CONTRATACIÓN"
 	case "RC":
-		body_cambio_estado.EstadoCumplidoId = estado_cumplido
-		body_cambio_estado.CumplidoProveedorId = cumplido_proveedor
-		body_cambio_estado.DocumentoResponsable = 0
-		body_cambio_estado.CargoResponsable = "CONTRATACIÓN"
+		supervisor_contrato, err := ObtenerSupervisorContrato(cumplido_proveedor.NumeroContrato, strconv.Itoa(cumplido_proveedor.VigenciaContrato))
+		if err == nil {
+			documento_supervisor, _ := strconv.Atoi(supervisor_contrato.Contratos.Supervisor[0].Documento)
+			body_cambio_estado.EstadoCumplidoId = estado_cumplido
+			body_cambio_estado.CumplidoProveedorId = cumplido_proveedor
+			body_cambio_estado.DocumentoResponsable = documento_supervisor
+			body_cambio_estado.CargoResponsable = supervisor_contrato.Contratos.Supervisor[0].Cargo
+		} else {
+			outputError = fmt.Errorf("Error al obtener el supervisor del contrato")
+			return body_cambio_estado, outputError
+		}
 	case "AC":
 		body_cambio_estado.EstadoCumplidoId = estado_cumplido
 		body_cambio_estado.CumplidoProveedorId = cumplido_proveedor
@@ -149,15 +161,15 @@ func CrearBodyCambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_
 			return body_cambio_estado, outputError
 		}
 	case "RO":
-		ordenador_contrato, err := helpers.ObtenerOrdenadorContrato(cumplido_proveedor.NumeroContrato, strconv.Itoa(cumplido_proveedor.VigenciaContrato))
+		supervisor_contrato, err := ObtenerSupervisorContrato(cumplido_proveedor.NumeroContrato, strconv.Itoa(cumplido_proveedor.VigenciaContrato))
 		if err == nil {
-			documento_ordenador, _ := strconv.Atoi(ordenador_contrato.Contratos.Ordenador[0].Documento)
+			documento_supervisor, _ := strconv.Atoi(supervisor_contrato.Contratos.Supervisor[0].Documento)
 			body_cambio_estado.EstadoCumplidoId = estado_cumplido
 			body_cambio_estado.CumplidoProveedorId = cumplido_proveedor
-			body_cambio_estado.DocumentoResponsable = documento_ordenador
-			body_cambio_estado.CargoResponsable = ordenador_contrato.Contratos.Ordenador[0].RolOrdenador
+			body_cambio_estado.DocumentoResponsable = documento_supervisor
+			body_cambio_estado.CargoResponsable = supervisor_contrato.Contratos.Supervisor[0].Cargo
 		} else {
-			outputError = fmt.Errorf("Error al obtener el ordenador del contrato")
+			outputError = fmt.Errorf("Error al obtener el supervisor del contrato")
 			return body_cambio_estado, outputError
 		}
 	default:
@@ -230,7 +242,7 @@ func DesactivarCambiosAnterioresCumplido(cumplido_proveedor_id int, codigo_abrev
 
 	var respuesta_peticion map[string]interface{}
 	var cambios_anteriores []models.CambioEstadoCumplido
-	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/?query=CumplidoProveedorId.Id:"+strconv.Itoa(cumplido_proveedor_id)+",Activo:true&sortby=FechaCreacion&order=desc", &respuesta_peticion); err == nil && response == 200 {
+	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/?query=CumplidoProveedorId.Id:"+strconv.Itoa(cumplido_proveedor_id)+",Activo:true&sortby=FechaCreacion&order=desc&limit=-1", &respuesta_peticion); err == nil && response == 200 {
 		data := respuesta_peticion["Data"].([]interface{})
 		if len(data[0].(map[string]interface{})) == 0 {
 			outputError = nil
@@ -261,4 +273,106 @@ func DesactivarCambiosAnterioresCumplido(cumplido_proveedor_id int, codigo_abrev
 		return ultimo_cambio_cumplido, outputError
 	}
 	return ultimo_cambio_cumplido, outputError
+}
+
+func EnviarNotificacionCambioEstado(nombre_estado string, documento_responsable string, documento_responsable_anterior string, num_contrato_suscrito string, vigencia int) (outputError error) {
+	defer func() {
+		if err := recover(); err != nil {
+			outputError = fmt.Errorf("%v", err)
+			panic(outputError)
+		}
+	}()
+
+	var responsable_anterior string
+	var email string
+
+	if documento_responsable == "0" {
+		email = "fctrujilloo@udistrital.edu.co"
+	} else {
+		var autenticacion_persona models.AutenticacionPersona
+		body_autenticacion := map[string]interface{}{
+			"numero": documento_responsable,
+		}
+		var respuesta_peticion map[string]interface{}
+		// Se busca con el numero de documento del responsable los datos para recuperar el correo electronico
+		if err := helpers.SendJson(beego.AppConfig.String("UrlAutenticacionMid")+"/token/documentoToken", "POST", &respuesta_peticion, body_autenticacion); err == nil {
+			json_autenticacion, err := json.Marshal(respuesta_peticion)
+			if err != nil {
+				outputError = fmt.Errorf("Error al convertir el json")
+				return outputError
+			}
+			err = json.Unmarshal(json_autenticacion, &autenticacion_persona)
+			if err != nil {
+				outputError = fmt.Errorf("Error al convertir el json")
+				return outputError
+			}
+
+			if autenticacion_persona.Email == "" {
+				outputError = fmt.Errorf("No se encontró el correo electrónico del responsable")
+				return outputError
+			}
+			//email = autenticacion_persona.Email
+			email = "fctrujilloo@udistrital.edu.co"
+		} else {
+			outputError = fmt.Errorf("Error al consultar el responsable")
+			return outputError
+		}
+	}
+
+	if documento_responsable_anterior != "0" {
+		// Se busca con el numero de documento del responsable anterior los datos para recuperar el nombre
+		var informacion_personal []models.InformacionProveedor
+		//fmt.Println(beego.AppConfig.String("UrlcrudAgora") + "/informacion_proveedor/?query=NumDocumento:" + documento_responsable_anterior)
+		if response, err := helpers.GetJsonWSO2Test(beego.AppConfig.String("UrlcrudAgora")+"/informacion_proveedor/?query=NumDocumento:"+documento_responsable_anterior, &informacion_personal); err == nil && response == 200 {
+			if len(informacion_personal) == 0 {
+				outputError = fmt.Errorf("No se encontraron datos del responsable anterior")
+				return outputError
+			}
+			responsable_anterior = informacion_personal[0].NomProveedor
+		} else {
+			outputError = fmt.Errorf("Error al consultar el responsable anterior")
+			return outputError
+		}
+	} else {
+		responsable_anterior = "Contratación"
+	}
+
+	// Se busca con el numero de contrato suscrito y la vigencia los datos para recuperar el nombre del proveedor
+	informacion_contrato, outputError := helpers.ObtenerInformacionContratoProveedor(num_contrato_suscrito, strconv.Itoa(vigencia))
+	if outputError != nil {
+		outputError = fmt.Errorf("Error al consultar el proveedor")
+		return outputError
+	}
+
+	// Se crea el body y se hace el Post para enviar un correo electronico
+	var body_enviar_notificacion models.NotificacionEmail
+	body_enviar_notificacion.Source = "notificacionescumplidosproveedores@udistrital.edu.co"
+	body_enviar_notificacion.Template = "REVISION_CUMPLIDOS_PROVEEDORES_PLANTILLA"
+	body_enviar_notificacion.Destinations = make([]models.DestinationItem, 1)
+	body_enviar_notificacion.Destinations[0].Destination.ToAddresses = append(body_enviar_notificacion.Destinations[0].Destination.ToAddresses, email)
+	body_enviar_notificacion.Destinations[0].ReplacementTemplateData.EstadoCumplido = nombre_estado
+	body_enviar_notificacion.Destinations[0].ReplacementTemplateData.NombreEmisorCumplido = responsable_anterior
+	body_enviar_notificacion.Destinations[0].ReplacementTemplateData.NombreProveedor = informacion_contrato[0].NombreProveedor
+	body_enviar_notificacion.Destinations[0].ReplacementTemplateData.RevisionCumplidosProveedoresUrl = beego.AppConfig.String("UrlRevisionCumplidosProveedoresCliente")
+	body_enviar_notificacion.Destinations[0].Attachments = []string{}
+	body_enviar_notificacion.Destinations[0].Destination.BccAddresses = []string{}
+	body_enviar_notificacion.Destinations[0].Destination.CcAddresses = []string{}
+	body_enviar_notificacion.DefaultTemplateData.EstadoCumplido = nombre_estado
+	body_enviar_notificacion.DefaultTemplateData.NombreEmisorCumplido = responsable_anterior
+	body_enviar_notificacion.DefaultTemplateData.NombreProveedor = informacion_contrato[0].NombreProveedor
+	body_enviar_notificacion.DefaultTemplateData.RevisionCumplidosProveedoresUrl = beego.AppConfig.String("UrlRevisionCumplidosProveedoresCliente")
+
+	var respuesta map[string]interface{}
+	fmt.Println(beego.AppConfig.String("UrlNotificacionesMid") + "/email/enviar_templated_email")
+	if err := helpers.SendJsonTls(beego.AppConfig.String("UrlNotificacionesMid")+"/email/enviar_templated_email", "POST", &respuesta, body_enviar_notificacion); err != nil {
+		jsonData, err := json.MarshalIndent(body_enviar_notificacion, "", "    ")
+		if err != nil {
+			log.Fatalf("Error al convertir a JSON: %s", err)
+		}
+		fmt.Println(string(jsonData))
+		outputError = fmt.Errorf("Error al enviar la notificacion al correo")
+		return outputError
+	}
+
+	return
 }

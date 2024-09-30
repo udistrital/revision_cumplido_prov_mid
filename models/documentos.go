@@ -11,7 +11,6 @@ type DocumentosSoporteSimplificado struct {
 	SoporteCumplidoId int
 	Documento         DocumentoSimplificado
 	Archivo           FileGestorDocumental
-	Comentarios       []ComentarioSoporte
 }
 
 type DocumentoSimplificado struct {
