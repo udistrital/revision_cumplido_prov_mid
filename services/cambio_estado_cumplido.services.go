@@ -78,10 +78,9 @@ func CambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_proveedor
 			respuesta_cambio_estado.CargoResponsable = body_cambio_estado.CargoResponsable
 			respuesta_cambio_estado.EstadoCumplido = &estado_cumplido[0]
 
-			error := EnviarNotificacionCambioEstado(estado_cumplido[0].Nombre, strconv.Itoa(body_cambio_estado.DocumentoResponsable), strconv.Itoa(ultimo_cambio_estado_cumplido.DocumentoResponsable), cumplido_proveedor[0].NumeroContrato, cumplido_proveedor[0].VigenciaContrato)
-			if error != nil {
-				outputError = fmt.Errorf("Error al enviar la notificación al correo")
-				return respuesta_cambio_estado, outputError
+			if codigo_abreviacion_cumplido != "CD" {
+				EnviarNotificacionCambioEstado(estado_cumplido[0].Nombre, strconv.Itoa(body_cambio_estado.DocumentoResponsable), strconv.Itoa(ultimo_cambio_estado_cumplido.DocumentoResponsable), cumplido_proveedor[0].NumeroContrato, cumplido_proveedor[0].VigenciaContrato)
+
 			}
 			if codigo_abreviacion_cumplido == "AC" {
 				respuesta_cambio_estado, outputError = CambioEstadoCumplido("PRO", cumplido_proveedor_id)
@@ -288,7 +287,7 @@ func EnviarNotificacionCambioEstado(nombre_estado string, documento_responsable 
 	var email string
 
 	if documento_responsable == "0" {
-		email = "tramitescontratacion@udistrital.edu.co"
+		email = "fctrujilloo@udistrital.edu.co"
 	} else {
 		var autenticacion_persona models.AutenticacionPersona
 		body_autenticacion := map[string]interface{}{
@@ -308,7 +307,12 @@ func EnviarNotificacionCambioEstado(nombre_estado string, documento_responsable 
 				return outputError
 			}
 
-			email = autenticacion_persona.Email
+			if autenticacion_persona.Email == "" {
+				outputError = fmt.Errorf("No se encontró el correo electrónico del responsable")
+				return outputError
+			}
+			//email = autenticacion_persona.Email
+			email = "fctrujilloo@udistrital.edu.co"
 		} else {
 			outputError = fmt.Errorf("Error al consultar el responsable")
 			return outputError
