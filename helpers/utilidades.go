@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"math/big"
@@ -64,6 +65,45 @@ func SendJson(url string, trequest string, target interface{}, datajson interfac
 		}
 	}()
 
+	return json.NewDecoder(r.Body).Decode(target)
+}
+
+func SendJsonTls(url string, trequest string, target interface{}, datajson interface{}) error {
+	// Crear un buffer para el cuerpo de la solicitud
+	b := new(bytes.Buffer)
+	if datajson != nil {
+		if err := json.NewEncoder(b).Encode(datajson); err != nil {
+			beego.Error(err)
+		}
+	}
+
+	// Configurar el transporte del cliente para que ignore las validaciones de certificado
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+
+	// Crear la solicitud HTTP
+	req, err := http.NewRequest(trequest, url, b)
+	if err != nil {
+		beego.Error("error creando la solicitud", err)
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	// Enviar la solicitud
+	r, err := client.Do(req)
+	if err != nil {
+		beego.Error("error", err)
+		return err
+	}
+	defer func() {
+		if err := r.Body.Close(); err != nil {
+			beego.Error(err)
+		}
+	}()
+
+	// Decodificar la respuesta en la variable target
 	return json.NewDecoder(r.Body).Decode(target)
 }
 
