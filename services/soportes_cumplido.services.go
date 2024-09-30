@@ -16,45 +16,6 @@ import (
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 )
 
-func EliminarSoporteCumplido(documento_id string) (response string, outputError error) {
-	defer func() {
-		if err := recover(); err != nil {
-			outputError = fmt.Errorf("%v", err)
-			panic(outputError)
-		}
-	}()
-
-	var soportes_pagos_mensuales []models.SoporteCumplido
-	var respuesta_peticion map[string]interface{}
-
-	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido/?limit=1&query=DocumentoId:"+documento_id+",Activo:true", &respuesta_peticion); (err == nil) && (response == 200) {
-		data := respuesta_peticion["Data"].([]interface{})
-		if len(data[0].(map[string]interface{})) == 0 {
-			return "No se encontró el soporte de pago o este ya se elimino con anterioridad", nil
-		}
-		helpers.LimpiezaRespuestaRefactor(respuesta_peticion, &soportes_pagos_mensuales)
-		if (soportes_pagos_mensuales[0] == models.SoporteCumplido{}) {
-			return "No se encontró el soporte de pago o este ya se elimino con anterioridad", nil
-		}
-	} else {
-		outputError = fmt.Errorf("Error al obtener el soporte de pago")
-		return "No se encontró el soporte de pago", outputError
-	}
-	var res map[string]interface{}
-	delete_true := "Soporte pago eliminado correctamente"
-	delect_false := "No se encontró el soporte de pago"
-
-	if err := helpers.SendJson(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/soporte_cumplido/"+strconv.Itoa(soportes_pagos_mensuales[0].Id), "DELETE", &res, nil); err == nil {
-		response = delete_true
-		return response, nil
-	} else {
-		outputError = fmt.Errorf("Error al eliminar el cumplido proveedor")
-		response = delect_false
-		return response, outputError
-	}
-
-}
-
 func ObtenerSoportesCumplido(cumplido_proveedor_id string) (documentos []models.DocumentosSoporteSimplificado, outputError error) {
 	defer func() {
 		if err := recover(); err != nil {

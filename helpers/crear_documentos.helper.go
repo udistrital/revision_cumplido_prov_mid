@@ -381,6 +381,8 @@ func CrearPdfCumplidoSatisfaccion(dependencia string, nombre_proveedor string, n
 		vigencia_rp,
 		cargo)
 
+	pdf.SetMargins(30, 30, 30)
+
 	pdf = body_segunda_parte(
 		pdf,
 		tipo_factura,
@@ -394,6 +396,7 @@ func CrearPdfCumplidoSatisfaccion(dependencia string, nombre_proveedor string, n
 		tipo_cuenta,
 		numero_cuenta,
 		nombre_banco)
+	pdf.SetMargins(30, 30, 30)
 
 	pdf = footerInformeSeguimiento(pdf,
 		numero_contrato,
@@ -458,28 +461,29 @@ func body_segunda_parte(pdf *gofpdf.Fpdf, tipo_factura string, numero_cuenta_fac
 	pdf.Ln(5)
 	pdf.SetMargins(30, 30, 30)
 	pdf.MultiCell(0, 8, tr(fmt.Sprintf(`Que el presente pago se encuentra en cumplimiento dentro del tiempo de ejecución del contrato del %s al %s.`, formatear_fecha(fecha_inicio), formatear_fecha(fecha_fin))), "", "J", false)
-	pdf.SetMargins(30, 30, 30)
+	pdf.SetMargins(30, 0, 30)
 	pdf.MultiCell(0, 8, "", "", "J", false)
 	pdf.MultiCell(0, 8, tr(fmt.Sprintf(`Que tal valor debe girarse por petición del contratista a la %s  No. %s del Banco %s.`, tipo_cuenta, numero_cuenta, strings.ToUpper(nombre_banco))), "", "J", false)
-
+	pdf.SetMargins(30, 0, 30)
 	return pdf
 }
 
 func footerInformeSeguimiento(pdf *gofpdf.Fpdf, contrato_suscrito string, fecha_inicio time.Time, tipo_contrato string, numero_factura string, supervisor string, cargo string, vigencia string, dependencia string, documento_supervisor string) *gofpdf.Fpdf {
-	pdf.SetMargins(30, 30, 30)
+	pdf.MultiCell(0, 5, "", "", "J", false)
 	dia := time.Now().Day()
 	mes := int(time.Now().Month())
 	año := time.Now().Year()
-
-	pdf.SetFont("Times", "", 10)
-
-	tr := pdf.UnicodeTranslatorFromDescriptor("")
-
 	pdf.SetMargins(30, 0, 30)
-	pdf.MultiCell(0, 8, "", "", "J", false)
+	pdf.MultiCell(0, 0, "", "", "J", false)
+	pdf.SetFont("Times", "", 10)
+	tr := pdf.UnicodeTranslatorFromDescriptor("")
+	pdf.SetMargins(30, 0, 30)
 	pdf.MultiCell(0, 8, tr(fmt.Sprintf(`Con el presente cumplido y de acuerdo a lo establecido en los numerales 32 y 33 del Artículo 18° de la Resolución de Rectoría No. 629 de 2016- Manual de Interventoría y Supervisión certifico que los informes físicos técnicos financieros y administrativos sobre el avance de la ejecución del objeto contractual reposan en el expediente del %s No. %s de %s. De igual forma certifico que se verificaron las condiciones y elementos que hacen parte de la(s) factura(s) No. %s acorde con lo establecido en la ficha técnica del proceso en mención garantizando la calidad del bien o servicio adquirido por la Universidad.`, tipo_contrato, contrato_suscrito, formatear_fecha(fecha_inicio), numero_factura)), "", "J", false)
+	pdf.SetMargins(30, 0, 30)
 	pdf.Ln(15)
+	pdf.SetMargins(30, 0, 30)
 	pdf.MultiCell(0, 8, tr(fmt.Sprintf(`La presente se expide a los %s días del mes %s de %s.`, strconv.Itoa(dia), ObtenerMes(mes), strconv.Itoa(año))), "", "J", false)
+	pdf.SetMargins(30, 0, 30)
 	pdf.Ln(5) // Espacio para la firma
 	pdf.SetMargins(30, 30, 30)
 	pdf.SetFont("Times", "B", 10)
@@ -517,31 +521,18 @@ func encodePDF(pdf *gofpdf.Fpdf) (encodedFile string, outputError error) {
 		}
 	}()
 	var buffer bytes.Buffer
-	fmt.Println("Buffer creado:", buffer)
-
 	writer := bufio.NewWriter(&buffer)
-	fmt.Println("Writer creado:", writer)
-
 	//pdf.OutputFileAndClose("/home/faidercamilo/go/src/github.com/udistrital/prueba.pdf") // para guardar el archivo localmente
 	err := pdf.Output(writer)
 	if err != nil {
 		outputError = fmt.Errorf("Error al generar el PDF:", err)
-		fmt.Println("Error al generar el PDF:", err)
 		return encodedFile, outputError
-	} else {
-		fmt.Println("PDF generado correctamente:", err)
 	}
-
 	err = writer.Flush()
 	if err != nil {
 		outputError = fmt.Errorf("Error al hacer flush del writer:", err)
-		fmt.Println("Error al hacer flush del writer:", err)
-	} else {
-		fmt.Println("Writer flush exitoso:", err)
 	}
-
 	encodedFile = base64.StdEncoding.EncodeToString(buffer.Bytes())
-	fmt.Println("PDF codificado en base64")
 	//fmt.Println(encodedFile)
 	return encodedFile, nil
 }
