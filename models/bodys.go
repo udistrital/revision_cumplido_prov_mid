@@ -33,17 +33,17 @@ type BodySoportePago struct {
 }
 
 type BodyCumplidoSatisfaccion struct {
-	NumeroContratoSuscrito int    `json:"NumeroContratoSuscrito"`
-	VigenciaContrato       string `json:"VigenciaContrato"`
-	TipoPago               string `json:"TipoPago"`
-	PeriodoInicio          string `json:"PeriodoInicio"`
-	PeriodoFin             string `json:"PeriodoFin"`
-	TipoFactura            string `json:"TipoFactura"`
-	NumeroCuentaFactura    string `json:"NumeroCuentaFactura"`
-	ValorPagar             int    `json:"ValorPagar"`
-	TipoCuenta             string `json:"TipoCuenta"`
-	NumeroCuenta           string `json:"NumeroCuenta"`
-	Banco                  string `json:"Banco"`
+	NumeroContratoSuscrito int       `json:"NumeroContratoSuscrito"`
+	VigenciaContrato       string    `json:"VigenciaContrato"`
+	TipoPago               string    `json:"TipoPago"`
+	PeriodoInicio          time.Time `json:"PeriodoInicio"`
+	PeriodoFin             time.Time `json:"PeriodoFin"`
+	TipoFactura            string    `json:"TipoFactura"`
+	NumeroCuentaFactura    string    `json:"NumeroCuentaFactura"`
+	ValorPagar             int       `json:"ValorPagar"`
+	TipoCuenta             string    `json:"TipoCuenta"`
+	NumeroCuenta           string    `json:"NumeroCuenta"`
+	Banco                  string    `json:"Banco"`
 }
 
 type BodyCumplidoRequest struct {

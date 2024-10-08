@@ -122,11 +122,11 @@ func ValorLetras(n int) string {
 			return "un millón"
 		}
 		millones := fmt.Sprintf("%s millones", ValorLetras(n/1000000))
-		resto := ValorLetras(n % 1000000)
-		if resto == "cero" {
+		resto := n % 1000000
+		if resto == 0 {
 			return millones
 		}
-		return fmt.Sprintf("%s %s", millones, resto)
+		return fmt.Sprintf("%s %s", millones, ValorLetras(resto))
 	}
 
 	// Miles
@@ -135,11 +135,12 @@ func ValorLetras(n int) string {
 			return "mil"
 		}
 		miles := fmt.Sprintf("%s mil", ValorLetras(n/1000))
-		resto := ValorLetras(n % 1000)
-		if resto == "cero" {
+		resto := n % 1000
+		// Si el resto es 0, solo retornamos la parte de los miles.
+		if resto == 0 {
 			return miles
 		}
-		return fmt.Sprintf("%s %s", miles, resto)
+		return fmt.Sprintf("%s %s", miles, ValorLetras(resto))
 	}
 
 	// Centenas
@@ -148,9 +149,9 @@ func ValorLetras(n int) string {
 			return "cien"
 		}
 		centenasStr := fmt.Sprintf("%s %s", centenas[n/100], ValorLetras(n%100))
-		resto := ValorLetras(n % 100)
-		if resto == "cero" {
-			return strings.TrimSpace(centenasStr)
+		resto := n % 100
+		if resto == 0 {
+			return strings.TrimSpace(centenas[n/100])
 		}
 		return strings.TrimSpace(centenasStr)
 	}

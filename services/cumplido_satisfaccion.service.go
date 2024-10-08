@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/astaxie/beego"
 
@@ -153,7 +154,7 @@ func ObtenerInformacionCumplidoSatisfaccion(numero_contrato_suscrito string, vig
 	return informacion_informe, nil
 }
 
-func CrearCumplidoSatisfaccion(numero_contrato_suscrito int, vigencia_contrato string, tipo_pago string, periodo_inicio string, periodo_fin string, tipo_factura string, numero_cuenta_factura string, valor_pagar int, tipo_cuenta string, numero_cuenta string, banco string) (cumplido_satisfaccion models.CumplidoSatisfaccion, outputError error) {
+func CrearCumplidoSatisfaccion(numero_contrato_suscrito int, vigencia_contrato string, tipo_pago string, periodo_inicio time.Time, periodo_fin time.Time, tipo_factura string, numero_cuenta_factura string, valor_pagar int, tipo_cuenta string, numero_cuenta string, banco string) (cumplido_satisfaccion models.CumplidoSatisfaccion, outputError error) {
 	defer func() {
 		if err := recover(); err != nil {
 			outputError = fmt.Errorf("%v", err)
@@ -195,7 +196,7 @@ func CrearCumplidoSatisfaccion(numero_contrato_suscrito int, vigencia_contrato s
 		cumplido_satisfaccion.Archivo = archivo_cumplido_satisfaccion
 		cumplido_satisfaccion.NombreResponsable = informacion_informe_satisfaccion.Supervisor
 		cumplido_satisfaccion.CargoResponsable = informacion_informe_satisfaccion.CargoSupervisor
-		cumplido_satisfaccion.DescripcionDocumento = "Cumplido satisfaccion para el cumplido " + strconv.Itoa(numero_contrato_suscrito) + " de " + vigencia_contrato + " con actividades compredidas entre " + periodo_inicio + " al " + periodo_fin
+		cumplido_satisfaccion.DescripcionDocumento = "Autorización de pago para el cumplido " + strconv.Itoa(numero_contrato_suscrito) + " de " + vigencia_contrato + " con actividades compredidas entre " + helpers.FormatearFecha(periodo_inicio) + " al " + helpers.FormatearFecha(periodo_fin)
 
 		return cumplido_satisfaccion, nil
 	} else {
