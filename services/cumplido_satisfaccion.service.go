@@ -196,7 +196,7 @@ func CrearCumplidoSatisfaccion(numero_contrato_suscrito int, vigencia_contrato s
 		cumplido_satisfaccion.Archivo = archivo_cumplido_satisfaccion
 		cumplido_satisfaccion.NombreResponsable = informacion_informe_satisfaccion.Supervisor
 		cumplido_satisfaccion.CargoResponsable = informacion_informe_satisfaccion.CargoSupervisor
-		cumplido_satisfaccion.DescripcionDocumento = "Autorización de pago para el cumplido " + strconv.Itoa(numero_contrato_suscrito) + " de " + vigencia_contrato + " con actividades compredidas entre " + helpers.FormatearFecha(periodo_inicio) + " al " + helpers.FormatearFecha(periodo_fin)
+		cumplido_satisfaccion.DescripcionDocumento = "Cumplido satisfaccion del contrato suscrito " + strconv.Itoa(numero_contrato_suscrito) + " de " + vigencia_contrato + " con actividades compredidas entre " + helpers.FormatearFecha(periodo_inicio) + " al " + helpers.FormatearFecha(periodo_fin)
 
 		return cumplido_satisfaccion, nil
 	} else {
