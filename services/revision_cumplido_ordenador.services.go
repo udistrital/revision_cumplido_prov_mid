@@ -239,13 +239,13 @@ func GenerarAutorizacionGiro(id_solicitud_pago string) (autorizacion_pago models
 
 											autorizacion := helpers.GenerarPdfAutorizacionGiro(datos_documento)
 											if autorizacion != "" {
-												nombre := "AutorizacionPago_" + strings.Join(strings.Fields(proveedor.NomProveedor), "") + "_" + cambio_estado[0].CumplidoProveedorId.NumeroContrato + "_" + strconv.Itoa(cambio_estado[0].CumplidoProveedorId.VigenciaContrato)
+												nombre := "AutorizacionGiro_" + strings.Join(strings.Fields(proveedor.NomProveedor), "") + "_" + cambio_estado[0].CumplidoProveedorId.NumeroContrato + "_" + strconv.Itoa(cambio_estado[0].CumplidoProveedorId.VigenciaContrato)
 												autorizacion_pago = models.DocumentoAutorizacionPago{
 													NombreArchivo:        nombre,
 													Archivo:              autorizacion,
 													NombreResponsable:    ordenador_contrato.Contratos.Ordenador[0].NombreOrdenador,
 													CargoResponsable:     ordenador_contrato.Contratos.Ordenador[0].RolOrdenador,
-													DescripcionDocumento: "Autorización de pago para el cumplido " + cambio_estado[0].CumplidoProveedorId.NumeroContrato + " de " + strconv.Itoa(cambio_estado[0].CumplidoProveedorId.VigenciaContrato) + " - " + strconv.Itoa(cambio_estado[0].CumplidoProveedorId.Id),
+													DescripcionDocumento: "Autorización de giro para el cumplido " + cambio_estado[0].CumplidoProveedorId.NumeroContrato + " de " + strconv.Itoa(cambio_estado[0].CumplidoProveedorId.VigenciaContrato) + " - " + strconv.Itoa(cambio_estado[0].CumplidoProveedorId.Id),
 												}
 												return autorizacion_pago, nil
 											} else {
