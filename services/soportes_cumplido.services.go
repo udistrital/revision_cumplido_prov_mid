@@ -59,6 +59,7 @@ func ObtenerSoportesCumplido(cumplido_proveedor_id string) (documentos []models.
 						documento_individual.TipoDocumento = documento_crud.TipoDocumento.Nombre
 						documento_individual.Descripcion = documento_crud.Descripcion
 						documento_individual.FechaCreacion = documento_crud.FechaCreacion
+						documento_individual.CodigoAbreviacionTipoDocumento = documento_crud.TipoDocumento.CodigoAbreviacion
 						if err := json.Unmarshal([]byte(documento_crud.Metadatos), &observaciones); err == nil {
 							documento_individual.Observaciones = observaciones["observaciones"].(string)
 						}
