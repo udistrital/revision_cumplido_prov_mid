@@ -14,12 +14,13 @@ type DocumentosSoporteSimplificado struct {
 }
 
 type DocumentoSimplificado struct {
-	Id            int
-	Nombre        string
-	TipoDocumento string
-	Descripcion   string
-	Observaciones string
-	FechaCreacion string
+	Id                             int
+	Nombre                         string
+	TipoDocumento                  string
+	CodigoAbreviacionTipoDocumento string
+	Descripcion                    string
+	Observaciones                  string
+	FechaCreacion                  string
 }
 
 type Documento struct {
