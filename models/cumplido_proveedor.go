@@ -12,16 +12,17 @@ type CumplidoProveedor struct {
 }
 
 type SolicituRevisionCumplidoProveedor struct {
-	CumplidoId        int
-	TipoContrato      string
-	NumeroContrato    string
-	VigenciaContrato  int
-	Rp                string
-	NombreProveedor   string
-	Dependencia       string
-	Cdp               string
-	VigenciaRP        string
-	FechaModificacion time.Time
-	FechaCreacion     time.Time
-	Activo            bool
+	CumplidoId                int
+	CodigoAbreviacionCumplido string
+	TipoContrato              string
+	NumeroContrato            string
+	VigenciaContrato          int
+	Rp                        string
+	NombreProveedor           string
+	Dependencia               string
+	Cdp                       string
+	VigenciaRP                string
+	FechaModificacion         time.Time
+	FechaCreacion             time.Time
+	Activo                    bool
 }

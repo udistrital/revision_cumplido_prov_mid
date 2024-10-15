@@ -51,18 +51,19 @@ func ObtenerSolicitudesCumplidos(documento_ordenador string) (cumplidosInfo []mo
 			if err == nil {
 				vigencia, _ := strconv.Atoi(informacion_contrato_proveedor[0].Vigencia)
 				solicitudes_cumplido := models.SolicituRevisionCumplidoProveedor{
-					TipoContrato:      informacion_contrato_proveedor[0].TipoContrato,
-					NumeroContrato:    informacion_contrato_proveedor[0].NumeroContratoSuscrito,
-					VigenciaContrato:  vigencia,
-					Dependencia:       informacion_contrato_proveedor[0].NombreDependencia,
-					NombreProveedor:   informacion_contrato_proveedor[0].NombreProveedor,
-					Cdp:               informacion_contrato_proveedor[0].NumeroCdp,
-					Rp:                informacion_contrato_proveedor[0].NumeroRp,
-					VigenciaRP:        informacion_contrato_proveedor[0].VigenciaRp,
-					CumplidoId:        cumplido.CumplidoProveedorId.Id,
-					Activo:            cumplido.Activo,
-					FechaCreacion:     cumplido.CumplidoProveedorId.FechaCreacion,
-					FechaModificacion: cumplido.CumplidoProveedorId.FechaModificacion,
+					TipoContrato:              informacion_contrato_proveedor[0].TipoContrato,
+					NumeroContrato:            informacion_contrato_proveedor[0].NumeroContratoSuscrito,
+					VigenciaContrato:          vigencia,
+					Dependencia:               informacion_contrato_proveedor[0].NombreDependencia,
+					NombreProveedor:           informacion_contrato_proveedor[0].NombreProveedor,
+					Cdp:                       informacion_contrato_proveedor[0].NumeroCdp,
+					Rp:                        informacion_contrato_proveedor[0].NumeroRp,
+					VigenciaRP:                informacion_contrato_proveedor[0].VigenciaRp,
+					CumplidoId:                cumplido.CumplidoProveedorId.Id,
+					CodigoAbreviacionCumplido: cumplido.EstadoCumplidoId.CodigoAbreviacion,
+					Activo:                    cumplido.Activo,
+					FechaCreacion:             cumplido.CumplidoProveedorId.FechaCreacion,
+					FechaModificacion:         cumplido.CumplidoProveedorId.FechaModificacion,
 				}
 				cumplidosInfo = append(cumplidosInfo, solicitudes_cumplido)
 			} else {
@@ -134,18 +135,19 @@ func ListaCumplidosReversibles(documento_ordenador string) (soliciudes_revertibl
 					if err == nil {
 						vigencia, _ := strconv.Atoi(informacion_contrato_proveedor[0].Vigencia)
 						solicitudes_cumplido := models.SolicituRevisionCumplidoProveedor{
-							TipoContrato:      informacion_contrato_proveedor[0].TipoContrato,
-							NumeroContrato:    informacion_contrato_proveedor[0].NumeroContratoSuscrito,
-							VigenciaContrato:  vigencia,
-							Dependencia:       informacion_contrato_proveedor[0].NombreDependencia,
-							NombreProveedor:   informacion_contrato_proveedor[0].NombreProveedor,
-							Cdp:               informacion_contrato_proveedor[0].NumeroCdp,
-							Rp:                informacion_contrato_proveedor[0].NumeroRp,
-							VigenciaRP:        informacion_contrato_proveedor[0].VigenciaRp,
-							CumplidoId:        cumplido.CumplidoProveedorId.Id,
-							Activo:            cumplido.Activo,
-							FechaCreacion:     cumplido.CumplidoProveedorId.FechaCreacion,
-							FechaModificacion: cumplido.CumplidoProveedorId.FechaModificacion,
+							TipoContrato:              informacion_contrato_proveedor[0].TipoContrato,
+							NumeroContrato:            informacion_contrato_proveedor[0].NumeroContratoSuscrito,
+							VigenciaContrato:          vigencia,
+							Dependencia:               informacion_contrato_proveedor[0].NombreDependencia,
+							NombreProveedor:           informacion_contrato_proveedor[0].NombreProveedor,
+							Cdp:                       informacion_contrato_proveedor[0].NumeroCdp,
+							Rp:                        informacion_contrato_proveedor[0].NumeroRp,
+							VigenciaRP:                informacion_contrato_proveedor[0].VigenciaRp,
+							CumplidoId:                cumplido.CumplidoProveedorId.Id,
+							CodigoAbreviacionCumplido: cumplido.EstadoCumplidoId.CodigoAbreviacion,
+							Activo:                    cumplido.Activo,
+							FechaCreacion:             cumplido.CumplidoProveedorId.FechaCreacion,
+							FechaModificacion:         cumplido.CumplidoProveedorId.FechaModificacion,
 						}
 						soliciudes_revertibles = append(soliciudes_revertibles, solicitudes_cumplido)
 					} else {

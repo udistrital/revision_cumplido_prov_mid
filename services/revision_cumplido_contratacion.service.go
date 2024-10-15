@@ -31,18 +31,19 @@ func ObtenerCumplidosPendientesContratacion() (cumplidosInfo []models.SolicituRe
 					informacion_contrato, err := helpers.ObtenerInformacionContratoProveedor(cumplido.CumplidoProveedorId.NumeroContrato, strconv.Itoa(cumplido.CumplidoProveedorId.VigenciaContrato))
 					if err == nil {
 						contrato := models.SolicituRevisionCumplidoProveedor{
-							TipoContrato:      informacion_contrato[0].TipoContrato,
-							NumeroContrato:    informacion_contrato[0].NumeroContratoSuscrito,
-							VigenciaContrato:  cumplido.CumplidoProveedorId.VigenciaContrato,
-							Dependencia:       informacion_contrato[0].NombreDependencia,
-							NombreProveedor:   informacion_contrato[0].NombreProveedor,
-							Cdp:               informacion_contrato[0].NumeroCdp,
-							Rp:                informacion_contrato[0].NumeroRp,
-							VigenciaRP:        informacion_contrato[0].VigenciaRp,
-							CumplidoId:        cumplido.CumplidoProveedorId.Id,
-							Activo:            cumplido.Activo,
-							FechaModificacion: cumplido.CumplidoProveedorId.FechaModificacion,
-							FechaCreacion:     cumplido.CumplidoProveedorId.FechaCreacion,
+							TipoContrato:              informacion_contrato[0].TipoContrato,
+							NumeroContrato:            informacion_contrato[0].NumeroContratoSuscrito,
+							VigenciaContrato:          cumplido.CumplidoProveedorId.VigenciaContrato,
+							Dependencia:               informacion_contrato[0].NombreDependencia,
+							NombreProveedor:           informacion_contrato[0].NombreProveedor,
+							Cdp:                       informacion_contrato[0].NumeroCdp,
+							Rp:                        informacion_contrato[0].NumeroRp,
+							VigenciaRP:                informacion_contrato[0].VigenciaRp,
+							CumplidoId:                cumplido.CumplidoProveedorId.Id,
+							CodigoAbreviacionCumplido: cumplido.EstadoCumplidoId.CodigoAbreviacion,
+							Activo:                    cumplido.Activo,
+							FechaModificacion:         cumplido.CumplidoProveedorId.FechaModificacion,
+							FechaCreacion:             cumplido.CumplidoProveedorId.FechaCreacion,
 						}
 						cumplidosInfo = append(cumplidosInfo, contrato)
 					} else {
