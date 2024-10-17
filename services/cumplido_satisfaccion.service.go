@@ -178,6 +178,7 @@ func CrearCumplidoSatisfaccion(numero_contrato_suscrito int, vigencia_contrato s
 			informacion_informe_satisfaccion.CargoSupervisor,
 			tipo_factura,
 			numero_cuenta_factura,
+			valor_pagar,
 			informacion_informe_satisfaccion.ValorTotalContrato,
 			periodo_inicio,
 			periodo_fin,
