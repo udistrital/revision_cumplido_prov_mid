@@ -115,9 +115,9 @@ func ObtenerInformacionCumplidoSatisfaccion(numero_contrato_suscrito string, vig
 							informacion_informe.FechaInicio = acta_inicio.FechaInicio
 							informacion_informe.NumeroContratoSuscrito = numero_contrato_suscrito
 							informacion_informe.Cdp = informacion_contrato[0].NumeroCdp
-							informacion_informe.VigenciaCdp = informacion_contrato[0].VigenciaCdp
+							informacion_informe.VigenciaCdp = informacion_contrato[0].CDPFechaExpedicion
 							informacion_informe.Rp = informacion_contrato[0].NumeroRp
-							informacion_informe.VigenciaRp = informacion_contrato[0].VigenciaRp
+							informacion_informe.VigenciaRp = informacion_contrato[0].RPFechaRegistro
 							informacion_informe.CargoSupervisor = contrato_general.Supervisor.Cargo
 							informacion_informe.ValorTotalContrato = total_contrato
 							informacion_informe.SaldoContrato = saldo
@@ -178,6 +178,7 @@ func CrearCumplidoSatisfaccion(numero_contrato_suscrito int, vigencia_contrato s
 			informacion_informe_satisfaccion.CargoSupervisor,
 			tipo_factura,
 			numero_cuenta_factura,
+			valor_pagar,
 			informacion_informe_satisfaccion.ValorTotalContrato,
 			periodo_inicio,
 			periodo_fin,

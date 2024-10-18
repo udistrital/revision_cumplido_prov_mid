@@ -34,10 +34,12 @@ func ObtenerInformacionContratoProveedor(numero_contrato_suscrito string, vigenc
 									Vigencia:               contratoMap["vigencia"].(string),
 									NumeroRp:               rp.CdpXRp.CdpRp[0].RpNumeroRegistro,
 									VigenciaRp:             rp.CdpXRp.CdpRp[0].RpVigencia,
+									RPFechaRegistro:        rp.CdpXRp.CdpRp[0].RpFechaRegistro,
 									NombreProveedor:        contratoMap["proveedor"].(string),
 									NombreDependencia:      contratoMap["dependencia"].(string),
 									NumeroCdp:              contratoMap["numero_cdp"].(string),
 									VigenciaCdp:            contratoMap["vigencia_cdp"].(string),
+									CDPFechaExpedicion:     rp.CdpXRp.CdpRp[0].CdpFechaExpedicion,
 									Rubro:                  contratoMap["rubro"].(string),
 								}
 								contratos_proveedor = append(contratos_proveedor, contrato_proveedor)
