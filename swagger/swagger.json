@@ -747,6 +747,10 @@
             "title": "InformacionContratoProveedor",
             "type": "object",
             "properties": {
+                "CDPFechaExpedicion": {
+                    "type": "string",
+                    "format": "datetime"
+                },
                 "NombreDependencia": {
                     "type": "string"
                 },
@@ -761,6 +765,10 @@
                 },
                 "NumeroRp": {
                     "type": "string"
+                },
+                "RPFechaRegistro": {
+                    "type": "string",
+                    "format": "datetime"
                 },
                 "Rubro": {
                     "type": "string"

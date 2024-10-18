@@ -11,9 +11,9 @@ type InformacionInformeSatisfaccion struct {
 	FechaInicio            time.Time
 	NumeroContratoSuscrito string
 	Cdp                    string
-	VigenciaCdp            string
+	VigenciaCdp            time.Time
 	Rp                     string
-	VigenciaRp             string
+	VigenciaRp             time.Time
 	CargoSupervisor        string
 	ValorTotalContrato     int
 	SaldoContrato          int
