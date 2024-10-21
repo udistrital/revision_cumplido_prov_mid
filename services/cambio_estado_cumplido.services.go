@@ -100,7 +100,7 @@ func CrearBodyCambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_
 			panic(outputError.Error())
 		}
 	}()
-
+	error_supervisor_contrato := fmt.Errorf("Error al obtener el supervisor del contrato")
 	switch codigo_abreviacion_cumplido {
 	case "CD":
 		supervisor_contrato, err := ObtenerSupervisorContrato(cumplido_proveedor.NumeroContrato, strconv.Itoa(cumplido_proveedor.VigenciaContrato))
@@ -111,7 +111,7 @@ func CrearBodyCambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_
 			body_cambio_estado.DocumentoResponsable = documento_supervisor
 			body_cambio_estado.CargoResponsable = supervisor_contrato.Contratos.Supervisor[0].Cargo
 		} else {
-			outputError = fmt.Errorf("Error al obtener el supervisor del contrato")
+			outputError = error_supervisor_contrato
 			return body_cambio_estado, outputError
 		}
 	case "PRC":
@@ -128,7 +128,7 @@ func CrearBodyCambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_
 			body_cambio_estado.DocumentoResponsable = documento_supervisor
 			body_cambio_estado.CargoResponsable = supervisor_contrato.Contratos.Supervisor[0].Cargo
 		} else {
-			outputError = fmt.Errorf("Error al obtener el supervisor del contrato")
+			outputError = error_supervisor_contrato
 			return body_cambio_estado, outputError
 		}
 	case "AC":
@@ -169,7 +169,7 @@ func CrearBodyCambioEstadoCumplido(codigo_abreviacion_cumplido string, cumplido_
 			body_cambio_estado.DocumentoResponsable = documento_supervisor
 			body_cambio_estado.CargoResponsable = supervisor_contrato.Contratos.Supervisor[0].Cargo
 		} else {
-			outputError = fmt.Errorf("Error al obtener el supervisor del contrato")
+			outputError = error_supervisor_contrato
 			return body_cambio_estado, outputError
 		}
 	default:
@@ -188,6 +188,7 @@ func ObtenerSupervisorContrato(numero_contrato_suscrito string, vigencia string)
 		}
 	}()
 
+	error_json := fmt.Errorf("Error al convertir el json")
 	var respuesta_peticion map[string]interface{}
 
 	if response, err := helpers.GetJsonWSO2Test(beego.AppConfig.String("UrlAdministrativaJBPM")+"/informacion_supervisor_contrato/"+numero_contrato_suscrito+"/"+vigencia, &respuesta_peticion); err == nil && response == 200 {
@@ -199,11 +200,11 @@ func ObtenerSupervisorContrato(numero_contrato_suscrito string, vigencia string)
 		if err_json == nil {
 			err := json.Unmarshal(json_supervisor, &supervisor_contrato)
 			if err != nil {
-				outputError = fmt.Errorf("Error al convertir el json")
+				outputError = error_json
 				return supervisor_contrato, outputError
 			}
 		} else {
-			outputError = fmt.Errorf("Error al convertir el json")
+			outputError = error_json
 			return supervisor_contrato, outputError
 		}
 	} else {
@@ -282,7 +283,7 @@ func EnviarNotificacionCambioEstado(nombre_estado string, documento_responsable 
 			panic(outputError)
 		}
 	}()
-
+	error_json := fmt.Errorf("Error al convertir el json")
 	var responsable_anterior string
 	var email string
 
@@ -298,12 +299,12 @@ func EnviarNotificacionCambioEstado(nombre_estado string, documento_responsable 
 		if err := helpers.SendJson(beego.AppConfig.String("UrlAutenticacionMid")+"/token/documentoToken", "POST", &respuesta_peticion, body_autenticacion); err == nil {
 			json_autenticacion, err := json.Marshal(respuesta_peticion)
 			if err != nil {
-				outputError = fmt.Errorf("Error al convertir el json")
+				outputError = error_json
 				return outputError
 			}
 			err = json.Unmarshal(json_autenticacion, &autenticacion_persona)
 			if err != nil {
-				outputError = fmt.Errorf("Error al convertir el json")
+				outputError = error_json
 				return outputError
 			}
 
