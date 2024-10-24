@@ -29,6 +29,35 @@
                 }
             }
         },
+        "/historico/historico_cumplido/{cumplido_proveedor_id}": {
+            "get": {
+                "tags": [
+                    "historico"
+                ],
+                "description": "Generar el historico de los estado por lo que ha pasado un cumplido proveedor",
+                "operationId": "HistoricoCumplidoController.ObtenerHistoricoDeCumplido",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "cumplido_proveedor_id",
+                        "description": "ID del cumplido del proveedor",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.HistoricoCumplido"
+                        }
+                    },
+                    "404": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/ordenador/autorizacion-giro/{cumplido_proveedor_id}": {
             "get": {
                 "tags": [
@@ -739,6 +768,25 @@
             "type": "object",
             "properties": {
                 "File": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.HistoricoCumplido": {
+            "title": "HistoricoCumplido",
+            "type": "object",
+            "properties": {
+                "cargo": {
+                    "type": "string"
+                },
+                "estado": {
+                    "type": "string"
+                },
+                "fecha": {
+                    "type": "string",
+                    "format": "datetime"
+                },
+                "nombreResponsable": {
                     "type": "string"
                 }
             }
