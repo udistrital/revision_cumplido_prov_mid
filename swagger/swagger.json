@@ -691,6 +691,10 @@
                 "FechaCambioEstado": {
                     "type": "string"
                 },
+                "IdCumplido": {
+                    "type": "integer",
+                    "format": "int64"
+                },
                 "Mes": {
                     "type": "integer",
                     "format": "int64"
@@ -908,6 +912,10 @@
                 "CDPFechaExpedicion": {
                     "type": "string",
                     "format": "datetime"
+                },
+                "IdProveedor": {
+                    "type": "integer",
+                    "format": "int64"
                 },
                 "NombreDependencia": {
                     "type": "string"

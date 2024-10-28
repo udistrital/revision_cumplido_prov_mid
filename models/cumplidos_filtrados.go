@@ -10,4 +10,5 @@ type CumplidosFiltrados struct {
 	Dependencia       string `json:"Dependencia"`
 	Estado            string `json:"Estado"`
 	TipoContrato      string `json:"TipoContrato"`
+	IdCumplido        int    `json:"IdCumplido"`
 }

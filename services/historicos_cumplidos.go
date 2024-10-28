@@ -161,6 +161,7 @@ func ObtenerHistoricoCumplidosFiltro(anios []int, meses []int, vigencias []int, 
 				Dependencia:       informacion_contrato[0].NombreDependencia,
 				Estado:            cumplido.EstadoCumplidoId.Nombre,
 				TipoContrato:      informacion_contrato[0].TipoContrato,
+				IdCumplido:        cumplido.CumplidoProveedorId.Id,
 			}
 			cumplidos_filtrados = append(cumplidos_filtrados, cumplido_filtrado)
 		}
@@ -199,8 +200,7 @@ func ObtenerCambiosCumplidosFiltro(contratos []string, vigencias []string, estad
 
 	var respuesta_peticion map[string]interface{}
 
-	//Se contruye dinamicamente el query
-
+	//Se contruye dinamicamente el query //	estadoFiltrado := buildQuery([]string{"Aprobado ordenador"}, "EstadoCumplidoId.Nombre")
 	query := strings.TrimSuffix(("?query=" + buildQuery(contratos, "CumplidoProveedorId.NumeroContrato") + buildQuery(vigencias, "CumplidoProveedorId.VigenciaContrato") + buildQuery(estados, "EstadoCumplidoId.CodigoAbreviacion")), ",")
 	order := "&order=desc"
 	sortby := "&sortby=FechaCreacion,CumplidoProveedorId__Id"
