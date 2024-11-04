@@ -688,16 +688,12 @@
                 "Estado": {
                     "type": "string"
                 },
-                "FechaCambioEstado": {
-                    "type": "string"
-                },
                 "IdCumplido": {
                     "type": "integer",
                     "format": "int64"
                 },
-                "Mes": {
-                    "type": "integer",
-                    "format": "int64"
+                "InformacionPago": {
+                    "type": "string"
                 },
                 "NombreProveedor": {
                     "type": "string"

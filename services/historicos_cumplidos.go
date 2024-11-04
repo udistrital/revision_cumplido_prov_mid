@@ -2,12 +2,14 @@ package services
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/helpers"
 	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
-	"strconv"
-	"strings"
 )
 
 func ObtberHistoricoEstado(cumplido_proveedor_id string) (historicos []models.HistoricoCumplido, outputError error) {
@@ -117,23 +119,25 @@ func ObtenerHistoricoCumplidosFiltro(anios []int, meses []int, vigencias []int, 
 				logs.Error(err)
 				continue
 			}
+			informacion_pago := ObtenerPeriodoInformacionPago(cumplido.CumplidoProveedorId.Id)
 			cumplido_filtrado := models.CumplidosFiltrados{
-				NumeroContrato:    cumplido.CumplidoProveedorId.NumeroContrato,
-				Vigencia:          strconv.Itoa(cumplido.CumplidoProveedorId.VigenciaContrato),
-				Rp:                informacion_contrato[0].NumeroRp,
-				Mes:               int(cumplido.FechaCreacion.Month()),
-				FechaCambioEstado: cumplido.FechaCreacion.Format("2006/01/02"),
-				NombreProveedor:   informacion_contrato[0].NombreProveedor,
-				Dependencia:       informacion_contrato[0].NombreDependencia,
-				Estado:            cumplido.EstadoCumplidoId.Nombre,
-				TipoContrato:      informacion_contrato[0].TipoContrato,
+				IdCumplido:      cumplido.CumplidoProveedorId.Id,
+				NumeroContrato:  cumplido.CumplidoProveedorId.NumeroContrato,
+				Vigencia:        strconv.Itoa(cumplido.CumplidoProveedorId.VigenciaContrato),
+				Rp:              informacion_contrato[0].NumeroRp,
+				NombreProveedor: informacion_contrato[0].NombreProveedor,
+				Dependencia:     informacion_contrato[0].NombreDependencia,
+				Estado:          cumplido.EstadoCumplidoId.Nombre,
+				TipoContrato:    informacion_contrato[0].TipoContrato,
+				InformacionPago: informacion_pago,
 			}
 			cumplidos_filtrados = append(cumplidos_filtrados, cumplido_filtrado)
 		}
 	}
 
-	// Aplicar filtros de meses, anios y nombres proveedores
+	// Aplicar filtros de meses, anios, tipos de contrato y nombres proveedores
 	for _, cumplido := range primer_filtro {
+
 		informacion_contrato, err := helpers.ObtenerInformacionContratoProveedor(cumplido.CumplidoProveedorId.NumeroContrato, strconv.Itoa(cumplido.CumplidoProveedorId.VigenciaContrato))
 		if err != nil {
 			logs.Error(err)
@@ -144,30 +148,116 @@ func ObtenerHistoricoCumplidosFiltro(anios []int, meses []int, vigencias []int, 
 			logs.Error(err)
 			continue
 		}
-		// Verificar que se cumplan los filtros si no estan vacios
-		cumplimiento_mes := len(meses) == 0 || contieneInt(meses, int(cumplido.FechaCreacion.Month()))
-		cumplimiento_anio := len(anios) == 0 || contieneInt(anios, cumplido.FechaCreacion.Year())
+
+		fecha_inicio, fecha_fin := ObtenerInformacionPagoProveedor(cumplido.CumplidoProveedorId.Id)
+		if (fecha_inicio == "" || fecha_fin == "") && (len(meses) > 0 || len(anios) > 0) {
+			continue
+		}
+		layout := "2006-01-02"
+		FechaInicio, _ := time.Parse(layout, fecha_inicio)
+		FechaFin, _ := time.Parse(layout, fecha_fin)
+
+		// Usar MesesEntreFechas para obtener todos los meses entre las fechas de inicio y fin
+		periodoMeses := MesesEntreFechas(FechaInicio, FechaFin)
+
+		// Validar filtros de meses y años
+		cumplimiento_mes := len(meses) == 0
+		cumplimiento_anio := len(anios) == 0
+
+		cumplimiento_anio_mes := false
+		if !cumplimiento_mes && !cumplimiento_anio {
+			for _, periodo := range periodoMeses {
+				if contieneInt(meses, periodo.Mes) {
+					if contieneInt(anios, periodo.Anio) {
+						cumplimiento_anio_mes = true
+						break
+					}
+				}
+			}
+		}
+
+		if !cumplimiento_mes && cumplimiento_anio {
+			for _, periodo := range periodoMeses {
+				if contieneInt(meses, periodo.Mes) {
+					cumplimiento_anio_mes = true
+					break
+				}
+			}
+		}
+
+		if cumplimiento_mes && !cumplimiento_anio {
+			for _, periodo := range periodoMeses {
+				if contieneInt(anios, periodo.Anio) {
+					cumplimiento_anio_mes = true
+					break
+				}
+			}
+		}
+
+		if cumplimiento_mes && cumplimiento_anio {
+			cumplimiento_anio_mes = true
+		}
+
 		cumplimiento_proveedor := len(proveedores) == 0 || contieneInt(proveedores, contrato_general.Contratista)
 		cumplimiento_tipo_contrato := len(tipos_contratos) == 0 || contieneInt(tipos_contratos, contrato_general.TipoContrato.Id)
 
-		if cumplimiento_mes && cumplimiento_anio && cumplimiento_proveedor && cumplimiento_tipo_contrato {
+		if cumplimiento_anio_mes && cumplimiento_proveedor && cumplimiento_tipo_contrato {
+			informacion_pago := ObtenerPeriodoInformacionPago(cumplido.CumplidoProveedorId.Id)
 			cumplido_filtrado := models.CumplidosFiltrados{
-				NumeroContrato:    cumplido.CumplidoProveedorId.NumeroContrato,
-				Vigencia:          strconv.Itoa(cumplido.CumplidoProveedorId.VigenciaContrato),
-				Rp:                informacion_contrato[0].NumeroRp,
-				Mes:               int(cumplido.FechaCreacion.Month()),
-				FechaCambioEstado: cumplido.FechaCreacion.Format("2006/01/02"),
-				NombreProveedor:   informacion_contrato[0].NombreProveedor,
-				Dependencia:       informacion_contrato[0].NombreDependencia,
-				Estado:            cumplido.EstadoCumplidoId.Nombre,
-				TipoContrato:      informacion_contrato[0].TipoContrato,
-				IdCumplido:        cumplido.CumplidoProveedorId.Id,
+				NumeroContrato:  cumplido.CumplidoProveedorId.NumeroContrato,
+				Vigencia:        strconv.Itoa(cumplido.CumplidoProveedorId.VigenciaContrato),
+				Rp:              informacion_contrato[0].NumeroRp,
+				NombreProveedor: informacion_contrato[0].NombreProveedor,
+				Dependencia:     informacion_contrato[0].NombreDependencia,
+				Estado:          cumplido.EstadoCumplidoId.Nombre,
+				TipoContrato:    informacion_contrato[0].TipoContrato,
+				IdCumplido:      cumplido.CumplidoProveedorId.Id,
+				InformacionPago: informacion_pago,
 			}
 			cumplidos_filtrados = append(cumplidos_filtrados, cumplido_filtrado)
 		}
 
 	}
 	return cumplidos_filtrados, nil
+}
+
+func MesesEntreFechas(fechaInicio, fechaFin time.Time) []models.MesAnio {
+	// Ajuste las fechas al primer día del mes para incluir todos los meses completos
+	fechaInicio = time.Date(fechaInicio.Year(), fechaInicio.Month(), 1, 0, 0, 0, 0, fechaInicio.Location())
+	fechaFin = time.Date(fechaFin.Year(), fechaFin.Month(), 1, 0, 0, 0, 0, fechaFin.Location())
+
+	var meses []models.MesAnio
+
+	// Recorremos los meses y años entre las fechas dadas
+	for fecha := fechaInicio; !fecha.After(fechaFin); fecha = fecha.AddDate(0, 1, 0) {
+		meses = append(meses, models.MesAnio{
+			Mes:  int(fecha.Month()),
+			Anio: fecha.Year(),
+		})
+	}
+
+	return meses
+}
+
+func ObtenerInformacionPagoProveedor(cumplido_proveedor_id int) (fecha_inicio, fecha_fin string) {
+
+	var respuesta_peticion map[string]interface{}
+	var informacion_pago_proveedor []models.InformacionPago
+	//fmt.Println("URL", beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/informacion_pago/?query=Activo:true,CumplidoProveedorId.Id:"+strconv.Itoa(cumplido_proveedor_id))
+	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/informacion_pago/?query=Activo:true,CumplidoProveedorId.Id:"+strconv.Itoa(cumplido_proveedor_id), &respuesta_peticion); err == nil && response == 200 {
+		data := respuesta_peticion["Data"].([]interface{})
+		if len(data[0].(map[string]interface{})) == 0 {
+			return "", ""
+		}
+		helpers.LimpiezaRespuestaRefactor(respuesta_peticion, &informacion_pago_proveedor)
+		fecha_inicio := informacion_pago_proveedor[0].FechaInicial.Format("2006-01-02")
+		fecha_fin := informacion_pago_proveedor[0].FechaFinal.Format("2006-01-02")
+
+		return fecha_inicio, fecha_fin
+
+	} else {
+		return "", ""
+	}
 }
 
 /**
