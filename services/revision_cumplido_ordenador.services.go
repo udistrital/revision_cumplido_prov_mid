@@ -101,13 +101,17 @@ func ListaCumplidosReversibles(documento_ordenador string) (soliciudes_revertibl
 
 	//Verificar si hace 15 días el ordenador estaba activo
 	if fechaMenosQuinceDias.After(ordenadores[0].FechaInicio) && fechaMenosQuinceDias.Before(ordenadores[0].FechaFin) {
+
 		listaDocumentos = append(listaDocumentos, strconv.Itoa(ordenadores[0].Documento))
 	} else {
 		// Si el oredenador no estuvo activo hace 15 días buscar el ordenador que si lo estaba
 		var ordenadores_contrato []models.ArgoOrdenadorContrato
-		if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlcrudAgora")+"/ordenadores/?query=RolId:"+strconv.Itoa(ordenadores[0].RolId)+"FechaFin__gte:"+fechaFormateada+"&limit=-1&sortby=FechaFin&order=desc", &ordenadores_contrato); err == nil && response == 200 {
+		if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlcrudAgora")+"/ordenadores/?query=RolId:"+strconv.Itoa(ordenadores[0].RolId)+",FechaFin__gte:"+fechaFormateada+"&limit=-1&sortby=FechaFin&order=desc", &ordenadores_contrato); err == nil && response == 200 {
+
 			if len(ordenadores_contrato) > 0 {
+
 				for _, ordenador_contrato := range ordenadores_contrato {
+
 					listaDocumentos = append(listaDocumentos, strconv.Itoa(ordenador_contrato.Documento))
 				}
 			} else {
@@ -120,13 +124,12 @@ func ListaCumplidosReversibles(documento_ordenador string) (soliciudes_revertibl
 		}
 	}
 
-	documentos := strings.Join(listaDocumentos, ",")
+	documentos := strings.Join(listaDocumentos, "|")
 	var respuesta_peticion map[string]interface{}
 	var cumplidos []models.CambioEstadoCumplido
-	//fmt.Println(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores") + "/cambio_estado_cumplido/?query=DocumentoResponsable:" + documento_ordenador + ",EstadoCumplidoId.CodigoAbreviacion:AO,Activo:true,FechaModificacion__gte:" + fechaFormateada)
-	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/?query=DocumentoResponsable:"+documentos+",EstadoCumplidoId.CodigoAbreviacion:AO,Activo:true,FechaModificacion__gte:"+fechaFormateada+"&limit=-1", &respuesta_peticion); err == nil && response == 200 {
+	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/?query=DocumentoResponsable.in:"+documentos+",EstadoCumplidoId.CodigoAbreviacion:AO,Activo:true,FechaModificacion__gte:"+fechaFormateada+"&limit=-1", &respuesta_peticion); err == nil && response == 200 {
 		data := respuesta_peticion["Data"].([]interface{})
-		if len(data[0].(map[string]interface{})) > 0 {
+		if respuesta_peticion["Data"].([]interface{}) != nil && len(data[0].(map[string]interface{})) > 0 {
 			helpers.LimpiezaRespuestaRefactor(respuesta_peticion, &cumplidos)
 			if len(cumplidos) > 0 {
 				for _, cumplido := range cumplidos {
@@ -305,7 +308,7 @@ func ObtenerInformacionProveedor(IdProveedor string) (provedor models.Informacio
 	}()
 
 	var informacion_proveedor []models.InformacionProveedor
-	fmt.Println("URL proveedor: ", beego.AppConfig.String("UrlcrudAgora")+"/informacion_proveedor/?query=id:"+IdProveedor)
+	//fmt.Println("URL proveedor: ", beego.AppConfig.String("UrlcrudAgora")+"/informacion_proveedor/?query=id:"+IdProveedor)
 	if response, err := helpers.GetJsonWSO2Test(beego.AppConfig.String("UrlcrudAgora")+"/informacion_proveedor/?query=id:"+IdProveedor, &informacion_proveedor); err == nil && response == 200 {
 		if len(informacion_proveedor) > 0 {
 			return informacion_proveedor[0], nil
