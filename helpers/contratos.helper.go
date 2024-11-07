@@ -18,7 +18,7 @@ func ObtenerInformacionContratoProveedor(numero_contrato_suscrito string, vigenc
 	}()
 
 	var respuesta_peticion map[string]interface{}
-	fmt.Println(beego.AppConfig.String("UrlAdministrativaJBPM") + "/informacion_contrato_proveedor/" + numero_contrato_suscrito + "/" + vigencia)
+	//fmt.Println(beego.AppConfig.String("UrlAdministrativaJBPM") + "/informacion_contrato_proveedor/" + numero_contrato_suscrito + "/" + vigencia)
 	if response, err := GetJsonWSO2Test(beego.AppConfig.String("UrlAdministrativaJBPM")+"/informacion_contrato_proveedor/"+numero_contrato_suscrito+"/"+vigencia, &respuesta_peticion); err == nil && response == 200 {
 		if respuesta_peticion != nil {
 			if contratosMap, exito := respuesta_peticion["proveedor"].(map[string]interface{}); exito {
@@ -45,29 +45,29 @@ func ObtenerInformacionContratoProveedor(numero_contrato_suscrito string, vigenc
 								contratos_proveedor = append(contratos_proveedor, contrato_proveedor)
 							} else {
 								logs.Error(err)
-								outputError = fmt.Errorf("Error al obtener el RP del contrato")
+								outputError = fmt.Errorf("Error al obtener la información del RP asociado al contrato con número %s y vigencia %s", contratoMap["numero_contrato_suscrito"], contratoMap["vigencia"])
 								return contratos_proveedor, outputError
 							}
 						}
 					} else {
-						logs.Error("Error al obtener la informacion del contrato del proveedor")
-						outputError = fmt.Errorf("Error al obtener la informacion del contrato del proveedor")
+						logs.Error("Error al procesar la lista de contratos del proveedor")
+						outputError = fmt.Errorf("Error al procesar la lista de contratos del proveedor")
 						return contratos_proveedor, outputError
 					}
 				}
 			} else {
-				logs.Error("Error al obtener la informacion del contrato del proveedor")
-				outputError = fmt.Errorf("Error al obtener la informacion del contrato del proveedor")
+				logs.Error("Error al extraer los datos del proveedor en la respuesta")
+				outputError = fmt.Errorf("Error al extraer los datos del proveedor en la respuesta")
 				return contratos_proveedor, outputError
 			}
 		} else {
-			logs.Error("Error al obtener la informacion del contrato del proveedor")
-			outputError = fmt.Errorf("Error al obtener la informacion del contrato del proveedor")
+			logs.Error("No se encontro información del contrato del proveedor")
+			outputError = fmt.Errorf("No se encontro información del contrato del proveedor")
 			return contratos_proveedor, outputError
 		}
 	} else {
 		logs.Error(err)
-		outputError = fmt.Errorf("Error al obtener los datos del contrato proveedor")
+		outputError = fmt.Errorf("Error al obtener los datos del servicio para el contrato número %s con vigencia %s", numero_contrato_suscrito, vigencia)
 		return contratos_proveedor, outputError
 	}
 
@@ -226,4 +226,46 @@ func ObtenerContratoGeneralProveedor(numero_contrato_suscrito string, vigencia_c
 		outputError = fmt.Errorf("Error al obtener el contrato general")
 		return contrato_general, outputError
 	}
+}
+
+func ObtenerContratosDependencia(dependencia string) (contratos_dependencia models.ContratoDependencia, outputError map[string]interface{}) {
+	defer func() {
+		if err := recover(); err != nil {
+			outputError = map[string]interface{}{
+				"Success": false,
+				"Status":  404,
+				"Message": "Error al obtener los contratos de la dependencia: " + dependencia,
+				"Error":   err,
+			}
+		}
+	}()
+
+	var respuesta_peticion map[string]interface{}
+	//fmt.Println(beego.AppConfig.String("UrlAdministrativaJBPM") + "/contratos_proveedor_dependencia/" + dependencia)
+	if response, err := GetJsonWSO2Test(beego.AppConfig.String("UrlAdministrativaJBPM")+"/contratos_proveedor_dependencia/"+dependencia, &respuesta_peticion); err == nil && response == 200 {
+		if respuesta_peticion != nil {
+			respuesta_json, err_json := json.Marshal(respuesta_peticion)
+			if err_json == nil {
+				if err := json.Unmarshal(respuesta_json, &contratos_dependencia); err == nil {
+					return contratos_dependencia, nil
+				} else {
+					logs.Error(err)
+					outputError = map[string]interface{}{"funcion": "/ObtenerContratosDependencia/", "err": err.Error(), "status": "404"}
+					return contratos_dependencia, outputError
+				}
+			} else {
+				logs.Error(err_json)
+				outputError = map[string]interface{}{"funcion": "/ObtenerContratosDependencia/", "err": err_json.Error(), "status": "404"}
+				return contratos_dependencia, outputError
+			}
+		} else {
+			outputError = map[string]interface{}{"funcion": "/ObtenerContratosDependencia/", "err": "No se encontraron contratos para la dependencia: " + dependencia, "status": "404"}
+			return contratos_dependencia, outputError
+		}
+	} else {
+		logs.Error(err)
+		outputError = map[string]interface{}{"funcion": "/ObtenerContratosDependencia/", "err": err, "status": "404"}
+		return contratos_dependencia, outputError
+	}
+
 }
