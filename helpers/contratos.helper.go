@@ -227,3 +227,45 @@ func ObtenerContratoGeneralProveedor(numero_contrato_suscrito string, vigencia_c
 		return contrato_general, outputError
 	}
 }
+
+func ObtenerContratosDependencia(dependencia string) (contratos_dependencia models.ContratoDependencia, outputError map[string]interface{}) {
+	defer func() {
+		if err := recover(); err != nil {
+			outputError = map[string]interface{}{
+				"Success": false,
+				"Status":  404,
+				"Message": "Error al obtener los contratos de la dependencia: " + dependencia,
+				"Error":   err,
+			}
+		}
+	}()
+
+	var respuesta_peticion map[string]interface{}
+	//fmt.Println(beego.AppConfig.String("UrlAdministrativaJBPM") + "/contratos_proveedor_dependencia/" + dependencia)
+	if response, err := GetJsonWSO2Test(beego.AppConfig.String("UrlAdministrativaJBPM")+"/contratos_proveedor_dependencia/"+dependencia, &respuesta_peticion); err == nil && response == 200 {
+		if respuesta_peticion != nil {
+			respuesta_json, err_json := json.Marshal(respuesta_peticion)
+			if err_json == nil {
+				if err := json.Unmarshal(respuesta_json, &contratos_dependencia); err == nil {
+					return contratos_dependencia, nil
+				} else {
+					logs.Error(err)
+					outputError = map[string]interface{}{"funcion": "/ObtenerContratosDependencia/", "err": err.Error(), "status": "404"}
+					return contratos_dependencia, outputError
+				}
+			} else {
+				logs.Error(err_json)
+				outputError = map[string]interface{}{"funcion": "/ObtenerContratosDependencia/", "err": err_json.Error(), "status": "404"}
+				return contratos_dependencia, outputError
+			}
+		} else {
+			outputError = map[string]interface{}{"funcion": "/ObtenerContratosDependencia/", "err": "No se encontraron contratos para la dependencia: " + dependencia, "status": "404"}
+			return contratos_dependencia, outputError
+		}
+	} else {
+		logs.Error(err)
+		outputError = map[string]interface{}{"funcion": "/ObtenerContratosDependencia/", "err": err, "status": "404"}
+		return contratos_dependencia, outputError
+	}
+
+}

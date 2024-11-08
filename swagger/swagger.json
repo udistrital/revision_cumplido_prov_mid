@@ -29,6 +29,111 @@
                 }
             }
         },
+        "/historico-cumplidos/filtro-cumplidos": {
+            "post": {
+                "tags": [
+                    "historico-cumplidos"
+                ],
+                "description": "Obtiene el historico de los cumplidos dependiendo de varios filtros",
+                "operationId": "HistoricoCumplidosController.ObtenerHistoricoCumplidos",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "Anios",
+                        "description": "años de los cumplidos a consultar",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "query",
+                        "name": "Meses",
+                        "description": "meses de los cumplidos a consultar",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "query",
+                        "name": "Vigencias",
+                        "description": "vigencias de los cumplidos a consultar",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "Proveedores",
+                        "description": "proveedores de los cumplidos a consultar",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "Estados",
+                        "description": "estados de los cumplidos a consultar",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "Dependencias",
+                        "description": "dependencias de los cumplidos a consultar",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "Contratos",
+                        "description": "contratos de los cumplidos a consultar",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.CumplidosFiltrados"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "{object} map[string]interface{}"
+                    }
+                }
+            }
+        },
+        "/historico-cumplidos/historico_cumplido/{cumplido_proveedor_id}": {
+            "get": {
+                "tags": [
+                    "historico-cumplidos"
+                ],
+                "description": "Generar el historico de los estado por lo que ha pasado un cumplido proveedor",
+                "operationId": "HistoricoCumplidosController.ObtenerHistoricoDeCumplido",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "cumplido_proveedor_id",
+                        "description": "ID del cumplido del proveedor",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.HistoricoCumplido"
+                        }
+                    },
+                    "404": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/ordenador/autorizacion-giro/{cumplido_proveedor_id}": {
             "get": {
                 "tags": [
@@ -573,6 +678,40 @@
                 }
             }
         },
+        "models.CumplidosFiltrados": {
+            "title": "CumplidosFiltrados",
+            "type": "object",
+            "properties": {
+                "Dependencia": {
+                    "type": "string"
+                },
+                "Estado": {
+                    "type": "string"
+                },
+                "IdCumplido": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "InformacionPago": {
+                    "type": "string"
+                },
+                "NombreProveedor": {
+                    "type": "string"
+                },
+                "NumeroContrato": {
+                    "type": "string"
+                },
+                "Rp": {
+                    "type": "string"
+                },
+                "TipoContrato": {
+                    "type": "string"
+                },
+                "Vigencia": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Dependencia": {
             "title": "Dependencia",
             "type": "object",
@@ -743,6 +882,25 @@
                 }
             }
         },
+        "models.HistoricoCumplido": {
+            "title": "HistoricoCumplido",
+            "type": "object",
+            "properties": {
+                "cargo": {
+                    "type": "string"
+                },
+                "estado": {
+                    "type": "string"
+                },
+                "fecha": {
+                    "type": "string",
+                    "format": "datetime"
+                },
+                "nombreResponsable": {
+                    "type": "string"
+                }
+            }
+        },
         "models.InformacionContratoProveedor": {
             "title": "InformacionContratoProveedor",
             "type": "object",
@@ -750,6 +908,10 @@
                 "CDPFechaExpedicion": {
                     "type": "string",
                     "format": "datetime"
+                },
+                "IdProveedor": {
+                    "type": "integer",
+                    "format": "int64"
                 },
                 "NombreDependencia": {
                     "type": "string"

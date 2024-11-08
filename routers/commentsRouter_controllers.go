@@ -43,6 +43,24 @@ func init() {
             Filters: nil,
             Params: nil})
 
+    beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:HistoricoCumplidosController"] = append(beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:HistoricoCumplidosController"],
+        beego.ControllerComments{
+            Method: "ObtenerHistoricoCumplidos",
+            Router: "/filtro-cumplidos",
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:HistoricoCumplidosController"] = append(beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:HistoricoCumplidosController"],
+        beego.ControllerComments{
+            Method: "ObtenerHistorico",
+            Router: "/historico_cumplido/:cumplido_proveedor_id",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
     beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:ListarTipoDocumentosCumplidoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/revision_cumplidos_proveedores_mid/controllers:ListarTipoDocumentosCumplidoController"],
         beego.ControllerComments{
             Method: "ObtenerTiposDocumentosCumplido",

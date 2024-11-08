@@ -15,4 +15,5 @@ type InformacionContratoProveedor struct {
 	VigenciaCdp            string
 	CDPFechaExpedicion     time.Time
 	Rubro                  string
+	IdProveedor            int
 }
