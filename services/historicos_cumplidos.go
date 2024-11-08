@@ -84,8 +84,20 @@ func ObtenerHistoricoCumplidosFiltro(anios []int, meses []int, vigencias []int, 
 		contratos_dependencias.Contratos.Contrato = append(contratos_dependencias.Contratos.Contrato, contratos.Contratos.Contrato...)
 	}
 
-	for _, contrato := range contratos_dependencias.Contratos.Contrato {
-		contratos = append(contratos, contrato.NumeroContrato)
+	if len(contratos) == 0 {
+		for _, contrato := range contratos_dependencias.Contratos.Contrato {
+			contratos = append(contratos, contrato.NumeroContrato)
+		}
+	} else {
+		var contratos_validos []string
+		for _, contrato := range contratos {
+			for _, contrato_dependencia := range contratos_dependencias.Contratos.Contrato {
+				if contrato == contrato_dependencia.NumeroContrato {
+					contratos_validos = append(contratos_validos, contrato)
+				}
+			}
+		}
+		contratos = contratos_validos
 	}
 
 	var vigencias_string []string
