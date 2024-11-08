@@ -84,6 +84,10 @@ func ObtenerHistoricoCumplidosFiltro(anios []int, meses []int, vigencias []int, 
 		contratos_dependencias.Contratos.Contrato = append(contratos_dependencias.Contratos.Contrato, contratos.Contratos.Contrato...)
 	}
 
+	for _, contrato := range contratos_dependencias.Contratos.Contrato {
+		contratos = append(contratos, contrato.NumeroContrato)
+	}
+
 	var vigencias_string []string
 	if len(vigencias) > 0 {
 		for _, vigencia := range vigencias {
@@ -289,11 +293,13 @@ func ObtenerCambiosCumplidosFiltro(contratos []string, vigencias []string, estad
 	}()
 
 	var respuesta_peticion map[string]interface{}
+	fmt.Println("Contratos", contratos)
+	fmt.Println(buildQuery(contratos, "CumplidoProveedorId.NumeroContrato"))
 
 	//Se contruye dinamicamente el query //	estadoFiltrado := buildQuery([]string{"Aprobado ordenador"}, "EstadoCumplidoId.Nombre")
-	query := strings.TrimSuffix(("?query=" + buildQuery(contratos, "CumplidoProveedorId.NumeroContrato") + buildQuery(vigencias, "CumplidoProveedorId.VigenciaContrato") + buildQuery(estados, "EstadoCumplidoId.CodigoAbreviacion")), ",")
+	query := strings.TrimSuffix(("?query=Activo:true," + buildQuery(contratos, "CumplidoProveedorId.NumeroContrato") + buildQuery(vigencias, "CumplidoProveedorId.VigenciaContrato") + buildQuery(estados, "EstadoCumplidoId.CodigoAbreviacion")), ",")
 	order := "&order=desc"
-	sortby := ",Activo:true&sortby=FechaCreacion,CumplidoProveedorId__Id"
+	sortby := "&sortby=FechaCreacion,CumplidoProveedorId__Id"
 	limit := "&limit=0"
 
 	fmt.Println("URL Filtros", beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/"+query+sortby+order+limit)
