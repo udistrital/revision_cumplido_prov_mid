@@ -84,7 +84,7 @@ func ObtenerOrdenadorContrato(numero_contrato_suscrito string, vigencia string) 
 
 	var respuesta_peticion map[string]interface{}
 
-	fmt.Println("URL ordenador contrato: ", beego.AppConfig.String("UrlAdministrativaJBPM")+"/informacion_ordenador_contrato/"+numero_contrato_suscrito+"/"+vigencia)
+	//fmt.Println("URL ordenador contrato: ", beego.AppConfig.String("UrlAdministrativaJBPM")+"/informacion_ordenador_contrato/"+numero_contrato_suscrito+"/"+vigencia)
 	if response, err := GetJsonWSO2Test(beego.AppConfig.String("UrlAdministrativaJBPM")+"/informacion_ordenador_contrato/"+numero_contrato_suscrito+"/"+vigencia, &respuesta_peticion); err == nil && response == 200 {
 		if respuesta_peticion == nil {
 			outputError = fmt.Errorf("No se encontro el ordenador del contrato")

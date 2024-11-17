@@ -52,7 +52,7 @@ func ObtenerValorGiradoPorCdp(cdp string, vigencia_cdp string, unidad_ejecucion 
 	var temp_giros_tercero map[string]interface{}
 	var giros_tercero models.GirosTercero
 	valor_girado = 0
-	fmt.Println(beego.AppConfig.String("UrlFinancieraJBPM") + "/giros_tercero/" + cdp + "/" + vigencia_cdp + "/" + unidad_ejecucion)
+	//fmt.Println(beego.AppConfig.String("UrlFinancieraJBPM") + "/giros_tercero/" + cdp + "/" + vigencia_cdp + "/" + unidad_ejecucion)
 	if response, err := helpers.GetJsonWSO2Test(beego.AppConfig.String("UrlFinancieraJBPM")+"/giros_tercero/"+cdp+"/"+vigencia_cdp+"/"+unidad_ejecucion, &temp_giros_tercero); (err == nil) && (response == 200) {
 		if temp_giros_tercero == nil {
 			err = errors.New("error en la consulta de giros_tercero")
@@ -197,7 +197,7 @@ func CrearCumplidoSatisfaccion(numero_contrato_suscrito int, vigencia_contrato s
 		cumplido_satisfaccion.Archivo = archivo_cumplido_satisfaccion
 		cumplido_satisfaccion.NombreResponsable = informacion_informe_satisfaccion.Supervisor
 		cumplido_satisfaccion.CargoResponsable = informacion_informe_satisfaccion.CargoSupervisor
-		cumplido_satisfaccion.DescripcionDocumento = "Cumplido satisfaccion del contrato suscrito " + strconv.Itoa(numero_contrato_suscrito) + " de " + vigencia_contrato + " con actividades compredidas entre " + helpers.FormatearFecha(periodo_inicio) + " al " + helpers.FormatearFecha(periodo_fin)
+		cumplido_satisfaccion.DescripcionDocumento = "Cumplido satisfacción del contrato suscrito " + strconv.Itoa(numero_contrato_suscrito) + " de " + vigencia_contrato + " con actividades comprendidas entre " + helpers.FormatearFecha(periodo_inicio) + " y " + helpers.FormatearFecha(periodo_fin)
 
 		return cumplido_satisfaccion, nil
 	} else {

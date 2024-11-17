@@ -168,7 +168,7 @@ func body(pdf *gofpdf.Fpdf, cellx float64, cellY float64, month int, day int, ye
 }
 
 func CrearTablaDocumentos(pdf *gofpdf.Fpdf, cellx float64, cellY float64, autorizacion models.DatosAutorizacionPago, documentos map[string]string) *gofpdf.Fpdf {
-	fmt.Println(autorizacion.DocumentosCargados)
+	//fmt.Println(autorizacion.DocumentosCargados)
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
 	col1Width := 120.0
 	col2Width := 20.0
