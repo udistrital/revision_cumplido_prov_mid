@@ -305,8 +305,8 @@ func ObtenerCambiosCumplidosFiltro(contratos []string, vigencias []string, estad
 	}()
 
 	var respuesta_peticion map[string]interface{}
-	fmt.Println("Contratos", contratos)
-	fmt.Println(buildQuery(contratos, "CumplidoProveedorId.NumeroContrato"))
+	//fmt.Println("Contratos", contratos)
+	//fmt.Println(buildQuery(contratos, "CumplidoProveedorId.NumeroContrato"))
 
 	//Se contruye dinamicamente el query //	estadoFiltrado := buildQuery([]string{"Aprobado ordenador"}, "EstadoCumplidoId.Nombre")
 	query := strings.TrimSuffix(("?query=Activo:true," + buildQuery(contratos, "CumplidoProveedorId.NumeroContrato") + buildQuery(vigencias, "CumplidoProveedorId.VigenciaContrato") + buildQuery(estados, "EstadoCumplidoId.CodigoAbreviacion")), ",")
@@ -314,7 +314,7 @@ func ObtenerCambiosCumplidosFiltro(contratos []string, vigencias []string, estad
 	sortby := "&sortby=FechaCreacion,CumplidoProveedorId__Id"
 	limit := "&limit=0"
 
-	fmt.Println("URL Filtros", beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/"+query+sortby+order+limit)
+	//fmt.Println("URL Filtros", beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/"+query+sortby+order+limit)
 	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlCrudRevisionCumplidosProveedores")+"/cambio_estado_cumplido/"+query+sortby+order+limit, &respuesta_peticion); err == nil && response == 200 {
 		data := respuesta_peticion["Data"].([]interface{})
 		if len(data[0].(map[string]interface{})) > 0 {

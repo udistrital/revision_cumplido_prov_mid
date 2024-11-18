@@ -55,7 +55,7 @@ func ObtenerContratosDependencia(dependencia string) (contratos_dependencia mode
 	}()
 
 	var respuesta_peticion map[string]interface{}
-	fmt.Println(beego.AppConfig.String("UrlAdministrativaJBPM") + "/contratos_proveedor_dependencia/" + dependencia)
+	//fmt.Println(beego.AppConfig.String("UrlAdministrativaJBPM") + "/contratos_proveedor_dependencia/" + dependencia)
 	if response, err := helpers.GetJsonWSO2Test(beego.AppConfig.String("UrlAdministrativaJBPM")+"/contratos_proveedor_dependencia/"+dependencia, &respuesta_peticion); err == nil && response == 200 {
 		if respuesta_peticion != nil {
 			respuesta_json, err_json := json.Marshal(respuesta_peticion)
@@ -92,7 +92,7 @@ func ObtenerDependenciasSupervisor(documento_supervisor string) (dependencias_su
 	}()
 
 	var respuesta_peticion map[string]interface{}
-	fmt.Println("Url dependencias: ", beego.AppConfig.String("UrlAdministrativaJBPM")+"/dependencias_supervisor/"+documento_supervisor)
+	//fmt.Println("Url dependencias: ", beego.AppConfig.String("UrlAdministrativaJBPM")+"/dependencias_supervisor/"+documento_supervisor)
 	if response, err := helpers.GetJsonWSO2Test(beego.AppConfig.String("UrlAdministrativaJBPM")+"/dependencias_supervisor/"+documento_supervisor, &respuesta_peticion); err == nil && response == 200 {
 		if respuesta_peticion != nil {
 			if dependenciasMap, ok := respuesta_peticion["dependencias"].(map[string]interface{}); ok {

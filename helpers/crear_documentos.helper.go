@@ -179,19 +179,19 @@ func CrearTablaDocumentos(pdf *gofpdf.Fpdf, cellx float64, cellY float64, autori
 
 	pdf.SetXY(startX, cellY)
 	pdf.SetFont("Times", "B", 10)
-	pdf.CellFormat(col1Width, 7, "DOCUMENTO", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(col2Width, 7, "X", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(col1Width, 5, "DOCUMENTO", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(col2Width, 5, "X", "1", 0, "C", false, 0, "")
 
 	pdf.SetFont("Times", "", 10)
 	for key, value := range documentos {
-		cellY += 7
+		cellY += 5
 		pdf.SetXY(startX, cellY)
-		pdf.CellFormat(col1Width, 7, tr(value), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(col1Width, 5, tr(value), "1", 0, "L", false, 0, "")
 
 		if DocumentoEnLista(autorizacion.DocumentosCargados, key) {
-			pdf.CellFormat(col2Width, 7, "X", "1", 0, "C", false, 0, "")
+			pdf.CellFormat(col2Width, 5, "X", "1", 0, "C", false, 0, "")
 		} else {
-			pdf.CellFormat(col2Width, 7, "", "1", 0, "C", false, 0, "")
+			pdf.CellFormat(col2Width, 5, "", "1", 0, "C", false, 0, "")
 		}
 		if cellY > 250 {
 			pdf.AddPage()
@@ -199,11 +199,11 @@ func CrearTablaDocumentos(pdf *gofpdf.Fpdf, cellx float64, cellY float64, autori
 		}
 	}
 	pdf.SetFont("Times", "B", 10)
-	cellY += 7
+	cellY += 5
 	pdf.SetXY(startX, cellY)
 	pdf.SetFont("Times", "B", 10)
-	pdf.CellFormat(col1Width, 7, "OTROS DOCUMENTOS (DETALLAR)", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(col2Width, 7, "X", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(col1Width, 5, "OTROS DOCUMENTOS (DETALLAR)", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(col2Width, 5, "X", "1", 0, "C", false, 0, "")
 
 	if cellY > 235 {
 		pdf.AddPage()

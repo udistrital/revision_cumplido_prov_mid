@@ -364,7 +364,7 @@ func EnviarNotificacionCambioEstado(nombre_estado string, documento_responsable 
 	body_enviar_notificacion.DefaultTemplateData.RevisionCumplidosProveedoresUrl = beego.AppConfig.String("UrlRevisionCumplidosProveedoresCliente")
 
 	var respuesta map[string]interface{}
-	fmt.Println(beego.AppConfig.String("UrlNotificacionesMid") + "/email/enviar_templated_email")
+	//fmt.Println(beego.AppConfig.String("UrlNotificacionesMid") + "/email/enviar_templated_email")
 	if err := helpers.SendJsonTls(beego.AppConfig.String("UrlNotificacionesMid")+"/email/enviar_templated_email", "POST", &respuesta, body_enviar_notificacion); err != nil {
 		jsonData, err := json.MarshalIndent(body_enviar_notificacion, "", "    ")
 		if err != nil {
