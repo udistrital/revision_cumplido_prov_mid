@@ -179,19 +179,19 @@ func CrearTablaDocumentos(pdf *gofpdf.Fpdf, cellx float64, cellY float64, autori
 
 	pdf.SetXY(startX, cellY)
 	pdf.SetFont("Times", "B", 10)
-	pdf.CellFormat(col1Width, 7, "DOCUMENTO", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(col2Width, 7, "X", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(col1Width, 5, "DOCUMENTO", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(col2Width, 5, "X", "1", 0, "C", false, 0, "")
 
 	pdf.SetFont("Times", "", 10)
 	for key, value := range documentos {
-		cellY += 7
+		cellY += 5
 		pdf.SetXY(startX, cellY)
-		pdf.CellFormat(col1Width, 7, tr(value), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(col1Width, 5, tr(value), "1", 0, "L", false, 0, "")
 
 		if DocumentoEnLista(autorizacion.DocumentosCargados, key) {
-			pdf.CellFormat(col2Width, 7, "X", "1", 0, "C", false, 0, "")
+			pdf.CellFormat(col2Width, 5, "X", "1", 0, "C", false, 0, "")
 		} else {
-			pdf.CellFormat(col2Width, 7, "", "1", 0, "C", false, 0, "")
+			pdf.CellFormat(col2Width, 5, "", "1", 0, "C", false, 0, "")
 		}
 		if cellY > 250 {
 			pdf.AddPage()
@@ -199,11 +199,11 @@ func CrearTablaDocumentos(pdf *gofpdf.Fpdf, cellx float64, cellY float64, autori
 		}
 	}
 	pdf.SetFont("Times", "B", 10)
-	cellY += 7
+	cellY += 5
 	pdf.SetXY(startX, cellY)
 	pdf.SetFont("Times", "B", 10)
-	pdf.CellFormat(col1Width, 7, "OTROS DOCUMENTOS (DETALLAR)", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(col2Width, 7, "X", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(col1Width, 5, "OTROS DOCUMENTOS (DETALLAR)", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(col2Width, 5, "X", "1", 0, "C", false, 0, "")
 
 	if cellY > 235 {
 		pdf.AddPage()
@@ -221,21 +221,33 @@ func body2(pdf *gofpdf.Fpdf, cellx float64, cellY float64, month int, day int, y
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
 	cellY += 10
 	pdf.SetXY(29, cellY)
-	pdf.MultiCell(153, 5, tr(fmt.Sprintf(`Autorizo a la Tesorería General a girar a favor de %s con C.C., NIT, TI, OTROS Nº %s para realizar el giro una vez sean deducidos los descuentos de Ley correspondientes. El valor bruto de la presente autorización es de %s pesos m/cte. (%s). `, tr(autorizacion.NombreProveedor), tr(autorizacion.DocumentoProveedor), strings.ToUpper(ValorLetras(autorizacion.ValorPago)), FormatNumber(autorizacion.ValorPago, 0, ".", ","))), "", "", false)
+
+	pdf.MultiCell(153, 5, tr(fmt.Sprintf(`Autorizo a la Tesorería General a girar a favor de %s con C.C., NIT, TI, OTROS Nº %s para realizar el giro una vez sean deducidos los descuentos de Ley correspondientes. El valor bruto de la presente autorización es de %s pesos m/cte. (%s). `,
+		tr(autorizacion.NombreProveedor), tr(autorizacion.DocumentoProveedor),
+		strings.ToUpper(ValorLetras(autorizacion.ValorPago)), FormatNumber(autorizacion.ValorPago, 0, ".", ","))), "", "", false)
+
 	cellY += 35
+
 	pdf.SetXY(29, cellY)
 	pdf.MultiCell(153, 5, tr("___________________________ "), "", "C", false)
+
 	cellY += 5
 	pdf.SetXY(29, cellY)
 	pdf.MultiCell(153, 5, tr("Firma"), "", "C", false)
+
 	cellY += 10
 	pdf.SetFont("Times", "B", 10)
 	pdf.SetXY(29, cellY)
-	pdf.MultiCell(153, 5, tr("NOTA. "), "", "", false)
 
 	pdf.SetFont("Times", "", 10)
 	pdf.SetXY(29, cellY)
-	pdf.MultiCell(153, 5, tr("NOTA. De igual forma, se deben reservar presupuestalmente aquellos saldos de órdenes de compra o serviciosen que no se utilizo la totalidad del registro presupuestal "), "", "", false)
+
+	_, pageHeight := pdf.GetPageSize()
+	if pdf.GetY()+5 > pageHeight-float64(30) { // Convertir 30 a float64
+		pdf.AddPage()
+	}
+
+	pdf.MultiCell(153, 5, tr("NOTA. De igual forma, se deben reservar presupuestalmente aquellos saldos de órdenes de compra o servicios en que no se utilizó la totalidad del registro presupuestal "), "", "", false)
 
 	return pdf
 }
