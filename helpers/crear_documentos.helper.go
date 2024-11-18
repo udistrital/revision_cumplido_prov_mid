@@ -168,7 +168,7 @@ func body(pdf *gofpdf.Fpdf, cellx float64, cellY float64, month int, day int, ye
 }
 
 func CrearTablaDocumentos(pdf *gofpdf.Fpdf, cellx float64, cellY float64, autorizacion models.DatosAutorizacionPago, documentos map[string]string) *gofpdf.Fpdf {
-	//fmt.Println(autorizacion.DocumentosCargados)
+	fmt.Println(autorizacion.DocumentosCargados)
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
 	col1Width := 120.0
 	col2Width := 20.0
@@ -221,33 +221,21 @@ func body2(pdf *gofpdf.Fpdf, cellx float64, cellY float64, month int, day int, y
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
 	cellY += 10
 	pdf.SetXY(29, cellY)
-
-	pdf.MultiCell(153, 5, tr(fmt.Sprintf(`Autorizo a la Tesorería General a girar a favor de %s con C.C., NIT, TI, OTROS Nº %s para realizar el giro una vez sean deducidos los descuentos de Ley correspondientes. El valor bruto de la presente autorización es de %s pesos m/cte. (%s). `,
-		tr(autorizacion.NombreProveedor), tr(autorizacion.DocumentoProveedor),
-		strings.ToUpper(ValorLetras(autorizacion.ValorPago)), FormatNumber(autorizacion.ValorPago, 0, ".", ","))), "", "", false)
-
+	pdf.MultiCell(153, 5, tr(fmt.Sprintf(`Autorizo a la Tesorería General a girar a favor de %s con C.C., NIT, TI, OTROS Nº %s para realizar el giro una vez sean deducidos los descuentos de Ley correspondientes. El valor bruto de la presente autorización es de %s pesos m/cte. (%s). `, tr(autorizacion.NombreProveedor), tr(autorizacion.DocumentoProveedor), strings.ToUpper(ValorLetras(autorizacion.ValorPago)), FormatNumber(autorizacion.ValorPago, 0, ".", ","))), "", "", false)
 	cellY += 35
-
 	pdf.SetXY(29, cellY)
 	pdf.MultiCell(153, 5, tr("___________________________ "), "", "C", false)
-
 	cellY += 5
 	pdf.SetXY(29, cellY)
 	pdf.MultiCell(153, 5, tr("Firma"), "", "C", false)
-
 	cellY += 10
 	pdf.SetFont("Times", "B", 10)
 	pdf.SetXY(29, cellY)
+	pdf.MultiCell(153, 5, tr("NOTA. "), "", "", false)
 
 	pdf.SetFont("Times", "", 10)
 	pdf.SetXY(29, cellY)
-
-	_, pageHeight := pdf.GetPageSize()
-	if pdf.GetY()+5 > pageHeight-float64(30) { // Convertir 30 a float64
-		pdf.AddPage()
-	}
-
-	pdf.MultiCell(153, 5, tr("NOTA. De igual forma, se deben reservar presupuestalmente aquellos saldos de órdenes de compra o servicios en que no se utilizó la totalidad del registro presupuestal "), "", "", false)
+	pdf.MultiCell(153, 5, tr("NOTA. De igual forma, se deben reservar presupuestalmente aquellos saldos de órdenes de compra o serviciosen que no se utilizo la totalidad del registro presupuestal "), "", "", false)
 
 	return pdf
 }
