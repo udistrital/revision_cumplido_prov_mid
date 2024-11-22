@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	AllowedOrigins := []string{"*", "*.udistrital.edu.co"}
+	AllowedOrigins := []string{"*.udistrital.edu.co"}
 	if beego.BConfig.RunMode == "dev" {
 		beego.BConfig.WebConfig.DirectoryIndex = true
 		beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
