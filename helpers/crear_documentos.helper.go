@@ -185,15 +185,15 @@ func CrearTablaDocumentos(pdf *gofpdf.Fpdf, cellx float64, cellY float64, autori
 			nombre_documento := strings.TrimSuffix(value, ".pdf")
 			pdf.SetFont("Times", "", 10)
 
-			cellY += 7
+			cellY += 5
 			pdf.SetXY(startX, cellY)
 
-			pdf.MultiCell(col1Width, 7, tr(nombre_documento), "1", "L", false)
+			pdf.MultiCell(col1Width, 5, tr(nombre_documento), "1", "L", false)
 
 			textHeight := pdf.GetY() - cellY
-			cellY += textHeight - 7 // Ajusta la posición
+			cellY += textHeight - 5
 
-			pdf.SetXY(startX+col1Width, cellY-textHeight+7)
+			pdf.SetXY(startX+col1Width, cellY-textHeight+5)
 			pdf.CellFormat(col2Width, textHeight, "X", "1", 0, "C", false, 0, "")
 
 			if cellY > maxContentHeight {
@@ -242,7 +242,7 @@ func body2(pdf *gofpdf.Fpdf, cellx float64, cellY float64, month int, day int, y
 
 	pdf.SetFont("Times", "", 10)
 	pdf.SetXY(29, cellY)
-	pdf.MultiCell(153, 5, tr("NOTA. De igual forma, se deben reservar presupuestalmente aquellos saldos de órdenes de compra o serviciosen que no se utilizo la totalidad del registro presupuestal "), "", "", false)
+	pdf.MultiCell(153, 5, tr("NOTA. De igual forma, se deben reservar presupuestalmente aquellos saldos de órdenes de compra o servicios en que no se utilizo la totalidad del registro presupuestal "), "", "", false)
 
 	if cellY+alturaFirma > maxContentHeight {
 		pdf.AddPage()
