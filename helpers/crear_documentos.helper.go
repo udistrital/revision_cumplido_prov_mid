@@ -184,10 +184,18 @@ func CrearTablaDocumentos(pdf *gofpdf.Fpdf, cellx float64, cellY float64, autori
 		for _, value := range otros_documentos {
 			nombre_documento := strings.TrimSuffix(value, ".pdf")
 			pdf.SetFont("Times", "", 10)
+
 			cellY += 7
 			pdf.SetXY(startX, cellY)
-			pdf.CellFormat(col1Width, 7, tr(nombre_documento), "1", 0, "L", false, 0, "")
-			pdf.CellFormat(col2Width, 7, "X", "1", 0, "C", false, 0, "")
+
+			pdf.MultiCell(col1Width, 7, tr(nombre_documento), "1", "L", false)
+
+			textHeight := pdf.GetY() - cellY
+			cellY += textHeight - 7 // Ajusta la posición
+
+			pdf.SetXY(startX+col1Width, cellY-textHeight+7)
+			pdf.CellFormat(col2Width, textHeight, "X", "1", 0, "C", false, 0, "")
+
 			if cellY > maxContentHeight {
 				pdf.AddPage()
 				cellY = 35
@@ -211,28 +219,23 @@ func body2(pdf *gofpdf.Fpdf, cellx float64, cellY float64, month int, day int, y
 	const alturaFirma = 56.0
 	pdf.SetFont("Times", "", 10)
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
+	cellY += 20
 
-	if cellY+40 > maxContentHeight {
+	if cellY+20 > maxContentHeight {
 		pdf.AddPage()
-		cellY = 35
+		cellY = 45
 	}
 
-	cellY += 10
+	//cellY += 10
 	pdf.SetXY(29, cellY)
 	pdf.MultiCell(153, 5, tr(fmt.Sprintf(`Autorizo a la Tesorería General a girar a favor de %s con C.C., NIT, TI, OTROS Nº %s para realizar el giro una vez sean deducidos los descuentos de Ley correspondientes. El valor bruto de la presente autorización es de %s pesos m/cte. (%s). `, tr(autorizacion.NombreProveedor), tr(autorizacion.DocumentoProveedor), strings.ToUpper(ValorLetras(autorizacion.ValorPago)), FormatNumber(autorizacion.ValorPago, 0, ".", ","))), "", "", false)
-	cellY += 35
 
 	if cellY+15 > maxContentHeight {
 		pdf.AddPage()
 		cellY = 35
 	}
 
-	pdf.SetXY(29, cellY)
-	pdf.MultiCell(153, 5, tr("___________________________ "), "", "C", false)
-	cellY += 5
-	pdf.SetXY(29, cellY)
-	pdf.MultiCell(153, 5, tr("Firma"), "", "C", false)
-	cellY += 10
+	cellY += 25
 	pdf.SetFont("Times", "B", 10)
 	pdf.SetXY(29, cellY)
 	pdf.MultiCell(153, 5, tr("NOTA. "), "", "", false)
