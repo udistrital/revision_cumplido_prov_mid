@@ -120,6 +120,7 @@ func GenerarPdfAutorizacionGiro(autorizacion models.DatosAutorizacionPago, docum
 func body(pdf *gofpdf.Fpdf, cellx float64, cellY float64, month int, day int, year int, autorizacion models.DatosAutorizacionPago, documentos map[string]string, otros_documentos []string) *gofpdf.Fpdf {
 	const maxContentHeight = 245.0
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
+	pdf.SetFont("Times", "", 10)
 	formattedDate2 := tr(fmt.Sprintf("BOGOTÁ %s %d de %d", obtenerMes(int(month)), day, year))
 
 	if cellY+20 > maxContentHeight {
@@ -135,6 +136,7 @@ func body(pdf *gofpdf.Fpdf, cellx float64, cellY float64, month int, day int, ye
 	}
 
 	pdf.SetXY(29, 55)
+	pdf.SetFont("Times", "", 10)
 	pdf.MultiCell(153, 5, tr(fmt.Sprintf("Yo %s  en calidad de Ordenador del Gasto del (los) Rubro(s) %s, anexo los documentos detallados en la presente, como soporte a la orden de pago correspondiente.", autorizacion.NombreOrdenador, autorizacion.Rubro)), "", "", false)
 	pdf = CrearTablaDocumentos(pdf, cellx, cellY-10, autorizacion, documentos, otros_documentos)
 
