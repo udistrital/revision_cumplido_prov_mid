@@ -85,8 +85,7 @@ func Header(pdf *gofpdf.Fpdf, tipo_documento string, proceso string, codigo stri
 	return pdf
 }
 
-func GenerarPdfAutorizacionGiro(autorizacion models.DatosAutorizacionPago, documentos map[string]string) string {
-
+func GenerarPdfAutorizacionGiro(autorizacion models.DatosAutorizacionPago, documentos map[string]string, otros_documentos []string) string {
 	if len(autorizacion.DocumentosCargados) == 0 {
 		return ""
 	}
@@ -112,62 +111,40 @@ func GenerarPdfAutorizacionGiro(autorizacion models.DatosAutorizacionPago, docum
 	})
 
 	pdf.AddPage()
-	body(pdf, cellX, cellY, month, day, year, autorizacion, documentos)
+	body(pdf, cellX, cellY, month, day, year, autorizacion, documentos, otros_documentos)
 	filedata, _ := encodePDF(pdf)
 	// Retorna el PDF codificado en base64
 	return filedata
 }
 
-func header(pdf *gofpdf.Fpdf, cellX float64, cellY float64, cellX2 float64, cellY2 float64, cellWidth float64, cellHeight float64, cellWidth2 float64, cellHeight2 float64, formattedDate string) *gofpdf.Fpdf {
+func body(pdf *gofpdf.Fpdf, cellx float64, cellY float64, month int, day int, year int, autorizacion models.DatosAutorizacionPago, documentos map[string]string, otros_documentos []string) *gofpdf.Fpdf {
+	const maxContentHeight = 245.0
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
-	pdf.Rect(cellX, cellY, cellWidth, cellHeight, "")
-	logoU := "static/img/EscudoUd.png"
-	pdf.Image(logoU, cellX+2, cellY, cellWidth-3, cellHeight-5, false, "", 0, "")
-
-	pdf.Rect(cellX+123, cellY, cellWidth+2, cellHeight, "")
-	logoSigud := "static/img/EscudoSigud.png"
-	pdf.Image(logoSigud, cellX+127, cellY+8, cellWidth-5, cellHeight-16, false, "", 0, "")
-
-	pdf.Rect(cellX2, cellY2, cellWidth2, cellHeight2, "")
-	pdf.SetFont("Times", "B", 10)
-	pdf.Text(cellX2+5, cellY2+5, tr("AUTORIZACIÓN DE GIRO"))
-
 	pdf.SetFont("Times", "", 10)
-	pdf.Rect(cellX2, cellY2+7.5, cellWidth2, cellHeight2, "")
-	pdf.Text(cellX2+2, cellY2+12, "Macroproceso:  Gestion de Recursos")
-
-	pdf.Rect(cellX2, cellY2+15, cellWidth2, cellHeight2+2.5, "")
-	pdf.Text(cellX2+6, cellY2+20, tr("Proceso: Gestión de Recursos"))
-	pdf.Text(cellX2+20, cellY2+24, "Financieros")
-
-	pdf.Rect(cellX2+55, cellY2, cellWidth2-12, cellHeight2, "")
-	pdf.Text(cellX2+55, cellY2+5, "Codigo: GRF-PR-007-FR-005")
-
-	pdf.SetFont("Times", "", 10)
-	pdf.Rect(cellX2+55, cellY2+7.5, cellWidth2-12, cellHeight2, "")
-	pdf.Text(cellX2+55, cellY2+13, "Version: 04")
-
-	pdf.Rect(cellX2+55, cellY2+15, cellWidth2-12, cellHeight2+2.5, "")
-	pdf.Text(cellX2+55, cellY2+20, tr("Fecha de Aprobación:"))
-	pdf.Text(cellX2+55, cellY2+24, "02/08/2024")
-
-	return pdf
-}
-
-func body(pdf *gofpdf.Fpdf, cellx float64, cellY float64, month int, day int, year int, autorizacion models.DatosAutorizacionPago, documentos map[string]string) *gofpdf.Fpdf {
-
-	tr := pdf.UnicodeTranslatorFromDescriptor("")
 	formattedDate2 := tr(fmt.Sprintf("BOGOTÁ %s %d de %d", obtenerMes(int(month)), day, year))
+
+	if cellY+20 > maxContentHeight {
+		pdf.AddPage()
+		cellY = 35
+	}
+
 	pdf.Text(cellx, cellY+35, formattedDate2)
 
+	if cellY+30 > maxContentHeight {
+		pdf.AddPage()
+		cellY = 35
+	}
+
 	pdf.SetXY(29, 55)
+	pdf.SetFont("Times", "", 10)
 	pdf.MultiCell(153, 5, tr(fmt.Sprintf("Yo %s  en calidad de Ordenador del Gasto del (los) Rubro(s) %s, anexo los documentos detallados en la presente, como soporte a la orden de pago correspondiente.", autorizacion.NombreOrdenador, autorizacion.Rubro)), "", "", false)
-	pdf = CrearTablaDocumentos(pdf, cellx, cellY-10, autorizacion, documentos)
+	pdf = CrearTablaDocumentos(pdf, cellx, cellY-10, autorizacion, documentos, otros_documentos)
 
 	return pdf
 }
 
-func CrearTablaDocumentos(pdf *gofpdf.Fpdf, cellx float64, cellY float64, autorizacion models.DatosAutorizacionPago, documentos map[string]string) *gofpdf.Fpdf {
+func CrearTablaDocumentos(pdf *gofpdf.Fpdf, cellx float64, cellY float64, autorizacion models.DatosAutorizacionPago, documentos map[string]string, otros_documentos []string) *gofpdf.Fpdf {
+	const maxContentHeight = 245.0
 	fmt.Println(autorizacion.DocumentosCargados)
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
 	col1Width := 120.0
@@ -193,7 +170,7 @@ func CrearTablaDocumentos(pdf *gofpdf.Fpdf, cellx float64, cellY float64, autori
 		} else {
 			pdf.CellFormat(col2Width, 5, "", "1", 0, "C", false, 0, "")
 		}
-		if cellY > 250 {
+		if cellY > maxContentHeight {
 			pdf.AddPage()
 			cellY = 35
 		}
@@ -205,7 +182,30 @@ func CrearTablaDocumentos(pdf *gofpdf.Fpdf, cellx float64, cellY float64, autori
 	pdf.CellFormat(col1Width, 5, "OTROS DOCUMENTOS (DETALLAR)", "1", 0, "C", false, 0, "")
 	pdf.CellFormat(col2Width, 5, "X", "1", 0, "C", false, 0, "")
 
-	if cellY > 235 {
+	if len(otros_documentos) > 0 {
+		for _, value := range otros_documentos {
+			nombre_documento := strings.TrimSuffix(value, ".pdf")
+			pdf.SetFont("Times", "", 10)
+
+			cellY += 5
+			pdf.SetXY(startX, cellY)
+
+			pdf.MultiCell(col1Width, 5, tr(nombre_documento), "1", "L", false)
+
+			textHeight := pdf.GetY() - cellY
+			cellY += textHeight - 5
+
+			pdf.SetXY(startX+col1Width, cellY-textHeight+5)
+			pdf.CellFormat(col2Width, textHeight, "X", "1", 0, "C", false, 0, "")
+
+			if cellY > maxContentHeight {
+				pdf.AddPage()
+				cellY = 35
+			}
+		}
+	}
+
+	if cellY > maxContentHeight {
 		pdf.AddPage()
 		cellY = 35
 		pdf = body2(pdf, cellx, cellY, 0, 0, 0, autorizacion)
@@ -217,25 +217,39 @@ func CrearTablaDocumentos(pdf *gofpdf.Fpdf, cellx float64, cellY float64, autori
 }
 
 func body2(pdf *gofpdf.Fpdf, cellx float64, cellY float64, month int, day int, year int, autorizacion models.DatosAutorizacionPago) *gofpdf.Fpdf {
+	const maxContentHeight = 245.0
+	const alturaFirma = 56.0
 	pdf.SetFont("Times", "", 10)
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
-	cellY += 10
+	cellY += 20
+
+	if cellY+20 > maxContentHeight {
+		pdf.AddPage()
+		cellY = 45
+	}
+
+	//cellY += 10
 	pdf.SetXY(29, cellY)
 	pdf.MultiCell(153, 5, tr(fmt.Sprintf(`Autorizo a la Tesorería General a girar a favor de %s con C.C., NIT, TI, OTROS Nº %s para realizar el giro una vez sean deducidos los descuentos de Ley correspondientes. El valor bruto de la presente autorización es de %s pesos m/cte. (%s). `, tr(autorizacion.NombreProveedor), tr(autorizacion.DocumentoProveedor), strings.ToUpper(ValorLetras(autorizacion.ValorPago)), FormatNumber(autorizacion.ValorPago, 0, ".", ","))), "", "", false)
-	cellY += 35
-	pdf.SetXY(29, cellY)
-	pdf.MultiCell(153, 5, tr("___________________________ "), "", "C", false)
-	cellY += 5
-	pdf.SetXY(29, cellY)
-	pdf.MultiCell(153, 5, tr("Firma"), "", "C", false)
-	cellY += 10
+
+	if cellY+15 > maxContentHeight {
+		pdf.AddPage()
+		cellY = 35
+	}
+
+	cellY += 25
 	pdf.SetFont("Times", "B", 10)
 	pdf.SetXY(29, cellY)
 	pdf.MultiCell(153, 5, tr("NOTA. "), "", "", false)
 
 	pdf.SetFont("Times", "", 10)
 	pdf.SetXY(29, cellY)
-	pdf.MultiCell(153, 5, tr("NOTA. De igual forma, se deben reservar presupuestalmente aquellos saldos de órdenes de compra o serviciosen que no se utilizo la totalidad del registro presupuestal "), "", "", false)
+	pdf.MultiCell(153, 5, tr("NOTA. De igual forma, se deben reservar presupuestalmente aquellos saldos de órdenes de compra o servicios en que no se utilizo la totalidad del registro presupuestal "), "", "", false)
+
+	if cellY+alturaFirma > maxContentHeight {
+		pdf.AddPage()
+		cellY = 35
+	}
 
 	return pdf
 }
@@ -272,47 +286,6 @@ func footer(pdf *gofpdf.Fpdf, cellx float64, cellY float64) *gofpdf.Fpdf {
 	pdf.SetFont("Times", "", 10)
 	pdf.SetXY(29, 265)
 	pdf.MultiCell(153, 5, tr("Este documento es propiedad de la Universidad Distrital Francisco José de Caldas. Prohibida su reproducción por cualquier medio, sin previa autorización. "), "", "C", false)
-
-	return pdf
-}
-
-func tablaFooter(pdf *gofpdf.Fpdf, cellx float64, cellY float64) *gofpdf.Fpdf {
-
-	col1Width := 60.0
-	col2Width := 20.0
-	totalWidth := col1Width*2 + col2Width*2
-	pageWidth, _ := pdf.GetPageSize()
-	startX := (pageWidth - totalWidth) / 2
-	cellY += 150
-	pdf.SetXY(startX, cellY)
-	pdf.SetFont("Times", "B", 8)
-	tr := pdf.UnicodeTranslatorFromDescriptor("")
-	//fila 1
-	pdf.CellFormat(col2Width, 5, "               ", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(col1Width, 5, "NOMBRE", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(col1Width, 5, "CARGO/TIPO CONTRATO", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(col2Width, 5, "FIRMA", "1", 0, "C", false, 0, "")
-
-	//fila 2
-	pdf.SetXY(startX, cellY+5)
-	pdf.CellFormat(col2Width, 5, tr("PROYECTÓ"), "1", 0, "C", false, 0, "")
-	pdf.CellFormat(col1Width, 5, "", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(col1Width, 5, "", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(col2Width, 5, "", "1", 0, "C", false, 0, "")
-
-	//fila 2
-	pdf.SetXY(startX, cellY+10)
-	pdf.CellFormat(col2Width, 5, tr("REVISOÓ"), "1", 0, "C", false, 0, "")
-	pdf.CellFormat(col1Width, 5, "", "1", 0, "l", false, 0, "")
-	pdf.CellFormat(col1Width, 5, "", "1", 0, "l", false, 0, "")
-	pdf.CellFormat(col2Width, 5, "", "1", 0, "l", false, 0, "")
-
-	//fila 2
-	pdf.SetXY(startX, cellY+15)
-	pdf.CellFormat(col2Width, 5, tr("APROBÓ"), "1", 0, "l", false, 0, "")
-	pdf.CellFormat(col1Width, 5, "", "1", 0, "l", false, 0, "")
-	pdf.CellFormat(col1Width, 5, "", "1", 0, "l", false, 0, "")
-	pdf.CellFormat(col2Width, 5, "", "1", 0, "l", false, 0, "")
 
 	return pdf
 }

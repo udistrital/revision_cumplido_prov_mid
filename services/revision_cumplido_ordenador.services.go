@@ -2,12 +2,13 @@ package services
 
 import (
 	"fmt"
-	"github.com/astaxie/beego"
-	"github.com/udistrital/revision_cumplidos_proveedores_mid/helpers"
-	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/astaxie/beego"
+	"github.com/udistrital/revision_cumplidos_proveedores_mid/helpers"
+	"github.com/udistrital/revision_cumplidos_proveedores_mid/models"
 )
 
 func ObtenerCumplidosPendientesOrdenador(documento_ordenador string) (cambios_estado []models.CambioEstadoCumplido, outputError error) {
@@ -214,9 +215,13 @@ func GenerarAutorizacionGiro(id_solicitud_pago string) (autorizacion_pago models
 												outputError = fmt.Errorf("No se encontraron documentos cargados")
 												return autorizacion_pago, outputError
 											}
+											var otros_documentos []string
 											var lista_documentos_cargados []string
 											for _, documento := range documentos {
 												lista_documentos_cargados = append(lista_documentos_cargados, documento.TipoDocumento.CodigoAbreviacion)
+												if documento.TipoDocumento.CodigoAbreviacion == "OTR" {
+													otros_documentos = append(otros_documentos, documento.Nombre)
+												}
 											}
 											var respuesta_soporte map[string]interface{}
 											var informacion_pago []models.InformacionPago
@@ -241,7 +246,7 @@ func GenerarAutorizacionGiro(id_solicitud_pago string) (autorizacion_pago models
 												ValorPago:          valor_pago,
 											}
 
-											autorizacion := helpers.GenerarPdfAutorizacionGiro(datos_documento, docuementos())
+											autorizacion := helpers.GenerarPdfAutorizacionGiro(datos_documento, docuementos(), otros_documentos)
 											if autorizacion != "" {
 												nombre := "AutorizacionGiro_" + strings.Join(strings.Fields(proveedor.NomProveedor), "") + "_" + cambio_estado[0].CumplidoProveedorId.NumeroContrato + "_" + strconv.Itoa(cambio_estado[0].CumplidoProveedorId.VigenciaContrato)
 												autorizacion_pago = models.DocumentoAutorizacionPago{
