@@ -149,6 +149,7 @@ func ObtenerHistoricoCumplidosFiltro(anios []int, meses []int, vigencias []int, 
 			}
 			cumplidos_filtrados = append(cumplidos_filtrados, cumplido_filtrado)
 		}
+		return cumplidos_filtrados, nil
 	}
 
 	// Aplicar filtros de meses, anios, tipos de contrato y nombres proveedores
@@ -216,7 +217,6 @@ func ObtenerHistoricoCumplidosFiltro(anios []int, meses []int, vigencias []int, 
 
 		cumplimiento_proveedor := len(proveedores) == 0 || contieneInt(proveedores, contrato_general.Contratista)
 		cumplimiento_tipo_contrato := len(tipos_contratos) == 0 || contieneInt(tipos_contratos, contrato_general.TipoContrato.Id)
-
 		if cumplimiento_anio_mes && cumplimiento_proveedor && cumplimiento_tipo_contrato {
 			informacion_pago := ObtenerPeriodoInformacionPago(cumplido.CumplidoProveedorId.Id)
 			cumplido_filtrado := models.CumplidosFiltrados{
