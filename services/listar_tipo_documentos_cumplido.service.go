@@ -19,7 +19,7 @@ func ObtenerTiposDocumentosCumplido() (tipos_documento []models.DocumentoCumplid
 
 	var tipo_documento []models.TipoDocumento
 	//fmt.Println("UrlcrudAgora: ", beego.AppConfig.String("UrlDocumentosCrud")+"/tipo_documento/?query=DominioTipoDocumento.Id:12")
-	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlDocumentosCrud")+"/tipo_documento/?query=DominioTipoDocumento.Id:12&limit=0", &tipo_documento); err == nil && response == 200 {
+	if response, err := helpers.GetJsonTest(beego.AppConfig.String("UrlDocumentosCrud")+"/tipo_documento/?query=DominioTipoDocumento.CodigoAbreviacion:CUMP_PROV&limit=0", &tipo_documento); err == nil && response == 200 {
 		if len(tipo_documento) == 0 {
 			outputError = fmt.Errorf("No se encontraron tipos de documentos")
 			return nil, outputError

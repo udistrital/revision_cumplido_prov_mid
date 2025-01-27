@@ -288,7 +288,12 @@ func EnviarNotificacionCambioEstado(nombre_estado string, documento_responsable 
 	var email string
 
 	if documento_responsable == "0" {
-		email = "fctrujilloo@udistrital.edu.co"
+		if beego.AppConfig.String("runmode") == "prod" {
+			email = "tramitescontratacion@udistrital.edu.co"
+		} else {
+			// En un entorno de pruebas poner aqui el correo electronico con el que se van a probar las notificaciones
+			email = ""
+		}
 	} else {
 		var autenticacion_persona models.AutenticacionPersona
 		body_autenticacion := map[string]interface{}{
@@ -296,27 +301,31 @@ func EnviarNotificacionCambioEstado(nombre_estado string, documento_responsable 
 		}
 		var respuesta_peticion map[string]interface{}
 		// Se busca con el numero de documento del responsable los datos para recuperar el correo electronico
-		if err := helpers.SendJson(beego.AppConfig.String("UrlAutenticacionMid")+"/token/documentoToken", "POST", &respuesta_peticion, body_autenticacion); err == nil {
-			json_autenticacion, err := json.Marshal(respuesta_peticion)
-			if err != nil {
-				outputError = error_json
-				return outputError
-			}
-			err = json.Unmarshal(json_autenticacion, &autenticacion_persona)
-			if err != nil {
-				outputError = error_json
-				return outputError
-			}
-
-			if autenticacion_persona.Email == "" {
-				outputError = fmt.Errorf("No se encontró el correo electrónico del responsable")
-				return outputError
-			}
-			//email = autenticacion_persona.Email
-			email = "fctrujilloo@udistrital.edu.co"
+		if beego.AppConfig.String("runmode") != "prod" {
+			// En un entorno de pruebas poner aqui el correo electronico con el que se van a probar las notificaciones
+			email = ""
 		} else {
-			outputError = fmt.Errorf("Error al consultar el responsable")
-			return outputError
+			if err := helpers.SendJson(beego.AppConfig.String("UrlAutenticacionMid")+"/token/documentoToken", "POST", &respuesta_peticion, body_autenticacion); err == nil {
+				json_autenticacion, err := json.Marshal(respuesta_peticion)
+				if err != nil {
+					outputError = error_json
+					return outputError
+				}
+				err = json.Unmarshal(json_autenticacion, &autenticacion_persona)
+				if err != nil {
+					outputError = error_json
+					return outputError
+				}
+
+				if autenticacion_persona.Email == "" {
+					outputError = fmt.Errorf("No se encontró el correo electrónico del responsable")
+					return outputError
+				}
+				email = autenticacion_persona.Email
+			} else {
+				outputError = fmt.Errorf("Error al consultar el responsable")
+				return outputError
+			}
 		}
 	}
 
