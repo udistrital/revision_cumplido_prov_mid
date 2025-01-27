@@ -5,8 +5,7 @@ import (
 	"github.com/astaxie/beego/plugins/cors"
 	_ "github.com/udistrital/revision_cumplidos_proveedores_mid/routers"
 	apistatus "github.com/udistrital/utils_oas/apiStatusLib"
-
-	//auditoria "github.com/udistrital/utils_oas/auditoria"
+	auditoria "github.com/udistrital/utils_oas/auditoria"
 	"github.com/udistrital/utils_oas/customerrorv2"
 )
 
@@ -30,6 +29,6 @@ func main() {
 	}))
 	beego.ErrorController(&customerrorv2.CustomErrorController{})
 	apistatus.Init()
-	//auditoria.InitMiddleware()
+	auditoria.InitMiddleware()
 	beego.Run()
 }
